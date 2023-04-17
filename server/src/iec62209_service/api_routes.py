@@ -6,7 +6,13 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
+@router.post("/health")
+async def health():
+    ...
+
+
 @router.post("/sample")
 async def generate_sample():
+
     # work = Work()
     ...
