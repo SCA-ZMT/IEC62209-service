@@ -1,5 +1,3 @@
-.PHONY: devenv devenv-all node-env
-
 .venv:
 	@python3 --version
 	python3 -m venv $@
@@ -10,3 +8,8 @@
 		setuptools
 	@$@/bin/pip3 list --verbose
 
+
+.PHONY: help
+
+help: ## help on rule's targets
+	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "%-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)

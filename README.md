@@ -1,7 +1,17 @@
 # iec62209-service
 
-Service built to serve [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
+Service built to [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
 
+## Usage
+
+```console
+$ make help
+
+$ make .venv
+$ cd server
+$ make install-dev
+$ make start-dev
+```
 
 ---
 <p align="center">
