@@ -1,6 +1,6 @@
 # iec62209-service
 
-service built around publication-IEC62209
+Service built to serve [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
 
 ## Usage
 
