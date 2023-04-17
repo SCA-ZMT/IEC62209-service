@@ -26,6 +26,8 @@ pytest_*.xml
 # git ignore
 !.gitignore
 
+.python-version
+
 ## Python.gitignore
 # FROM https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Website</title>
+    <style>
+        /* CSS for the hero section */
+        .hero {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* CSS for the hero title */
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        /* CSS for the button */
+        .btn {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero">
+        <h1>hoi zaeme!</h1>
+        <button class="btn" onclick="openOpenAPI()">Visit OpenAPI Specs</button>
+        <p align="center">
+            <image
+                src="https://github.com/ITISFoundation/osparc-simcore-python-client/blob/4e8b18494f3191d55f6692a6a605818aeeb83f95/docs/_media/mwl.png?raw=true"
+                alt="Made with love at www.z43.swiss" width="100%" />
+        </p>
+    </section>
+
+    <script>
+        // Function to open OpenAPI in a new window
+        function openOpenAPI() {
+            window.open('http://127.0.0.1:8000/docs', '_blank');
+        }
+    </script>
+</body>
+
+</html>

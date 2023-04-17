@@ -11,13 +11,15 @@ install-dev: ## install development
 	pip install --editable .
 
 
-.PHONY: run-dev
+.PHONY: start-dev
+
+CLIENT_DIR := $(abspath $(CURDIR)/../client)
 
 start-dev: ## starts app for development
+	export CLIENT_INDEX_PATH="$(CLIENT_DIR)/source-output/index.html" && \
 	uvicorn iec62209_service.main:the_app \
       --host 0.0.0.0 \
       --reload \
       --reload-dir ./src \
-      --log-level "debug"
+      --log-level debug
 	echo "http://127.0.0.1:8000/docs"
-
