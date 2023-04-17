@@ -2,15 +2,6 @@
 
 Service built to serve [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
 
-## Usage
-
-```console
-$ make help
-
-$ make build
-$ make info-build
-$ make tests
-```
 
 ---
 <p align="center">
