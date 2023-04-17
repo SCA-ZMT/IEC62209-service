@@ -1,3 +1,5 @@
 fastapi
+iec62209 @ git+https://github.com/pcrespov/publication-IEC62209.git@enh/creates-setup#egg=iec62209
 pydantic
 uvicorn
+
