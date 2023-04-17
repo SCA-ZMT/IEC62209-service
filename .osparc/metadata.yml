@@ -3,7 +3,7 @@ key: simcore/services/comp/iec62209-service
 type: computational
 integration-version: 1.0.0
 version: 0.1.0
-description: service built around publication-IEC62209
+description: Service built around publication-IEC62209
 contact: 32402063+pcrespov@users.noreply.github.com
 authors:
   - name: Pedro Crespo-Valero
@@ -26,7 +26,7 @@ inputs:
     defaultValue: some_value(optional)
     fileToKeyMap:
       somefilename.ext: input_2
-  
+
 outputs:
   output_1:
     displayOrder: 1
@@ -35,4 +35,4 @@ outputs:
     type: string
     fileToKeyMap:
       somefilename.ext: output_1
-  
+
