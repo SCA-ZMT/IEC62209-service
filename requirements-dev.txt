@@ -1,0 +1,5 @@
+black
+isort
+pip-tools
+pre-commit
+pylint

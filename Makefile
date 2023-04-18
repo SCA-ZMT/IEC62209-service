@@ -17,7 +17,7 @@ help: ## help on rule's targets
 
 
 devenv: .venv ## create a python virtual environment with dev tools (e.g. linters, etc)
-	$</bin/pip3 --quiet install -r requirements/devenv.txt
+	$</bin/pip3 --quiet install -r requirements-dev.txt
 	# Installing pre-commit hooks in current .git repo
 	@$</bin/pre-commit install
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"

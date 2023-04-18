@@ -20,7 +20,7 @@ def read_reqs(reqs_path: Path) -> set[str]:
 CURRENT_DIR = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
 
 # Hard requirements on third-parties and latest for in-repo packages
-INSTALL_REQUIREMENTS = list( read_reqs(CURRENT_DIR / "requirements.txt") )
+INSTALL_REQUIREMENTS = list(read_reqs(CURRENT_DIR / "requirements.txt"))
 
 
 SETUP = dict(
@@ -30,7 +30,7 @@ SETUP = dict(
     author=", ".join(
         (
             "Odei Maiz (odeimaiz)",
-            "Simone Callegari",
+            "Simone Callegari (SCA-ZMT)",
             "Pedro Crespo-Valero (pcrespov)",
         )
     ),
@@ -38,7 +38,7 @@ SETUP = dict(
     package_dir={
         "": "src",
     },
-    python_requires="~=3.10",
+    python_requires="~=3.10.0",
     install_requires=INSTALL_REQUIREMENTS,
 )
 

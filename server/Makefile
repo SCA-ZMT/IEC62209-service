@@ -4,6 +4,12 @@
 help: ## help on rule's targets
 	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "%-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+.PHONY: info
+info: ## package info
+	 @pip show iec62209
+	 @echo "---------"
+	 @pip show iec62209-service
+
 
 .PHONY: install-dev
 install-dev: ## install development

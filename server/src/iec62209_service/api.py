@@ -3,8 +3,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, Request, UploadFile
 from fastapi.responses import HTMLResponse
-
-# from iec62209 import Work
+from iec62209.work import Work
 from pydantic import BaseModel, conint
 
 from .settings import ApplicationSettings
@@ -60,5 +59,5 @@ async def create_upload_file(file: UploadFile):
 
 @router.post("/sample")
 async def generate_sample():
-    # work = Work()
-    ...
+    work = Work()
+    print(work)
