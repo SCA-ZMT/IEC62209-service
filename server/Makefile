@@ -22,7 +22,7 @@ install-dev: ## install development
 CLIENT_DIR := $(abspath $(CURDIR)/../client)
 
 run-dev: ## runs app on a uvicorn server with watch+reload to aid development
-	export CLIENT_INDEX_PATH="$(CLIENT_DIR)/source-output/index.html" && \
+	export CLIENT_INDEX_PATH="$(CLIENT_DIR)/compiled/source/index.html" && \
 	uvicorn iec62209_service.main:the_app \
       --host 0.0.0.0 \
       --reload \

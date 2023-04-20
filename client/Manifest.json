@@ -1,0 +1,27 @@
+{
+  "$schema": "https://qooxdoo.org/schema/Manifest-2-0-0.json",
+  "info": {
+    "name": "sar",
+    "summary": "undefined",
+    "description": "undefined",
+    "homepage": "undefined",
+    "license": "MIT license",
+    "authors": [
+      {
+        "name": "odeimaiz",
+        "email": "maiz@itis.swiss"
+      }
+    ],
+    "version": "1.0.0"
+  },
+  "provides": {
+    "namespace": "sar",
+    "encoding": "utf-8",
+    "class": "source/class",
+    "resource": "source/resource",
+    "translation": "source/translation"
+  },
+  "requires": {
+    "@qooxdoo/framework": "^7.6.0"
+  }
+}
