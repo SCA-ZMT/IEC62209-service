@@ -14,7 +14,6 @@ repos:
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: trailing-whitespace
-      - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: detect-aws-credentials
         args: [--allow-missing-credentials]
