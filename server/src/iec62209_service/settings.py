@@ -47,7 +47,7 @@ class ApplicationSettings(OsparcServiceSettings):
     @classmethod
     def is_client_output(cls, value: Path):
         if not value.is_dir():
-            raise ValueError("Expected directory, got CLIENT_OUTPUT_DIR={value}")
+            raise ValueError(f"Expected directory, got CLIENT_OUTPUT_DIR={value}")
 
         if not any(value.glob("index.html")):
             raise ValueError(f"Expected {value / 'index.html'} not found")
