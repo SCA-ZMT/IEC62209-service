@@ -1,5 +1,5 @@
+from enum import Enum
 from os.path import dirname, realpath
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import (
@@ -69,11 +69,13 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def get_index(settings: ApplicationSettings = Depends(get_app_settings)):
-    html_content = Path(settings.CLIENT_INDEX_PATH).read_text()
+    """main index page"""
+    html_content = (settings.CLIENT_OUTPUT_DIR / "index.html").read_text()
     return html_content
 
 
 # Training set generation
+
 
 # for data storage
 class TrainingSetGeneration:

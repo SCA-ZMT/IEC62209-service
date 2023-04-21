@@ -18,14 +18,12 @@ def read_reqs(reqs_path: Path) -> set[str]:
 
 
 CURRENT_DIR = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
-
-# Hard requirements on third-parties and latest for in-repo packages
 INSTALL_REQUIREMENTS = list(read_reqs(CURRENT_DIR / "requirements.txt"))
 
 
 SETUP = dict(
     name="iec62209-service",
-    version="0.1.0",
+    version="1.0.0",
     description="Service built around publication-IEC62209",
     author=", ".join(
         (

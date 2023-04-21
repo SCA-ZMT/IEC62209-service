@@ -1,0 +1,23 @@
+restart-policy: no-restart
+settings:
+  # - name: ports
+  #   type: int
+  #   value: 8000
+  - name: constraints
+    type: string
+    value:
+      - node.platform.os == linux
+  # - name: Resources
+  #   type: Resources
+  #   value:
+  #     Reservations:
+  #       NanoCPUs: 4000000000
+  #       MemoryBytes: 17179869184
+  #     Limits:
+  #       NanoCPUs: 4000000000
+  #       MemoryBytes: 17179869184
+paths-mapping:
+  inputs_path: /home/scu/work/inputs
+  outputs_path: /home/scu/work/outputs
+  state_paths:
+    - /home/scu/work/workspace

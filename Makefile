@@ -1,8 +1,7 @@
-.PHONY: help
+include ./scripts/common.Makefile
 
-help: ## help on rule's targets
-	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "%-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+APP_NAME := iec62209-service
 
 .venv:
 	@python3 --version
@@ -14,8 +13,14 @@ help: ## help on rule's targets
 		setuptools
 	@$@/bin/pip3 list --verbose
 
+info: ## info on tools
+	 which python
+	 python --version
+	 which pip
+	 pip --version
 
 
+.PHONY: devenv
 devenv: .venv ## create a python virtual environment with dev tools (e.g. linters, etc)
 	$</bin/pip3 --quiet install -r requirements-dev.txt
 	# Installing pre-commit hooks in current .git repo
@@ -23,16 +28,26 @@ devenv: .venv ## create a python virtual environment with dev tools (e.g. linter
 	@echo "To activate the venv, execute 'source .venv/bin/activate'"
 
 
-## CLEAN -------------------------------
+.PHONY: build
+build: ## build image
+	docker build \
+		--tag local/${APP_NAME}:latest \
+		$(CURDIR)
 
-.PHONY: clean clean-images clean-venv clean-all clean-more
 
-_git_clean_args := -dx --force --exclude=.vscode --exclude=TODO.md --exclude=.venv --exclude=.python-version --exclude="*keep*"
+.PHONY: run
+run: ## runs container and serves in http://127.0.0.1:8000/
+	docker run \
+		--tty \
+		--interactive \
+		--publish 8000:8000 \
+		local/${APP_NAME}:latest
 
-.check-clean:
-	@git clean -n $(_git_clean_args)
-	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-	@echo -n "$(shell whoami), are you REALLY sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+
+.PHONY: compose
+compose: ## creates compose specs .osparc/docker-compose.yml
+	.osparc/bin/ooil.bash compose -f .osparc/docker-compose.yml
+
 
 clean-venv: devenv ## Purges .venv into original configuration
 	# Cleaning your venv
@@ -41,7 +56,3 @@ clean-venv: devenv ## Purges .venv into original configuration
 
 clean-hooks: ## Uninstalls git pre-commit hooks
 	@-pre-commit uninstall 2> /dev/null || rm .git/hooks/pre-commit
-
-clean: .check-clean ## cleans all unversioned files in project and temp files create by this makefile
-	# Cleaning unversioned
-	@git clean $(_git_clean_args)

@@ -197,6 +197,3 @@ cython_debug/
 *ignore*
 !.dockerignore
 !.gitignore
-
-
-.osparc/docker-compose.yml

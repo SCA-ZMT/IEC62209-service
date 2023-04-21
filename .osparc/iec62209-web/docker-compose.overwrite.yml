@@ -1,0 +1,6 @@
+version: "3.7"
+services:
+  iec62209-web:
+    build:
+      context: ../
+      dockerfile: Dockerfile

@@ -1,31 +1,25 @@
+include ../scripts/common.Makefile
 
-.PHONY: help
+CLIENT_DIR := $(abspath $(CURDIR)/../client)
 
-help: ## help on rule's targets
-	@awk --posix 'BEGIN {FS = ":.*?## "} /^[[:alpha:][:space:]_-]+:.*?## / {printf "%-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: info
-info: ## package info
+info: ## info in main packages
 	 @pip show iec62209
-	 @echo "---------"
+	 @echo
 	 @pip show iec62209-service
 
 
 .PHONY: install-dev
-install-dev: ## install development
+install-dev: ## installs for development
 	pip install -r requirements.txt
 	pip install --editable .
 
 
-.PHONY: start-dev
-
-CLIENT_DIR := $(abspath $(CURDIR)/../client)
-
+.PHONY: run-dev
 run-dev: ## runs app on a uvicorn server with watch+reload to aid development
-	export CLIENT_INDEX_PATH="$(CLIENT_DIR)/compiled/source/index.html" && \
+	export CLIENT_OUTPUT_DIR="$(CLIENT_DIR)/compiled/source" && \
 	uvicorn iec62209_service.main:the_app \
-      --host 0.0.0.0 \
-      --reload \
-      --reload-dir ./src \
-      --log-level debug
-	echo "http://127.0.0.1:8000/docs"
+		--reload \
+		--reload-dir ./src \
+		--log-level debug
