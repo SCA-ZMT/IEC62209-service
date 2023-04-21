@@ -74,10 +74,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
         };
         sar.io.Resources.fetch("trainingSetGeneration", "generate", params)
           .then(() => this.__trainingDataGenerated())
-          .catch(err => {
-            this.__trainingDataGenerated();
-            console.error(err);
-          })
+          .catch(err => console.error(err))
           .finally(() => createButton.setEnabled(true));
       });
       optionsLayout.add(createButton);
@@ -86,7 +83,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
         enabled: false
       });
       exportButton.addListener("execute", () => {
-        sar.io.Resources.fetch("trainingSetGeneration", "xport", params)
+        sar.io.Resources.fetch("trainingSetGeneration", "xport")
           .then(data => this.__trainingDataExported(data))
           .catch(err => console.error(err))
           .finally(() => createButton.setEnabled(true));
@@ -170,7 +167,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
 
     __fetchResults: function() {
       console.log("fetching results");
-
+      /*
       const data = {
         "headings": ["no.", "antenna", "freq. (MHz)", "Pin (dBm)", "mod.", "PAPR (db)", "BW (MHz)", "d (mm)", "O (*)", "x (mm)", "y (mm)", "SAR 1g (W/Kg)", "SAR 10g (W/Kg)", "U 1g (dB)", "U 10g (dB)"],
         "rows": [
@@ -179,12 +176,12 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
           [3,"qwre",5,6,7,8,9,10,11,12,13,,,,]
         ]};
       this.__popoluateTable(data);
+      */
 
-      /*
       sar.io.Resources.fetch("trainingSetGeneration", "getData")
         .then(data => this.__popoluateTable(data))
         .catch(err => console.error(err));
-        
+      /*
       sar.io.Resources.fetch("trainingSetGeneration", "getDistribution")
         .then(data => this.__popoluateDistributionImage(data))
         .catch(err => console.error(err));

@@ -31,26 +31,23 @@ qx.Class.define("sar.steps.LoadModel", {
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
-      const input = this.__input = new qx.html.Input("file", {
-        display: "none"
-      }, {
-        accept: "json"
+      const fileInput = this.__fileInput = new sar.widget.FileInput("Load Model...", ["json"]);
+      fileInput.addListener("selectionChanged", () => {
+        const file = fileInput.getFile();
+        if (file) {
+          this.__submitFile(file);
+        }
       });
-      this.getContentElement().add(this.__input);
+      optionsLayout.add(fileInput);
 
-      const loadModelButton = this.__loadModelButton = new qx.ui.form.Button("Load Model...").set({
+      const resetBtn = this.__resetBtn = new qx.ui.form.Button("Reset Model").set({
         allowGrowX: false
       });
-      optionsLayout.add(loadModelButton);
+      resetBtn.addListener("execute", () => this.setModel(null));
+      optionsLayout.add(resetBtn);
 
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null);
       optionsLayout.add(modelViewer);
-
-      input.addListener("change", () => {
-        const file = input.getDomElement().files.item(0);
-        this.__submitFile(file);
-      }, this);
-      loadModelButton.addListener("execute", () => this.__loadModelButtonPressed(), this);
 
       return optionsLayout;
     },
@@ -101,20 +98,15 @@ qx.Class.define("sar.steps.LoadModel", {
       this.setModel(newModel);
     },
 
-    __loadModelButtonPressed: function() {
-      if (this.getModel()) {
-        this.setModel(null);
-      } else {
-        this.__input.getDomElement().click();
-      }
-    },
-
     _applyModel: function(model) {
       if (model) {
-        this.__loadModelButton.setLabel("Reset Model");
+        this.__fileInput.exclude();
+        this.__resetBtn.show();
       } else {
-        this.__loadModelButton.setLabel("Load Model")
+        this.__fileInput.show();
+        this.__resetBtn.exclude();
       }
+
       this._optionsLayout.remove(this.__modelViewer);
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(model);
       this._optionsLayout.add(modelViewer);
