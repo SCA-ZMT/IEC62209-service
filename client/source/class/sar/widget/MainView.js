@@ -113,7 +113,7 @@ qx.Class.define("sar.widget.MainView", {
         label: "Analysis & Creation",
         step: new sar.steps.AnalysisCreation(),
       }, {
-        icon: "sar/icons/file-import.svg",
+        icon: "sar/icons/step_import_icon.svg",
         label: "Load Model",
         step: new sar.steps.LoadModel(),
       }, {

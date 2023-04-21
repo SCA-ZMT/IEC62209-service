@@ -52,10 +52,10 @@ qx.Class.define("sar.steps.ExploreSpace", {
       searchButton.addListener("execute", () => console.log("search"));
       optionsLayout.add(searchButton);
 
-      const exportButton = new qx.ui.form.Button("Export Tests").set({
+      const exportButton = new qx.ui.form.Button("Export Critical tests").set({
         enabled: false
       });
-      exportButton.addListener("execute", () => console.log("Export tests"));
+      exportButton.addListener("execute", () => console.log("Export Critical tests"));
       optionsLayout.add(exportButton);
 
       return optionsLayout;

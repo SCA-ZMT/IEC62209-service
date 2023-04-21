@@ -99,7 +99,7 @@ qx.Class.define("sar.steps.Utils", {
         const listItem = new qx.ui.form.ListItem(sarEntry.text);
         listItem.id = sarEntry.id;
         selectBox.add(listItem);
-        if (idx === 0) {
+        if (idx === 2) {
           selectBox.setSelection([listItem]);
         }
       });

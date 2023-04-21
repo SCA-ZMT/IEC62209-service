@@ -19,6 +19,7 @@ qx.Class.define("sar.steps.LoadModel", {
   },
 
   members: {
+    __input: null,
     __loadModelButton: null,
     __modelViewer: null,
 
@@ -30,15 +31,26 @@ qx.Class.define("sar.steps.LoadModel", {
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
-      const loadModelButton = this.__loadModelButton = new qx.ui.form.Button("Load Model").set({
+      const input = this.__input = new qx.html.Input("file", {
+        display: "none"
+      }, {
+        accept: "json"
+      });
+      this.getContentElement().add(this.__input);
+
+      const loadModelButton = this.__loadModelButton = new qx.ui.form.Button("Load Model...").set({
         allowGrowX: false
       });
-      loadModelButton.addListener("execute", () => this.__loadModelButtonPressed());
       optionsLayout.add(loadModelButton);
 
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null);
       optionsLayout.add(modelViewer);
 
+      input.addListener("change", () => {
+        const file = input.getDomElement().files.item(0);
+        this.__submitFile(file);
+      }, this);
+      loadModelButton.addListener("execute", () => this.__loadModelButtonPressed(), this);
 
       return optionsLayout;
     },
@@ -47,19 +59,53 @@ qx.Class.define("sar.steps.LoadModel", {
       return null;
     },
 
+    __submitFile: function(file) {
+      const fileName = file.name;
+      console.log("submitFile", fileName);
+      
+      const body = new FormData();
+      body.append("fileName", fileName);
+
+      const req = new XMLHttpRequest();
+      req.upload.addEventListener("progress", ep => {
+        // updateProgress
+        if (ep.lengthComputable) {
+          const percentComplete = ep.loaded / ep.total * 100;
+          console.log("percentComplete", percentComplete);
+        } else {
+          console.log("Unable to compute progress information since the total size is unknown");
+        }
+      }, false);
+      req.addEventListener("load", e => {
+        // transferComplete
+        if (req.status == 200) {
+          console.log("transferComplete");
+        } else if (req.status == 400) {
+          console.error("transferFailed");
+        }
+      });
+      req.addEventListener("error", e => console.error(e));
+      req.addEventListener("abort", e => console.error(e));
+      req.open("POST", "/load-model", true);
+      req.send(body);
+
+      const newModel = {
+        "filename": "fileName",
+        "systemName": "cSAR3D",
+        "phantomType": "Flat HSL",
+        "hardwareVersion": "SD C00 F01 AC",
+        "softwareVersion": "V5.2.0",
+        "acceptanceCriteria": "Pass",
+        "normalizedRMSError": "Pass",
+      }
+      this.setModel(newModel);
+    },
+
     __loadModelButtonPressed: function() {
       if (this.getModel()) {
         this.setModel(null);
       } else {
-        const newModel = {
-          "systemName": "cSAR3D",
-          "phantomType": "Flat HSL",
-          "hardwareVersion": "SD C00 F01 AC",
-          "softwareVersion": "V5.2.0",
-          "acceptanceCriteria": "Pass",
-          "normalizedRMSError": "Pass",
-        }
-        this.setModel(newModel);
+        this.__input.getDomElement().click();
       }
     },
 

@@ -1,7 +1,7 @@
 from enum import Enum
 from os.path import dirname, realpath
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, File, Request, status, UploadFile
 from fastapi.responses import (
     FileResponse,
     HTMLResponse,
@@ -48,6 +48,16 @@ class SarFiltering(str, Enum):
     SAR1G = "SAR1G"
     SAR10G = "SAR10G"
     SARBOTH = "SARBOTH"
+
+
+class ModelLoaded(BaseModel):
+    systemName: str
+    phantomType: str
+    hardwareVersion: str
+    softwareVersion: str
+    filename: str
+    acceptanceCriteria: str
+    normalizedRMSError: str
 
 
 #
@@ -138,3 +148,25 @@ async def generate_training_set(
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     return JSONResponse(message, status_code=end_status)
+
+
+@router.post("/load-model", response_class=ModelLoaded)
+async def post_model(file: UploadFile = File(...)) -> ModelLoaded:
+    try:
+        contents = file.file.read()
+        with open(file.filename, 'wb') as f:
+            f.write(contents)
+    except Exception:
+        return JSONResponse({"message": "There was an error uploading the model"})
+    finally:
+        file.file.close()
+
+    return ModelLoaded(
+        filename = file.filename,
+        systemName = "cSAR3D",
+        phantomType = "Flat HSL",
+        hardwareVersion = "SD C00 F01 AC",
+        softwareVersion = "V5.2.0",
+        acceptanceCriteria = "Pass",
+        normalizedRMSError = "2",
+    )

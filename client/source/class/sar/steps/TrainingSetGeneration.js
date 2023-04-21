@@ -15,6 +15,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
   extend: sar.steps.StepBase,
 
   members: {
+    __exportButton: null,
     __dataTable: null,
     __distributionImage: null,
 
@@ -71,20 +72,25 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
             resolveWResponse: true
           }
         };
-        sar.io.Resources.fetch("trainingSetGeneration", "create", params)
-          .then(() => this.__fetchResults())
+        sar.io.Resources.fetch("trainingSetGeneration", "generate", params)
+          .then(() => this.__trainingDataGenerated())
           .catch(err => {
-            this.__fetchResults();
+            this.__trainingDataGenerated();
             console.error(err);
           })
           .finally(() => createButton.setEnabled(true));
       });
       optionsLayout.add(createButton);
 
-      const exportButton = new qx.ui.form.Button("Export Training data").set({
+      const exportButton = this.__exportButton = new qx.ui.form.Button("Export Training data").set({
         enabled: false
       });
-      exportButton.addListener("execute", () => console.log("Export Training data"));
+      exportButton.addListener("execute", () => {
+        sar.io.Resources.fetch("trainingSetGeneration", "xport", params)
+          .then(data => this.__trainingDataExported(data))
+          .catch(err => console.error(err))
+          .finally(() => createButton.setEnabled(true));
+      });
       optionsLayout.add(exportButton);
 
       return optionsLayout;
@@ -120,10 +126,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
         showCellFocusIndicator: false,
         forceLineHeight: false
       });
-      table.getTableColumnModel().setDataCellRenderer(0, new qx.ui.table.cellrenderer.Number());
-      table.getTableColumnModel().setDataCellRenderer(1, new qx.ui.table.cellrenderer.String());
-      table.getTableColumnModel().setDataCellRenderer(2, new qx.ui.table.cellrenderer.Number());
-      table.setColumnWidth(0, 20);
+      table.setColumnWidth(0, 10);
       return table;
     },
 
@@ -160,27 +163,52 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       return resultsLayout;
     },
 
+    __trainingDataGenerated: function() {
+      this.__exportButton.setEnabled(true);
+      this.__fetchResults();
+    },
+
     __fetchResults: function() {
       console.log("fetching results");
 
-      sar.io.Resources.fetch("trainingSetGeneration", "getData")
-        .then(data => console.log(data))
-        .catch(err => console.error(err));
+      const data = {
+        "headings": ["no.", "antenna", "freq. (MHz)", "Pin (dBm)", "mod.", "PAPR (db)", "BW (MHz)", "d (mm)", "O (*)", "x (mm)", "y (mm)", "SAR 1g (W/Kg)", "SAR 10g (W/Kg)", "U 1g (dB)", "U 10g (dB)"],
+        "rows": [
+          [1,"asfd",3,4,5,6,7,8,9,10,11,,,,],
+          [2,"yxcv",4,5,6,7,8,9,10,11,12,,,,],
+          [3,"qwre",5,6,7,8,9,10,11,12,13,,,,]
+        ]};
+      this.__popoluateTable(data);
 
-      sar.io.Resources.fetch("trainingSetGeneration", "getDistribution")
-        .then(data => console.log(data))
+      /*
+      sar.io.Resources.fetch("trainingSetGeneration", "getData")
+        .then(data => this.__popoluateTable(data))
         .catch(err => console.error(err));
+        
+      sar.io.Resources.fetch("trainingSetGeneration", "getDistribution")
+        .then(data => this.__popoluateDistributionImage(data))
+        .catch(err => console.error(err));
+      */
     },
 
-    __populateResults: function(response) {
-      let csvText = null
-      if (response === undefined) {
-        csvText = "Name,Surname,Address,State,Pc\rJohn,Doe,120 jefferson st.,Riverside, NJ, 08075\rJack,McGinnis,220 hobo Av.,Phila,PA,09119\rJohn Da Man,Repici,120 Jefferson St.,Riverside,NJ,08075\rStephen,Tyler,7452 Terrace At the Plaza road,SomeTown,SD,91234\rBlankman,,SomeTown, SD, 00298\rJoan the bone, Anne,Jet,9th,at Terrace plc,Desert City,CO,00123"
-      } else {
-        // csvText = await response.text();
+    __popoluateTable: function(data) {
+      const table = this.__dataTable;
+      const tableModel = table.getTableModel();
+      if ("headings" in data) {
+        // tableModel.setColumns(data["headings"])
       }
-      const csvJson = sar.steps.Utils.csvToJson(csvText);
-      console.log("resultCSV", csvJson);
+      if ("rows" in data) {
+        tableModel.setData(data["rows"])
+      }
+    },
+
+    __popoluateDistributionImage: function(data) {
+      const distributionImage = this.__distributionImage;
+      console.log(data);
+    },
+
+    __trainingDataExported: function(data) {
+      console.log("__trainingDataExported", data);
     }
   }
 });

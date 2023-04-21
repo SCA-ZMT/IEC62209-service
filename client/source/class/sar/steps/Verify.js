@@ -41,8 +41,8 @@ qx.Class.define("sar.steps.Verify", {
       optionsLayout.add(stepLayout);
 
       let row = 0;
-      const loadTestButton = new qx.ui.form.Button("Load Test Data");
-      stepLayout.add(loadTestButton, {
+      const loadCriticalTestButton = new qx.ui.form.Button("Load Critical tests data");
+      stepLayout.add(loadCriticalTestButton, {
         row,
         column: 0
       });
