@@ -2,11 +2,16 @@ from os import remove
 from tempfile import NamedTemporaryFile
 
 from fastapi import APIRouter, File, UploadFile, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from .common import ModelInterface
 
-router = APIRouter(prefix="/training-data", tags=["training=data"])
+router = APIRouter(prefix="/training-data", tags=["training-data"])
+
+
+@router.get("/reset", response_class=Response)
+async def training_data_clear() -> Response:
+    ModelInterface.clear()
 
 
 @router.post("/load", response_class=JSONResponse)

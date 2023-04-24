@@ -6,6 +6,11 @@ from .common import ModelInterface, ModelMetadata
 router = APIRouter(prefix="/analysis-creation", tags=["analysis-creation"])
 
 
+@router.get("/reset", response_class=Response)
+async def analysis_creation_reset() -> Response:
+    ModelInterface.clear()
+
+
 @router.post("/create", response_class=JSONResponse)
 async def analysis_creation_create() -> JSONResponse:
     end_status = status.HTTP_200_OK

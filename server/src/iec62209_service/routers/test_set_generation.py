@@ -19,20 +19,27 @@ class TrainingSetConfig(SampleConfig):
     fAreaY: int | None = 240
 
 
+@router.get("/reset")
+async def training_set_reset():
+    SampleInterface.trainingSet.clear()
+
+
 @router.get("/distribution", response_class=FileResponse)
-async def get_training_set_distribution() -> FileResponse:
-    response = FileResponse(dirname(realpath(__file__)) + "/../../testdata/mwl.png")
-    response.media_type = "image/png"
-    return response
+async def training_set_distribution() -> FileResponse:
+    resp = FileResponse(
+        dirname(realpath(__file__)) + "/../../../../assets/mwl.png",
+        media_type="image/png",
+    )
+    return resp
 
 
 @router.get("/data", response_class=JSONResponse)
-async def get_training_set_data() -> JSONResponse:
+async def training_set_data() -> JSONResponse:
     return SampleInterface.trainingSet
 
 
 @router.get("/xport", response_class=PlainTextResponse)
-async def export_training_set() -> PlainTextResponse:
+async def training_set_xport() -> PlainTextResponse:
     need_extra_colums = False
     headings = SampleInterface.trainingSet.headings
     if "sar_1g" not in headings:
@@ -47,7 +54,7 @@ async def export_training_set() -> PlainTextResponse:
 
 
 @router.post("/generate", response_class=JSONResponse)
-async def generate_training_set(config: TrainingSetConfig) -> JSONResponse:
+async def training_set_generate(config: TrainingSetConfig) -> JSONResponse:
     message = ""
     end_status = status.HTTP_200_OK
     try:
