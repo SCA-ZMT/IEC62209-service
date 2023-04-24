@@ -35,8 +35,6 @@ def get_app_settings(request: Request) -> ApplicationSettings:
 class TrainingSetConfig(BaseModel):
     fRangeMin: int
     fRangeMax: int
-    measAreaX: int
-    measAreaY: int
     sampleSize: int
 
 
@@ -97,7 +95,7 @@ async def export_training_set() -> PlainTextResponse:
     headings = TrainingSetGeneration.headings
     if "sar_1g" not in headings:
         need_extra_colums = True
-        headings += [SarFiltering.SAR10G.lower(), "unc"]
+        headings += [SarFiltering.SAR10G.lower(), "u10g"]
     text = str(TrainingSetGeneration.headings).strip("[]")
     for row in TrainingSetGeneration.rows:
         if need_extra_colums:
@@ -107,9 +105,7 @@ async def export_training_set() -> PlainTextResponse:
 
 
 @router.post("/training-set-generation:generate", response_class=JSONResponse)
-async def generate_training_set(
-    config: TrainingSetConfig | None = None,
-) -> JSONResponse:
+async def generate_training_set(config: TrainingSetConfig) -> JSONResponse:
     message = ""
     end_status = status.HTTP_200_OK
     try:
@@ -180,11 +176,14 @@ class ModelInterface:
 
     @classmethod
     def has_model(cls) -> bool:
-        return cls.work.data.get("model") is not None
+        try:
+            return cls.work.data.get("model") is not None
+        except:
+            return False
 
     @classmethod
     def load_init_sample(cls, filename):
-        sample = cls.work.load_init_sample(filename, SarFiltering.SAR10G.lower())
+        sample = cls.work.load_init_sample(filename, "sard10g")
         return sample.size() > 0
 
     @classmethod
@@ -307,8 +306,8 @@ async def post_training_data(file: UploadFile = File(...)) -> JSONResponse:
 # Load Model
 
 
-@router.post("/load-model", response_class=JSONResponse)
-async def post_model(file: UploadFile = File(...)) -> JSONResponse:
+@router.post("/load-model:load", response_class=JSONResponse)
+async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
     response = {}
     end_status = status.HTTP_200_OK
     try:
@@ -340,3 +339,15 @@ async def post_model(file: UploadFile = File(...)) -> JSONResponse:
         file.file.close()
 
     return JSONResponse(response, status_code=end_status)
+
+
+@router.get("/load-model:isloaded", response_class=JSONResponse)
+async def load_model_isloaded() -> JSONResponse:
+    response = {"isloaded": ModelInterface.has_model()}
+    return response
+
+
+@router.get("/load-model:reset")
+async def load_model_reset() -> HTMLResponse:
+    ModelInterface.clear()
+    return HTMLResponse("")
