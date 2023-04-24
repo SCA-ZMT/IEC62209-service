@@ -1,5 +1,7 @@
+from json import dumps as jdumps
+
 from fastapi import APIRouter, status
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 
 from .common import ModelInterface, ModelMetadata
 
@@ -58,16 +60,18 @@ async def analysis_creation_marginals():
         )
 
 
-@router.get("/xport", response_class=JSONResponse)
-async def analysis_creation_xport(metadata: ModelMetadata) -> JSONResponse:
+@router.post("/xport", response_class=PlainTextResponse)
+async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
     response = ""
     end_status = status.HTTP_200_OK
     try:
         ModelInterface.raise_if_no_model()
         meta = metadata.dict()
         data = ModelInterface.dump_model_to_json()
-        response = {"metadata": meta, "model": data}
+        response = f'{{"metadata": {jdumps(meta)}, "model": {jdumps(data)} }}'
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse(response, status_code=end_status)
+    return PlainTextResponse(
+        response, media_type="application/json", status_code=end_status
+    )
