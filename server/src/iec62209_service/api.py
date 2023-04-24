@@ -260,7 +260,7 @@ async def analysis_creation_create() -> JSONResponse:
     return JSONResponse(response, status_code=end_status)
 
 
-@router.post("/analysis-creation:variogram", response_class=Response)
+@router.get("/analysis-creation:variogram", response_class=Response)
 async def analysis_creation_variogram():
     try:
         if not ModelInterface.has_model():
