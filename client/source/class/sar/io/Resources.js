@@ -125,7 +125,7 @@ qx.Class.define("sar.io.Resources", {
         });
 
         // OM: not sure about this one
-        const endPointExists = Object.keys(res.__routes__P_238_2).includes(endpoint);
+        const endPointExists = Object.keys(res.__routes__P_172_2).includes(endpoint);
         if (!endPointExists) {
           reject(Error(`Error while fetching ${resource}: the endpoint is not defined`));
         }
