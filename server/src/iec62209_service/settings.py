@@ -1,14 +1,23 @@
 import os
 from pathlib import Path
 
-from pydantic import BaseSettings, validator
+from pydantic import BaseSettings, Field, validator
 
 
 class OsparcServiceSettings(BaseSettings):
 
-    INPUT_FOLDER: Path | None = None
-    OUTPUT_FOLDER: Path | None = None
-    LOG_FOLDER: Path | None = None
+    INPUT_FOLDER: Path | None = Field(
+        None,
+        env=["INPUT_FOLDER", "DY_SIDECAR_PATH_INPUTS"],
+    )
+    OUTPUT_FOLDER: Path | None = Field(
+        None,
+        env=["OUTPUT_FOLDER", "DY_SIDECAR_PATH_OUTPUTS"],
+    )
+    STATE_FOLDERS: list[Path] = Field(
+        default_factory=list,
+        envs=["STATE_FOLDERS", "DY_SIDECAR_STATE_PATHS"],
+    )
 
     @validator("INPUT_FOLDER", "OUTPUT_FOLDER")
     @classmethod
@@ -18,18 +27,6 @@ class OsparcServiceSettings(BaseSettings):
                 f"Folder {v} does not exists."
                 "Expected predefined and created by sidecar"
             )
-        return v
-
-    @validator("INPUT_FOLDER")
-    @classmethod
-    def check_input_dir(cls, v):
-        if v is not None:
-            f = v / "inputs.json"
-            if not f.exists():
-                raise ValueError(
-                    f"File {f} does not exists."
-                    "Expected predefined and created by sidecar"
-                )
         return v
 
     @validator("OUTPUT_FOLDER")
