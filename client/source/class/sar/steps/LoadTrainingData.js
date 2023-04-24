@@ -84,7 +84,7 @@ qx.Class.define("sar.steps.LoadTrainingData", {
 
     __submitFile: function(file) {
       const successCallback = resp => this.setTrainingData(resp);
-      sar.steps.Utils.postFile(file, "/load-training-data", successCallback, null, this);
+      sar.steps.Utils.postFile(file, "/training-data/load", successCallback, null, this);
     },
 
     __applyTrainingData: function(trainingData) {

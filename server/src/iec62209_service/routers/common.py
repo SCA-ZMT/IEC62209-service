@@ -1,6 +1,7 @@
 from enum import Enum
 
 from iec62209.work import Work
+from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
 ### pydantic MODELS
@@ -9,7 +10,11 @@ from pydantic import BaseModel
 class SarFiltering(str, Enum):
     SAR1G = "SAR1G"
     SAR10G = "SAR10G"
-    SARBOTH = "SARBOTH"
+
+
+class ImageResponse:
+    path: str
+    type: str = "png"
 
 
 class SampleConfig(BaseModel):
