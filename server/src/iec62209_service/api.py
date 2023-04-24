@@ -1,14 +1,16 @@
 from enum import Enum
+from json import loads as jloads
 from os.path import dirname, realpath
 
-from fastapi import APIRouter, Depends, File, Request, status, UploadFile
+from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 from fastapi.responses import (
     FileResponse,
     HTMLResponse,
     JSONResponse,
     PlainTextResponse,
 )
-from iec62209.work import Work
+from iec62209.work import Model, Work
+from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
 from .settings import ApplicationSettings
@@ -37,7 +39,7 @@ class TrainingSetConfig(BaseModel):
     sampleSize: int
 
 
-class ModelCreation(BaseModel):
+class ModelInterface(BaseModel):
     systemName: str
     phantomType: str
     hardwareVersion: str
@@ -48,16 +50,6 @@ class SarFiltering(str, Enum):
     SAR1G = "SAR1G"
     SAR10G = "SAR10G"
     SARBOTH = "SARBOTH"
-
-
-class ModelLoaded(BaseModel):
-    systemName: str
-    phantomType: str
-    hardwareVersion: str
-    softwareVersion: str
-    filename: str
-    acceptanceCriteria: str
-    normalizedRMSError: str
 
 
 #
@@ -104,11 +96,11 @@ async def export_training_set() -> PlainTextResponse:
     headings = TrainingSetGeneration.headings
     if "sar_1g" not in headings:
         need_extra_colums = True
-        headings += ["sar_1g", "sar_10g", "u_1g", "u_10g"]
+        headings += [SarFiltering.SAR10G.lower(), "unc"]
     text = str(TrainingSetGeneration.headings).strip("[]")
     for row in TrainingSetGeneration.rows:
         if need_extra_colums:
-            row += [0, 0, 0, 0]
+            row += [0, 0]
         text += "\n" + str(row).strip("[]")
     return PlainTextResponse(text)
 
@@ -150,23 +142,170 @@ async def generate_training_set(
     return JSONResponse(message, status_code=end_status)
 
 
-@router.post("/load-model", response_class=ModelLoaded)
-async def post_model(file: UploadFile = File(...)) -> ModelLoaded:
+# Analysis & Creation
+
+
+class ModelLoaded(BaseModel):
+    filename: str = ""
+    systemName: str
+    phantomType: str
+    hardwareVersion: str
+    softwareVersion: str
+    acceptanceCriteria: str
+    normalizedRMSError: str
+
+
+class ModelInterface:
+    work: Work = Work()
+
+    @staticmethod
+    def fig2img(fig):
+        import io
+
+        buf = io.BytesIO()
+        fig.savefig(buf)
+        buf.seek(0)
+        return buf
+
+    @classmethod
+    def clear(cls):
+        cls.work.clear()
+        cls.work.clear_model()
+        cls.work.clear_sample()
+
+    @classmethod
+    def has_sample(cls) -> bool:
+        return cls.work.data.get("initsample") is not None
+
+    @classmethod
+    def has_model(cls) -> bool:
+        return cls.work.data.get("model") is not None
+
+    @classmethod
+    def load_init_sample(cls, filename):
+        sample = cls.work.load_init_sample(filename, SarFiltering.SAR10G.lower())
+        return sample.size() > 0
+
+    @classmethod
+    def dump_model_to_json(cls):
+        model: Model = cls.work.data.get("model")
+        if model is None:
+            raise Exception("no model has been created")
+        return model.to_json()
+
+    @classmethod
+    def make_model(cls):
+        cls.work.make_model(show=False)
+
+    @classmethod
+    def plot_model(cls):
+        model = cls.work.data.get("model")
+        if model is not None:
+            _, ax = plt.subplots(2, 1, figsize=(12, 9))
+            plt.subplots_adjust(
+                left=0.07, right=0.95, bottom=0.05, top=0.95, wspace=0.2, hspace=0.2
+            )
+            fig = model.plot_variogram(ax=ax)
+            return cls.fig2img(fig)
+
+    @classmethod
+    def goodfit_test(cls) -> dict:
+        if not cls.has_model():
+            raise Exception("No model loaded")
+        gfres: tuple = cls.work.goodfit_test()
+        return {
+            "Acceptance criteria": str(gfres[0]).lower(),
+            "Normalized RMS error": f"{gfres[1]:.3f}",
+        }
+
+    @classmethod
+    def goodfit_plot(cls):
+        if not cls.has_model():
+            raise Exception("No model loaded")
+        fig = cls.work.goodfit_plot()
+        return cls.fig2img(fig)
+
+
+@router.post("/analysis-creation/training-data:load", response_class=HTMLResponse)
+async def analysis_creation_load_training_data(
+    file: UploadFile = File(...),
+) -> HTMLResponse:
+    message = ""
+    end_status = status.HTTP_200_OK
     try:
-        contents = file.file.read()
-        with open(file.filename, 'wb') as f:
-            f.write(contents)
-    except Exception:
-        return JSONResponse({"message": "There was an error uploading the model"})
+        ModelInterface.clear()
+        ok = ModelInterface.load_init_sample(file.name)
+        if not ok:
+            raise Exception("failed to load training data")
+    except Exception as e:
+        message = str(e)
+        end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    return HTMLResponse(message, status_code=end_status)
+
+
+@router.post("/analysis-creation:create", response_class=JSONResponse)
+async def analysis_creation_create() -> JSONResponse:
+    end_status = status.HTTP_200_OK
+    try:
+        if not ModelInterface.has_sample():
+            raise Exception("no sample loaded")
+        ModelInterface.make_model(show=False)
+        response = ModelInterface.goodfit_test()
+    except Exception as e:
+        response = {"error": str(e)}
+        end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    return JSONResponse(response, status_code=end_status)
+
+
+@router.get("/analysis-creation:xport", response_class=JSONResponse)
+async def analysis_creation_xport(metadata: ModelLoaded) -> JSONResponse:
+    response = ""
+    end_status = status.HTTP_200_OK
+    try:
+        if not ModelInterface.has_model():
+            raise Exception("model has not been created")
+        meta = metadata.dict()
+        data = ModelInterface.dump_model_to_json()
+        response = {"metadata": meta, "model": data}
+    except Exception as e:
+        response = {"error": str(e)}
+        end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    return JSONResponse(response, status_code=end_status)
+
+
+# Load Model
+
+
+@router.post("/load-model", response_class=JSONResponse)
+async def post_model(file: UploadFile = File(...)) -> JSONResponse:
+    response = {}
+    end_status = status.HTTP_200_OK
+    try:
+        contents = jloads(file.file.read())
+        try:
+            meta = contents.get("metadata")
+        except:
+            # dummy
+            meta = {
+                "systemName": "Test Metadata",
+                "phantomType": "here goes the phantom name",
+                "hardwareVersion": "metadata is still missing",
+                "softwareVersion": "the best version",
+                "acceptanceCriteria": "full marks",
+                "normalizedRMSError": "3.14159",
+            }
+        model = contents.get("model")
+        if meta is None or model is None:
+            raise Exception(f"Failed to load model from {file.filename}")
+
+        loaded = ModelLoaded(meta)
+        loaded.filename = file.filename
+        response = loaded.dict()
+
+    except Exception as e:
+        response = {"message": str(e)}
+        end_status = status.HTTP_400_BAD_REQUEST
     finally:
         file.file.close()
 
-    return ModelLoaded(
-        filename = file.filename,
-        systemName = "cSAR3D",
-        phantomType = "Flat HSL",
-        hardwareVersion = "SD C00 F01 AC",
-        softwareVersion = "V5.2.0",
-        acceptanceCriteria = "Pass",
-        normalizedRMSError = "2",
-    )
+    return JSONResponse(response, status_code=end_status)
