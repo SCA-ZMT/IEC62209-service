@@ -15,6 +15,110 @@ qx.Class.define("sar.steps.Utils", {
   type: "static",
 
   statics: {
+    trainingDataTable: function() {
+      const tableModel = new qx.ui.table.model.Simple();
+      tableModel.setColumns([
+        "no.",
+        "antenna",
+        "freq. (MHz)",
+        "Pin (dBm)",
+        "mod.",
+        "PAPR (db)",
+        "BW (MHz)",
+        "d (mm)",
+        "O (*)",
+        "x (mm)",
+        "y (mm)",
+        // "SAR 1g (W/Kg)",
+        "SAR 10g (W/Kg)",
+        // "U 1g (dB)",
+        "U 10g (dB)",
+      ]);
+      const custom = {
+        tableColumnModel: function(obj) {
+          return new qx.ui.table.columnmodel.Resize(obj);
+        }
+      };
+      const table = new qx.ui.table.Table(tableModel, custom).set({
+        selectable: true,
+        statusBarVisible: false,
+        showCellFocusIndicator: false,
+        forceLineHeight: false
+      });
+      table.setColumnWidth(0, 10);
+      return table;
+    },
+
+    populateTrainingDataTable: function(table, data) {
+      const tableModel = table.getTableModel();
+      if ("headings" in data) {
+        // tableModel.setColumns(data["headings"]);
+      }
+      if ("rows" in data) {
+        tableModel.setData(data["rows"]);
+      }
+    },
+
+    downloadCSV: function (data, fileName) {
+      const blob = new Blob([data], {
+        type: "text/csv"
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("href", url);
+      a.setAttribute("download", fileName);
+      a.click();
+    },
+
+    downloadJson: function (data, fileName) {
+      const blob = new Blob([data], {
+        type: "text/json"
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("href", url);
+      a.setAttribute("download", fileName);
+      a.click();
+    },
+
+    postFile: function(file, path, successCbk, failureCbk, context) {
+      const fileName = file.name;
+      console.log("submitFile", fileName);
+      
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const req = new XMLHttpRequest();
+      req.upload.addEventListener("progress", ep => {
+        // updateProgress
+        if (ep.lengthComputable) {
+          const percentComplete = ep.loaded / ep.total * 100;
+          console.log("percentComplete", percentComplete);
+        } else {
+          console.log("Unable to compute progress information since the total size is unknown");
+        }
+      }, false);
+      req.addEventListener("load", e => {
+        // transferComplete
+        if (req.status == 200) {
+          console.log("transferComplete");
+          if (successCbk) {
+            const resp = JSON.parse(req.responseText);
+            successCbk.call(context, resp);
+          }
+        } else if (req.status == 400) {
+          console.error("transferFailed");
+          if (failureCbk) {
+            failureCbk.call();
+          }
+        }
+      });
+      req.addEventListener("error", e => console.error(e));
+      req.addEventListener("abort", e => console.error(e));
+      req.open("POST", path, true);
+      req.send(formData);
+    },
+
     modelEditor: function() {
       const form = new qx.ui.form.Form();
 

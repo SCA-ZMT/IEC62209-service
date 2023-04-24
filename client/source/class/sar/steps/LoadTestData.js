@@ -11,7 +11,7 @@
 
 ************************************************************************ */
 
-qx.Class.define("sar.steps.LoadModel", {
+qx.Class.define("sar.steps.LoadTestData", {
   extend: sar.steps.StepBase,
 
   events: {
@@ -53,14 +53,40 @@ qx.Class.define("sar.steps.LoadModel", {
     },
 
     _createResults: function() {
-      return null;
+      const resultsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
+
+      const resultsTabView = new qx.ui.tabview.TabView().set({
+        contentPadding: 10
+      });
+      resultsLayout.add(resultsTabView);
+
+      const dataView = this.__createDataView();
+      resultsTabView.add(dataView);
+
+      return resultsLayout;
+    },
+
+    _applyModel: function(model) {
+      if (model) {
+        this.__fileInput.exclude();
+        this.__resetBtn.show();
+      } else {
+        this.__fileInput.show();
+        this.__resetBtn.exclude();
+      }
+
+      this._optionsLayout.remove(this.__modelViewer);
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(model);
+      this._optionsLayout.add(modelViewer);
+      this.fireDataEvent("dataSet", model);
     },
 
     __submitFile: function(file) {
       const fileName = file.name;
+      console.log("submitFile", fileName);
       
-      const formData = new FormData();
-      formData.append("file", file);
+      const body = new FormData();
+      body.append("fileName", fileName);
 
       const req = new XMLHttpRequest();
       req.upload.addEventListener("progress", ep => {
@@ -83,7 +109,7 @@ qx.Class.define("sar.steps.LoadModel", {
       req.addEventListener("error", e => console.error(e));
       req.addEventListener("abort", e => console.error(e));
       req.open("POST", "/load-model", true);
-      req.send(formData);
+      req.send(body);
 
       const newModel = {
         "filename": "fileName",
@@ -97,19 +123,14 @@ qx.Class.define("sar.steps.LoadModel", {
       this.setModel(newModel);
     },
 
-    _applyModel: function(model) {
-      if (model) {
-        this.__fileInput.exclude();
-        this.__resetBtn.show();
-      } else {
-        this.__fileInput.show();
-        this.__resetBtn.exclude();
-      }
-
-      this._optionsLayout.remove(this.__modelViewer);
-      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(model);
-      this._optionsLayout.add(modelViewer);
-      this.fireDataEvent("dataSet", model);
+    __createDataView: function() {
+      const dataTable = this.__dataTable = sar.steps.Utils.trainingDataTable();
+      const layout = new qx.ui.layout.VBox();
+      const tabPage = new qx.ui.tabview.Page("Data").set({
+        layout
+      });
+      tabPage.add(dataTable);
+      return tabPage;
     }
   }
 });

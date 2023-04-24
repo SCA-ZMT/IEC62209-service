@@ -22,7 +22,7 @@ qx.Class.define("sar.widget.MainView", {
     this.__steps = [];
     this.__builLayout();
     this.__attachHandlers();
-    this.__initModel();
+    this.__initStates();
   },
 
   members: {
@@ -65,12 +65,10 @@ qx.Class.define("sar.widget.MainView", {
       this._add(introLayout);
 
       const stepsGrid = new qx.ui.layout.Grid(20, 10);
-      stepsGrid.setColumnAlign(0, "center", "middle");
-      stepsGrid.setColumnAlign(1, "center", "middle");
-      stepsGrid.setColumnAlign(2, "center", "middle");
-      stepsGrid.setColumnAlign(3, "center", "middle");
-      stepsGrid.setColumnAlign(4, "center", "middle");
-      stepsGrid.setColumnAlign(5, "center", "middle");
+      const nSteps = 10;
+      for (let i=0; i<nSteps; i++) {
+        stepsGrid.setColumnAlign(i, "center", "middle");
+      }
       const stepsLayout = new qx.ui.container.Composite(stepsGrid).set({
         allowGrowX: false
       });
@@ -78,16 +76,16 @@ qx.Class.define("sar.widget.MainView", {
       let col = 0;
       [{
         label: "Model Creation",
-        colSpan: 2
+        colSpan: 3
       }, {
         label: "",
         colSpan: 1
       }, {
         label: "Model Confirmation",
-        colSpan: 2
+        colSpan: 3
       }, {
         label: "Critical Data Space Search",
-        colSpan: 2
+        colSpan: 3
       }].forEach(sectionInfo => {
         const sectionLabel = new qx.ui.basic.Label().set({
           value: sectionInfo.label,
@@ -102,12 +100,15 @@ qx.Class.define("sar.widget.MainView", {
       });
 
       const stepButtons = [];
-      const steps = [];
       const stepsStack = new qx.ui.container.Stack();
       [{
         icon: "sar/icons/step0_icon.png",
         label: "Training Set Generation",
         step: new sar.steps.TrainingSetGeneration(),
+      }, {
+        icon: "sar/icons/step_import_icon.svg",
+        label: "Load Training Data",
+        step: new sar.steps.LoadTrainingData()
       }, {
         icon: "sar/icons/step1_icon.png",
         label: "Analysis & Creation",
@@ -115,11 +116,15 @@ qx.Class.define("sar.widget.MainView", {
       }, {
         icon: "sar/icons/step_import_icon.svg",
         label: "Load Model",
-        step: new sar.steps.LoadModel(),
+        step: new sar.steps.LoadModel()
       }, {
         icon: "sar/icons/step2_icon.png",
         label: "Test Set Generation",
         step: new sar.steps.TestSetGeneration(),
+      }, {
+        icon: "sar/icons/step_import_icon.svg",
+        label: "Load Test Data",
+        step: new sar.steps.LoadTestData()
       }, {
         icon: "sar/icons/step3_icon.png",
         label: "Confirm Model",
@@ -129,11 +134,22 @@ qx.Class.define("sar.widget.MainView", {
         label: "Explore Space",
         step: new sar.steps.ExploreSpace(),
       }, {
+        icon: "sar/icons/step_import_icon.svg",
+        label: "Load Critical Data",
+        step: new sar.steps.LoadTestData()
+      }, {
         icon: "sar/icons/step5_icon.png",
         label: "Verify",
         step: new sar.steps.Verify(),
       }].forEach((section, idx) => {
         const stepButton = new sar.widget.StepButton(section.label, section.icon);
+        if (section.label.includes("Load")) {
+          stepButton.getContentElement().setStyles({
+            "border-radius": "32px",
+            "border-width": "1px",
+            "border-style": "double"
+          });
+        }
         section.step.stepButton = stepButton;
         stepButtons.push(stepButton);
         stepButton.addListener("tap", () => {
@@ -158,6 +174,10 @@ qx.Class.define("sar.widget.MainView", {
       stepButtons[0].setIsActive(true);
     },
 
+    __getLoadTrainingDataStep: function() {
+      return this.__steps.find(step => step instanceof sar.steps.LoadTrainingData);
+    },
+
     __getLoadModelStep: function() {
       return this.__steps.find(step => step instanceof sar.steps.LoadModel);
     },
@@ -165,7 +185,7 @@ qx.Class.define("sar.widget.MainView", {
     __attachHandlers: function() {
       const loadModelStep = this.__getLoadModelStep();
       if (loadModelStep) {
-        loadModelStep.addListener("modelSet", e => {
+        loadModelStep.addListener("dataSet", e => {
           const model = e.getData();
           this.__steps.forEach(step => {
             if (
@@ -182,7 +202,12 @@ qx.Class.define("sar.widget.MainView", {
       }
     },
 
-    __initModel: function() {
+    __initStates: function() {
+      const trainingDataStep = this.__getLoadTrainingDataStep();
+      if (trainingDataStep) {
+        trainingDataStep.setTrainingData(null);
+      }
+
       const loadModelStep = this.__getLoadModelStep();
       if (loadModelStep) {
         loadModelStep.setModel(null);

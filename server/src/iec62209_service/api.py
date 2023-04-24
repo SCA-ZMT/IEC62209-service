@@ -1,3 +1,4 @@
+import csv
 from enum import Enum
 from json import loads as jloads
 from os.path import dirname, realpath
@@ -271,6 +272,36 @@ async def analysis_creation_xport(metadata: ModelLoaded) -> JSONResponse:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse(response, status_code=end_status)
+
+
+@router.post("/load-training-data", response_class=JSONResponse)
+async def post_training_data(file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        contents = file.file.read()
+        with open(file.filename, "wb") as f:
+            f.write(contents)
+    except Exception:
+        return JSONResponse(
+            {"message": "There was an error uploading the training data"}
+        )
+    finally:
+        file.file.close()
+
+    try:
+        TrainingSetGeneration.rows = []
+        with open(file.filename) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=",")
+            TrainingSetGeneration.headings = next(csv_reader)
+            for row in csv_reader:
+                TrainingSetGeneration.rows.append(row)
+    except Exception:
+        return JSONResponse({"message": "There was an error reading the training data"})
+    finally:
+        file.file.close()
+    return {
+        "headings": TrainingSetGeneration.headings,
+        "rows": TrainingSetGeneration.rows,
+    }
 
 
 # Load Model

@@ -48,6 +48,7 @@ qx.Class.define("sar.steps.Verify", {
       });
       row++;
 
+      /*
       const sarSelectBox = sar.steps.Utils.sarSelectBox(null, false);
       stepLayout.add(sarSelectBox, {
         row,
@@ -69,6 +70,7 @@ qx.Class.define("sar.steps.Verify", {
         column: 1
       });
       row++;
+      */
 
       const confirmButton = new qx.ui.form.Button("Confirm").set({
         allowGrowY: false
