@@ -77,4 +77,4 @@ WORKDIR /home/scu
 COPY --chown=scu:scu --from=build ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --chown=scu:scu --from=build /build/client/compiled/source ${CLIENT_OUTPUT_DIR}
 
-CMD [ "uvicorn", "iec62209_service.main:the_app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]
+CMD [ "uvicorn", "iec62209_service.main:the_app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "warning"]

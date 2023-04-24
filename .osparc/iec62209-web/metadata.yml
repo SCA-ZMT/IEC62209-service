@@ -1,6 +1,6 @@
 name: iec62209-web
-key: simcore/services/comp/iec62209-web
-type: computational
+key: simcore/services/dynamic/iec62209-web
+type: dynamic
 integration-version: 1.0.0
 version: 1.0.0
 description: >
@@ -14,12 +14,15 @@ authors:
   - name: Mark Douglas
     email: douglas@itis.swiss
     affiliation: IT'IS Foundation
-  - name: Simone Callegari
-    email: callegari@zmt.swiss
-    affiliation: Zurich Medtech
+  - name: Esra Neufeld
+    email: neufeld@itis.swiss
+    affiliation: IT'IS Foundation
   - name: Odei Maiz
     email: odeimaiz@itis.swiss
     affiliation: IT'IS Foundation
+  - name: Simone Callegari
+    email: callegari@zmt.swiss
+    affiliation: Zurich Medtech
   - name: Pedro Crespo-Valero
     email: crespo@itis.swiss
     affiliation: IT'IS Foundation
@@ -28,11 +31,11 @@ outputs:
   output_1:
     label: output_training_data
     description: Training data
-    type: string
+    type: data:*/*
   output_2:
     label: output_model
     description: Model
-    type: string
+    type: data:*/*
   output_3:
     label: output_test_data
     description: Test data
