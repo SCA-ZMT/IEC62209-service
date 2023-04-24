@@ -119,6 +119,8 @@ class ModelInterface:
     @classmethod
     def load_init_sample(cls, filename) -> dict:
         sample = cls.work.load_init_sample(filename, "sard10g")
+        if not cls.has_sample():
+            raise Exception("Empty sample")
         if sample.size() == 0:
             raise Exception(f"Failed to load data, or {filename} is empty")
         return {

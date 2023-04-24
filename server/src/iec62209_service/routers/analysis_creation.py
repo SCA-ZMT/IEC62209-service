@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from .common import ModelInterface, ModelMetadata
 
@@ -17,7 +17,7 @@ async def analysis_creation_create() -> JSONResponse:
     try:
         if not ModelInterface.has_sample():
             raise Exception("no sample loaded")
-        ModelInterface.make_model(show=False)
+        ModelInterface.make_model()
         response = ModelInterface.goodfit_test()
     except Exception as e:
         response = {"error": str(e)}
@@ -30,9 +30,9 @@ async def analysis_creation_variogram():
     try:
         ModelInterface.raise_if_no_model()
         buf = ModelInterface.plot_model()
-        return Response(buf, media_type="image/png")
+        return FileResponse(buf, media_type="image/png")
     except Exception as e:
-        return Response(
+        return JSONResponse(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
