@@ -30,7 +30,7 @@ async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
         if meta is None or model is None:
             raise Exception(f"Failed to load model from {file.filename}")
 
-        loaded = ModelMetadata(meta)
+        loaded = ModelMetadata(**meta)
         loaded.filename = file.filename
         response = loaded.dict()
 
