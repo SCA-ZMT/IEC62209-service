@@ -9,6 +9,7 @@ from fastapi.responses import (
     HTMLResponse,
     JSONResponse,
     PlainTextResponse,
+    Response,
 )
 from iec62209.work import Model, Work
 from matplotlib import pyplot as plt
@@ -156,11 +157,11 @@ class ModelInterface:
     work: Work = Work()
 
     @staticmethod
-    def fig2img(fig):
+    def fig2png(fig):
         import io
 
         buf = io.BytesIO()
-        fig.savefig(buf)
+        fig.savefig(buf, format="png")
         buf.seek(0)
         return buf
 
@@ -206,7 +207,7 @@ class ModelInterface:
                 left=0.07, right=0.95, bottom=0.05, top=0.95, wspace=0.2, hspace=0.2
             )
             fig = model.plot_variogram(ax=ax)
-            return cls.fig2img(fig)
+            return cls.fig2png(fig)
 
     @classmethod
     def goodfit_test(cls) -> dict:
@@ -223,7 +224,7 @@ class ModelInterface:
         if not cls.has_model():
             raise Exception("No model loaded")
         fig = cls.work.goodfit_plot()
-        return cls.fig2img(fig)
+        return cls.fig2png(fig)
 
 
 @router.post("/analysis-creation/training-data:load", response_class=HTMLResponse)
@@ -255,6 +256,17 @@ async def analysis_creation_create() -> JSONResponse:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse(response, status_code=end_status)
+
+
+@router.post("/analysis-creation:variogram", response_class=Response)
+async def analysis_creation_variogram():
+    try:
+        if not ModelInterface.has_model():
+            raise Exception("Model not loaded")
+        buf = ModelInterface.plot_model()
+        return Response(buf, media_type="image/png")
+    except Exception as e:
+        return Response(str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get("/analysis-creation:xport", response_class=JSONResponse)
