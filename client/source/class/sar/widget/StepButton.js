@@ -25,6 +25,13 @@ qx.Class.define("sar.widget.StepButton", {
       cursor: "pointer",
       padding: 10
     });
+
+    this.getContentElement().setStyles({
+      "border-radius": "4px",
+      "border-width": "1px",
+      "border-style": "double"
+    });
+
     this.initIsActive();
 
     const grid = new qx.ui.layout.Grid(5, 5);
@@ -75,12 +82,7 @@ qx.Class.define("sar.widget.StepButton", {
 
   members: {
     __applyIsActive: function(isActive) {
-      this.getContentElement().setStyles({
-        "border-radius": "4px",
-        "border-width": "1px",
-        "border-style": "double",
-        "border-color": isActive ? "#5768c4" : "#0e0e0e"
-      });
+      this.setBackgroundColor(isActive ? "#cabbf9" : "#FFFFFF");
     }
   }
 });

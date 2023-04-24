@@ -46,19 +46,22 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       optionsLayout.add(stepLayout);
 
+      let row = 0;
       const loadButton = new qx.ui.form.Button("Load Training Data");
       loadButton.addListener("execute", () => {
         console.log("Select Training Data file");
         this.__trainingDataLoaded();
       });
       stepLayout.add(loadButton, {
-        row: 0,
+        row,
         column: 0
       });
+      row++;
 
+      /*
       const sarSelectBox = sar.steps.Utils.sarSelectBox(null, false);
       stepLayout.add(sarSelectBox, {
-        row: 1,
+        row,
         column: 0
       });
 
@@ -73,9 +76,11 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         sarSelected.setValue(listItem.getLabel())
       }, this);
       stepLayout.add(sarSelected, {
-        row: 1,
+        row,
         column: 1
       });
+      row++;
+      */
 
       const createButton = this.__createButton = new qx.ui.form.Button("Create & Analyze").set({
         allowGrowY: false,
@@ -98,7 +103,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
           .finally(() => createButton.setEnabled(true));
       });
       stepLayout.add(createButton, {
-        row: 2,
+        row,
         column: 0
       });
 
@@ -121,25 +126,28 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         column: 0
       });
       stepLayout.add(resultsLayout, {
-        row: 2,
+        row,
         column: 1
       });
+      row++;
 
       const modelEditor = sar.steps.Utils.modelEditor();
       stepLayout.add(modelEditor, {
-        row: 3,
+        row,
         column: 0,
         colSpan: 2
       });
+      row++;
 
       const exportButton = this.__exportButton = new qx.ui.form.Button("Export Model").set({
         enabled: false
       });
       stepLayout.add(exportButton, {
-        row: 4,
+        row,
         column: 0,
         colSpan: 2
       });
+      row++;
 
       return optionsLayout;
     },

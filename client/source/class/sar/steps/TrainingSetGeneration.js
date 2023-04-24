@@ -50,9 +50,9 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       sar.steps.Utils.addMeasurementAreaToForm(form);
 
       const sampleSize = new qx.ui.form.Spinner().set({
-        minimum: 400,
-        maximum: 400,
-        value: 400
+        minimum: 40,
+        maximum: 100,
+        value: 50
       });
       form.add(sampleSize, "Sample size", null, "sampleSize");
 
@@ -93,42 +93,8 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       return optionsLayout;
     },
 
-    __createDataTable: function() {
-      const tableModel = new qx.ui.table.model.Simple();
-      tableModel.setColumns([
-        "no.",
-        "antenna",
-        "freq. (MHz)",
-        "Pin (dBm)",
-        "mod.",
-        "PAPR (db)",
-        "BW (MHz)",
-        "d (mm)",
-        "O (*)",
-        "x (mm)",
-        "y (mm)",
-        "SAR 1g (W/Kg)",
-        "SAR 10g (W/Kg)",
-        "U 1g (dB)",
-        "U 10g (dB)",
-      ]);
-      const custom = {
-        tableColumnModel: function(obj) {
-          return new qx.ui.table.columnmodel.Resize(obj);
-        }
-      };
-      const table = new qx.ui.table.Table(tableModel, custom).set({
-        selectable: true,
-        statusBarVisible: false,
-        showCellFocusIndicator: false,
-        forceLineHeight: false
-      });
-      table.setColumnWidth(0, 10);
-      return table;
-    },
-
     __createDataView: function() {
-      const dataTable = this.__dataTable = this.__createDataTable();
+      const dataTable = this.__dataTable = sar.steps.Utils.trainingDataTable();
       const layout = new qx.ui.layout.VBox();
       const tabPage = new qx.ui.tabview.Page("Data").set({
         layout
@@ -166,37 +132,17 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __fetchResults: function() {
-      console.log("fetching results");
-      /*
-      const data = {
-        "headings": ["no.", "antenna", "freq. (MHz)", "Pin (dBm)", "mod.", "PAPR (db)", "BW (MHz)", "d (mm)", "O (*)", "x (mm)", "y (mm)", "SAR 1g (W/Kg)", "SAR 10g (W/Kg)", "U 1g (dB)", "U 10g (dB)"],
-        "rows": [
-          [1,"asfd",3,4,5,6,7,8,9,10,11,,,,],
-          [2,"yxcv",4,5,6,7,8,9,10,11,12,,,,],
-          [3,"qwre",5,6,7,8,9,10,11,12,13,,,,]
-        ]};
-      this.__popoluateTable(data);
-      */
-
       sar.io.Resources.fetch("trainingSetGeneration", "getData")
         .then(data => this.__popoluateTable(data))
         .catch(err => console.error(err));
-      /*
+
       sar.io.Resources.fetch("trainingSetGeneration", "getDistribution")
         .then(data => this.__popoluateDistributionImage(data))
         .catch(err => console.error(err));
-      */
     },
 
     __popoluateTable: function(data) {
-      const table = this.__dataTable;
-      const tableModel = table.getTableModel();
-      if ("headings" in data) {
-        // tableModel.setColumns(data["headings"])
-      }
-      if ("rows" in data) {
-        tableModel.setData(data["rows"])
-      }
+      sar.steps.Utils.populateTrainingDataTable(this.__dataTable, data);
     },
 
     __popoluateDistributionImage: function(data) {
@@ -205,7 +151,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __trainingDataExported: function(data) {
-      console.log("__trainingDataExported", data);
+      sar.steps.Utils.downloadCSV(data, "TrainingData.csv");
     }
   }
 });
