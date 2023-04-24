@@ -1,4 +1,3 @@
-import csv
 from enum import Enum
 from json import loads as jloads
 from os.path import dirname, realpath
@@ -183,9 +182,14 @@ class ModelInterface:
             return False
 
     @classmethod
-    def load_init_sample(cls, filename):
+    def load_init_sample(cls, filename) -> dict:
         sample = cls.work.load_init_sample(filename, "sard10g")
-        return sample.size() > 0
+        if sample.size() == 0:
+            raise Exception(f"Failed to load data, or {filename} is empty")
+        return {
+            "headings": sample.data.columns.tolist(),
+            "rows": sample.data.values.tolist(),
+        }
 
     @classmethod
     def dump_model_to_json(cls):
@@ -227,21 +231,19 @@ class ModelInterface:
         return cls.fig2png(fig)
 
 
-@router.post("/analysis-creation/training-data:load", response_class=HTMLResponse)
+@router.post("/training-data:load", response_class=JSONResponse)
 async def analysis_creation_load_training_data(
     file: UploadFile = File(...),
-) -> HTMLResponse:
-    message = ""
+) -> JSONResponse:
+    response = {}
     end_status = status.HTTP_200_OK
     try:
         ModelInterface.clear()
-        ok = ModelInterface.load_init_sample(file.name)
-        if not ok:
-            raise Exception("failed to load training data")
+        response = ModelInterface.load_init_sample(file.filename)
     except Exception as e:
-        message = str(e)
+        response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return HTMLResponse(message, status_code=end_status)
+    return JSONResponse(response, status_code=end_status)
 
 
 @router.post("/analysis-creation:create", response_class=JSONResponse)
@@ -258,7 +260,7 @@ async def analysis_creation_create() -> JSONResponse:
     return JSONResponse(response, status_code=end_status)
 
 
-@router.post("/analysis-creation:variogram", response_class=Response)
+@router.get("/analysis-creation:variogram", response_class=Response)
 async def analysis_creation_variogram():
     try:
         if not ModelInterface.has_model():
@@ -283,36 +285,6 @@ async def analysis_creation_xport(metadata: ModelLoaded) -> JSONResponse:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse(response, status_code=end_status)
-
-
-@router.post("/load-training-data", response_class=JSONResponse)
-async def post_training_data(file: UploadFile = File(...)) -> JSONResponse:
-    try:
-        contents = file.file.read()
-        with open(file.filename, "wb") as f:
-            f.write(contents)
-    except Exception:
-        return JSONResponse(
-            {"message": "There was an error uploading the training data"}
-        )
-    finally:
-        file.file.close()
-
-    try:
-        TrainingSetGeneration.rows = []
-        with open(file.filename) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=",")
-            TrainingSetGeneration.headings = next(csv_reader)
-            for row in csv_reader:
-                TrainingSetGeneration.rows.append(row)
-    except Exception:
-        return JSONResponse({"message": "There was an error reading the training data"})
-    finally:
-        file.file.close()
-    return {
-        "headings": TrainingSetGeneration.headings,
-        "rows": TrainingSetGeneration.rows,
-    }
 
 
 # Load Model
