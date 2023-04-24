@@ -26,11 +26,10 @@ async def training_set_reset():
 
 @router.get("/distribution", response_class=FileResponse)
 async def training_set_distribution() -> FileResponse:
-    resp = FileResponse(
+    return FileResponse(
         dirname(realpath(__file__)) + "/../../../../assets/mwl.png",
         media_type="image/png",
     )
-    return resp
 
 
 @router.get("/data", response_class=JSONResponse)

@@ -12,9 +12,12 @@ class SarFiltering(str, Enum):
     SAR10G = "SAR10G"
 
 
-class ImageResponse:
-    path: str
-    type: str = "png"
+class IsLoaded:
+    def __init__(self, ok: bool):
+        self.isloaded: bool = ok
+
+    def to_json(self):
+        return {"isloaded": self.isloaded}
 
 
 class SampleConfig(BaseModel):

@@ -3,7 +3,7 @@ from json import loads as jloads
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.responses import JSONResponse, Response
 
-from .common import ModelInterface, ModelMetadata
+from .common import IsLoaded, ModelInterface, ModelMetadata
 
 router = APIRouter(prefix="/model", tags=["model"])
 
@@ -45,8 +45,7 @@ async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
 
 @router.get("/isloaded", response_class=JSONResponse)
 async def load_model_isloaded() -> JSONResponse:
-    response = {"isloaded": ModelInterface.has_model()}
-    return response
+    return IsLoaded(ModelInterface.has_model()).to_json()
 
 
 @router.get("/reset", response_class=Response)
