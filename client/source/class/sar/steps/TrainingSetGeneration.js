@@ -23,7 +23,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     _getDescriptionText: function() {
       return "\
         Generates a random latin hypercube sample with 8 dimensions and saves the results to a .csv file. The 8 test variables are:\
-        <br>frequency, output power, peak to average power ratio (PAPR), bandwidth (BW), distance (mm), angle (deg), x (mm), and y (mm).\
+        <br>Frequency, output power, peak to average power ratio (PAPR), bandwidth (BW), distance (mm), angle (deg), x (mm), and y (mm).\
         <br><br>When performing the SAR measurements, fill in the SAR (SAR1g and/or SAR10g), and uncertainty (U1g and/or U10g) values. The uncertainty values should be reported with a 95% confidence level (k = 2 standard deviations).\
       "
     },
@@ -51,17 +51,17 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
 
       const sampleSize = new qx.ui.form.Spinner().set({
         minimum: 40,
-        maximum: 100,
-        value: 50
+        maximum: 1000,
+        value: 400
       });
       form.add(sampleSize, "Sample size", null, "sampleSize");
 
       const formRenderer = new qx.ui.form.renderer.Single(form);
       optionsLayout.add(formRenderer);
 
-      const createButton = new qx.ui.form.Button("Create Training data");
+      const createButton = new sar.widget.FetchButton("Create Training data");
       createButton.addListener("execute", () => {
-        createButton.setEnabled(false);
+        createButton.setFetching(true);
         const data = {};
         for (const [key, item] of Object.entries(form.getItems())) {
           data[key] = item.getValue()
@@ -75,18 +75,19 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
         sar.io.Resources.fetch("trainingSetGeneration", "generate", params)
           .then(() => this.__trainingDataGenerated())
           .catch(err => console.error(err))
-          .finally(() => createButton.setEnabled(true));
+          .finally(() => createButton.setFetching(false));
       });
       optionsLayout.add(createButton);
 
-      const exportButton = this.__exportButton = new qx.ui.form.Button("Export Training data").set({
+      const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Training data").set({
         enabled: false
       });
       exportButton.addListener("execute", () => {
+        exportButton.setFetching(true);
         sar.io.Resources.fetch("trainingSetGeneration", "xport")
           .then(data => this.__trainingDataExported(data))
           .catch(err => console.error(err))
-          .finally(() => createButton.setEnabled(true));
+          .finally(exportButton.setFetching(false));
       });
       optionsLayout.add(exportButton);
 
@@ -104,7 +105,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __createDistributionView: function() {
-      const distributionImage = this.__distributionImage = sar.steps.Utils.createImageViewer("sar/plots/step0_distribution.png")
+      const distributionImage = this.__distributionImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Distribution", distributionImage);
       return tabPage;
     },
@@ -136,18 +137,16 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
         .then(data => this.__popoluateTable(data))
         .catch(err => console.error(err));
 
-      sar.io.Resources.fetch("trainingSetGeneration", "getDistribution")
-        .then(data => this.__popoluateDistributionImage(data))
-        .catch(err => console.error(err));
+      this.__populateDistributionImage();
     },
 
     __popoluateTable: function(data) {
       sar.steps.Utils.populateTrainingDataTable(this.__dataTable, data);
     },
 
-    __popoluateDistributionImage: function(data) {
-      const distributionImage = this.__distributionImage;
-      console.log(data);
+    __populateDistributionImage: function() {
+      const endpoints = sar.io.Resources.resources["trainingSetGeneration"].endpoints;
+      this.__distributionImage.setSource(endpoints["getDistribution"].url);
     },
 
     __trainingDataExported: function(data) {

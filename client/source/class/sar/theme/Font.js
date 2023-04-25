@@ -40,6 +40,13 @@ qx.Theme.define("sar.theme.Font", {
       size: 14,
       family: ["Roboto", "sanf-serif"],
       color: "text"
+    },
+
+    "title-14": {
+      size: 14,
+      family: ["Roboto", "sanf-serif"],
+      color: "text",
+      bold: true
     }
   }
 });

@@ -21,6 +21,11 @@
     "resource": "source/resource",
     "translation": "source/translation"
   },
+  "externalResources": {
+    "css": [
+      "common/common.css"
+    ]
+  },
   "requires": {
     "@qooxdoo/framework": "^7.6.0"
   }

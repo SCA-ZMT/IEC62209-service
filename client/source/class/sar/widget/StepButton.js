@@ -19,11 +19,12 @@ qx.Class.define("sar.widget.StepButton", {
 
     const width = 120;
     const height = 120;
+    const padding = 10;
     this.set({
       width,
       height,
+      padding,
       cursor: "pointer",
-      padding: 10
     });
 
     this.getContentElement().setStyles({
@@ -36,13 +37,13 @@ qx.Class.define("sar.widget.StepButton", {
 
     const grid = new qx.ui.layout.Grid(5, 5);
     grid.setRowHeight(0, height-60);
-    grid.setRowHeight(1, 40);
+    grid.setRowHeight(1, 40); // two lines of text
     this._setLayout(grid);
 
     if (iconSrc) {
-      const offset = iconSrc.includes(".svg") ? 10 : 0;
+      const offset = iconSrc.includes(".svg") ? 5 : 0;
       const image = new qx.ui.basic.Image().set({
-        maxWidth: width-20 - offset,
+        maxWidth: width-2*padding - offset,
         maxHeight: height-60 - offset,
         source: iconSrc,
         scale: true,
@@ -59,7 +60,7 @@ qx.Class.define("sar.widget.StepButton", {
         value: text,
         font: "text-16",
         rich: true,
-        width: width - 20,
+        width: width - 2*padding,
         alignX: "center",
         alignY: "middle",
         textAlign: "center"

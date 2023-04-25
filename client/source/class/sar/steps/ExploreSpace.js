@@ -29,25 +29,6 @@ qx.Class.define("sar.steps.ExploreSpace", {
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
-      const form = new qx.ui.form.Form();
-      form.addGroupHeader("Explore space");
-      const iteraions = new qx.ui.form.Spinner().set({
-        minimum: 8,
-        maximum: 8,
-        value: 8,
-        enabled: false
-      });
-      form.add(iteraions, "Iterations");
-      const minFail = new qx.ui.form.Spinner().set({
-        minimum: 0,
-        maximum: 10,
-        value: 5,
-        enabled: false
-      });
-      form.add(minFail, "Min fail prob (%)");
-      const formRenderer = new qx.ui.form.renderer.Single(form);
-      optionsLayout.add(formRenderer);
-
       const searchButton = new qx.ui.form.Button("Search");
       searchButton.addListener("execute", () => console.log("search"));
       optionsLayout.add(searchButton);
@@ -68,7 +49,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
         "Pf (dBm)",
         "modulation",
         "s (mm)",
-        "0",
+        "θ (°)",
         "x (mm)",
         "y (mm)",
         "sard",

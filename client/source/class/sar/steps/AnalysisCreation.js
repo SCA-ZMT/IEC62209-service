@@ -18,8 +18,6 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     __createButton: null,
     __exportButton: null,
     __variogramImage: null,
-    __deviationsImage: null,
-    __marginalsImage: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -47,60 +45,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       optionsLayout.add(stepLayout);
 
       let row = 0;
-      const loadButton = new qx.ui.form.Button("Load Training Data");
-      loadButton.addListener("execute", () => {
-        console.log("Select Training Data file");
-        this.__trainingDataLoaded();
-      });
-      stepLayout.add(loadButton, {
-        row,
-        column: 0
-      });
-      row++;
-
-      /*
-      const sarSelectBox = sar.steps.Utils.sarSelectBox(null, false);
-      stepLayout.add(sarSelectBox, {
-        row,
-        column: 0
-      });
-
-      const sarSelected = new qx.ui.basic.Label().set({
-        alignY: "middle",
-        rich: true,
-        wrap: true,
-        selectable: true
-      });
-      sarSelectBox.addListener("changeSelection", e => {
-        const listItem = e.getData()[0];
-        sarSelected.setValue(listItem.getLabel())
-      }, this);
-      stepLayout.add(sarSelected, {
-        row,
-        column: 1
-      });
-      row++;
-      */
-
-      const createButton = this.__createButton = new qx.ui.form.Button("Create & Analyze").set({
-        allowGrowY: false,
-        enabled: false
-      });
-      createButton.addListener("execute", () => {
-        createButton.setEnabled(false);
-        const data = {
-          "sarOption": sarSelectBox.getSelection()[0].id
-        };
-        const params = {
-          data
-        };
-        sar.io.Resources.fetch("analysisCreation", "create", params)
-          .then(() => this.__trainingDataCreated())
-          .catch(err => {
-            this.__trainingDataCreated();
-            console.error(err);
-          })
-          .finally(() => createButton.setEnabled(true));
+      const createButton = this.__createButton = new sar.widget.FetchButton("Create & Analyze").set({
+        allowGrowY: false
       });
       stepLayout.add(createButton, {
         row,
@@ -112,22 +58,57 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         allowGrowX: false
       });
       const acceptanceTitle = new qx.ui.basic.Label().set({
-        value: "Acceptance criteria:"
+        value: "Acceptance criteria:",
+        alignX: "right",
+        textAlign: "right",
       });
       resultsLayout.add(acceptanceTitle, {
         row: 0,
         column: 0
       });
-      const normalityTitle = new qx.ui.basic.Label().set({
-        value: "Normalized rms error 10.2% < 25%:"
+      const acceptanceValue = new qx.ui.basic.Label();
+      resultsLayout.add(acceptanceValue, {
+        row: 0,
+        column: 1
       });
-      resultsLayout.add(normalityTitle, {
+      const rmsErrorTitle = new qx.ui.basic.Label().set({
+        value: "Normalized RMS error 10.2%<25%:",
+        alignX: "right",
+        textAlign: "right",
+      });
+      resultsLayout.add(rmsErrorTitle, {
         row: 1,
         column: 0
+      });
+      const rmsErrorValue = new qx.ui.basic.Label();
+      resultsLayout.add(rmsErrorValue, {
+        row: 1,
+        column: 1
+      });
+      resultsLayout.add(acceptanceValue, {
+        row: 0,
+        column: 1
       });
       stepLayout.add(resultsLayout, {
         row,
         column: 1
+      });
+      createButton.addListener("execute", () => {
+        createButton.setFetching(true);
+        acceptanceValue.setValue("");
+        rmsErrorValue.setValue("");
+        sar.io.Resources.fetch("analysisCreation", "create")
+          .then(data => {
+            if ("Acceptance criteria" in data) {
+              acceptanceValue.setValue(data["Acceptance criteria"]);
+            }
+            if ("Normalized RMS error" in data) {
+              rmsErrorValue.setValue(data["Normalized RMS error"]);
+            }
+            this.__trainingDataAnalyzed();
+          })
+          .catch(err => console.error(err))
+          .finally(() => createButton.setFetching(false));
       });
       row++;
 
@@ -139,8 +120,24 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       row++;
 
-      const exportButton = this.__exportButton = new qx.ui.form.Button("Export Model").set({
+      const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Model").set({
         enabled: false
+      });
+      exportButton.addListener("execute", () => {
+        exportButton.setFetching(true);
+        const data = {};
+        for (const [key, item] of Object.entries(modelEditor._form.getItems())) {
+          data[key] = item.getValue()
+        }
+        data["acceptanceCriteria"] = acceptanceValue.getValue();
+        data["normalizedRMSError"] = rmsErrorValue.getValue();
+        const params = {
+          data
+        };
+        sar.io.Resources.fetch("analysisCreation", "xport", params)
+          .then(data => this.__modelExported(data))
+          .catch(err => console.error(err))
+          .finally(() => exportButton.setFetching(false));
       });
       stepLayout.add(exportButton, {
         row,
@@ -153,20 +150,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     },
 
     __createVariogramView: function() {
-      const variogramImage = sar.steps.Utils.createImageViewer("sar/plots/step1_variogram.png")
+      const variogramImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Variogram", variogramImage);
-      return tabPage;
-    },
-
-    __createDeviationsView: function() {
-      const deviationsImage = sar.steps.Utils.createImageViewer("sar/plots/step1_deviations.png")
-      const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
-      return tabPage;
-    },
-
-    __createMarginalsView: function() {
-      const marginalsImage = sar.steps.Utils.createImageViewer("sar/plots/step1_marginals.png")
-      const tabPage = sar.steps.Utils.createTabPage("Marginals", marginalsImage);
       return tabPage;
     },
 
@@ -181,22 +166,25 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       const variogramView = this.__variogramImage = this.__createVariogramView()
       resultsTabView.add(variogramView);
 
-      const deviationsView = this.__deviationsImage = this.__createDeviationsView()
-      resultsTabView.add(deviationsView);
-
-      const marginalsView = this.__marginalsImage = this.__createMarginalsView()
-      resultsTabView.add(marginalsView);
-
       return resultsLayout;
     },
 
-    __trainingDataLoaded: function() {
-      this.__createButton.setEnabled(true);
-    },
-
-    __trainingDataCreated: function() {
+    __trainingDataAnalyzed: function() {
       this.__exportButton.setEnabled(true);
       this.__fetchResults();
     },
+
+    __fetchResults: function() {
+      this.__populateVariogramImage();
+    },
+
+    __populateVariogramImage: function() {
+      const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
+      this.__variogramImage.setSource(endpoints["getVariogram"].url);
+    },
+
+    __modelExported: function(data) {
+      sar.steps.Utils.downloadJson(data, "Model.json");
+    }
   }
 });

@@ -12,6 +12,7 @@
  * This is the main application class of "sar"
  *
  * @asset(sar/*)
+ * @asset(common/common.css)
  */
 
 qx.Class.define("sar.Application", {
@@ -32,6 +33,8 @@ qx.Class.define("sar.Application", {
         qx.log.appender.Console;
       }
 
+      this.__loadOwnCss();
+
       const mainLayout = this.__mainLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox());
 
       const scroll = new qx.ui.container.Scroll();
@@ -49,6 +52,12 @@ qx.Class.define("sar.Application", {
         right: padding,
         bottom: padding
       });
+    },
+
+    __loadOwnCss: function() {
+      qx.bom.Stylesheet.includeFile(qx.util.ResourceManager.getInstance().toUri(
+        "common/common.css"
+      ));
     },
 
     __addIntroPage: function() {

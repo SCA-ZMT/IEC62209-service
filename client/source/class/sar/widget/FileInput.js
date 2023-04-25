@@ -79,6 +79,10 @@ qx.Class.define("sar.widget.FileInput", {
       }, this);
     },
 
+    hideInputWidget: function() {
+      this.__input.setStyle("display", "none");
+    },
+
     getValue: function() {
       const file = this.__input.getDomElement().files.item(0);
       return file ? file.name : null;

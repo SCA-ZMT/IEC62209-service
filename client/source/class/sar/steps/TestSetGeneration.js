@@ -15,12 +15,16 @@ qx.Class.define("sar.steps.TestSetGeneration", {
   extend: sar.steps.StepBase,
 
   members: {
+    __exportButton: null,
+    __dataTable: null,
+    __distributionImage: null,
+
     // overriden
     _getDescriptionText: function() {
       return "\
         Generates a random latin hypercube sample with 8 dimensions and saves the results to a .csv file. The 8 test variables are:\
         <br>Frequency, output power, peak to average power ratio (PAPR), bandwidth (BW), distance (mm), angle (deg), x (mm), and y (mm).\
-        <br>When performing the SAR measurements, fill in the SAR (SAR1g and/or SAR10g), and uncertainty (U1g and/or U10g) values. The uncertainty values should be reported with a 95% confidence level (k = 2 standard deviations).\
+        <br><br>When performing the SAR measurements, fill in the SAR (SAR1g and/or SAR10g), and uncertainty (U1g and/or U10g) values. The uncertainty values should be reported with a 95% confidence level (k = 2 standard deviations).\
       "
     },
 
@@ -83,54 +87,6 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       peakSelectBox.setEnabled(false);
       form.add(peakSelectBox, "Select 2-PEAK set");
 
-      form.addGroupHeader("BW range (MHz)");
-      const bwRangeMin = new qx.ui.form.Spinner().set({
-        minimum: 0,
-        maximum: 0,
-        value: 0,
-        enabled: false
-      });
-      form.add(bwRangeMin, "Min");
-      const bwRangeMax = new qx.ui.form.Spinner().set({
-        minimum: 100,
-        maximum: 100,
-        value: 100,
-        enabled: false
-      });
-      form.add(bwRangeMax, "Max");
-
-      form.addGroupHeader("PAPR range (dB)");
-      const paprRangeMin = new qx.ui.form.Spinner().set({
-        minimum: 0,
-        maximum: 0,
-        value: 0,
-        enabled: false
-      });
-      form.add(paprRangeMin, "Min");
-      const paprRangeMax = new qx.ui.form.Spinner().set({
-        minimum: 12,
-        maximum: 12,
-        value: 12,
-        enabled: false
-      });
-      form.add(paprRangeMax, "Max");
-
-      form.addGroupHeader("Frequency range (MHz)");
-      const fRangeMin = new qx.ui.form.Spinner().set({
-        minimum: 300,
-        maximum: 300,
-        value: 300,
-        enabled: false
-      });
-      form.add(fRangeMin, "Min");
-      const fRangeMax = new qx.ui.form.Spinner().set({
-        minimum: 6000,
-        maximum: 6000,
-        value: 6000,
-        enabled: false
-      });
-      form.add(fRangeMax, "Max");
-
       sar.steps.Utils.addMeasurementAreaToForm(form);
 
       const sampleSize = new qx.ui.form.Spinner().set({
@@ -144,57 +100,40 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       optionsLayout.add(formRenderer);
 
       const createButton = new qx.ui.form.Button("Create Test data");
-      createButton.addListener("execute", () => console.log("Create test data"));
+      createButton.addListener("execute", () => {
+        createButton.setEnabled(false);
+        const data = {};
+        for (const [key, item] of Object.entries(form.getItems())) {
+          data[key] = item.getValue()
+        }
+        const params = {
+          data,
+          options: {
+            resolveWResponse: true
+          }
+        };
+        sar.io.Resources.fetch("testSetGeneration", "generate", params)
+          .then(() => this.__testDataGenerated())
+          .catch(err => console.error(err))
+          .finally(() => createButton.setEnabled(true));
+      });
       optionsLayout.add(createButton);
 
-      const exportButton = new qx.ui.form.Button("Export Test data").set({
+      const exportButton = this.__exportButton =new qx.ui.form.Button("Export Test data").set({
         enabled: false
       });
-      exportButton.addListener("execute", () => console.log("Export test data"));
+      exportButton.addListener("execute", () => {
+        sar.io.Resources.fetch("testSetGeneration", "xport")
+          .then(data => this.__testDataExported(data))
+          .catch(err => console.error(err));
+      });
       optionsLayout.add(exportButton);
 
       return optionsLayout;
     },
 
-    __createDataTable: function() {
-      const tableModel = new qx.ui.table.model.Simple();
-      tableModel.setColumns([
-        "no.",
-        "antenna",
-        "freq. (MHz)",
-        "Pin (dBm)",
-        "mod.",
-        "PAPR (db)",
-        "BW (MHz)",
-        "d (mm)",
-        "O (*)",
-        "x (mm)",
-        "y (mm)",
-        "SAR 1g (W/Kg)",
-        "SAR 10g (W/Kg)",
-        "U 1g (dB)",
-        "U 10g (dB)",
-      ]);
-      const custom = {
-        tableColumnModel: function(obj) {
-          return new qx.ui.table.columnmodel.Resize(obj);
-        }
-      };
-      const table = new qx.ui.table.Table(tableModel, custom).set({
-        selectable: true,
-        statusBarVisible: false,
-        showCellFocusIndicator: false,
-        forceLineHeight: false
-      });
-      table.getTableColumnModel().setDataCellRenderer(0, new qx.ui.table.cellrenderer.Number());
-      table.getTableColumnModel().setDataCellRenderer(1, new qx.ui.table.cellrenderer.String());
-      table.getTableColumnModel().setDataCellRenderer(2, new qx.ui.table.cellrenderer.Number());
-      table.setColumnWidth(0, 20);
-      return table;
-    },
-
     __createDataView: function() {
-      const dataTable = this.__createDataTable();
+      const dataTable = this.__dataTable = sar.steps.Utils.testDataTable();
       const layout = new qx.ui.layout.VBox();
       const tabPage = new qx.ui.tabview.Page("Data").set({
         layout
@@ -204,7 +143,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
     },
 
     __createDistributionView: function() {
-      const distributionImage = sar.steps.Utils.createImageViewer("sar/plots/step0_distribution.png")
+      const distributionImage = this.__distributionImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Distribution", distributionImage);
       return tabPage;
     },
@@ -224,6 +163,32 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       resultsTabView.add(distributionView);
 
       return resultsLayout;
+    },
+
+    __testDataGenerated: function() {
+      this.__exportButton.setEnabled(true);
+      this.__fetchResults();
+    },
+
+    __fetchResults: function() {
+      sar.io.Resources.fetch("testSetGeneration", "getData")
+        .then(data => this.__popoluateTable(data))
+        .catch(err => console.error(err));
+
+      this.__populateDistributionImage();
+    },
+
+    __popoluateTable: function(data) {
+      sar.steps.Utils.populateTestDataTable(this.__dataTable, data);
+    },
+
+    __populateDistributionImage: function() {
+      const endpoints = sar.io.Resources.resources["testSetGeneration"].endpoints;
+      this.__distributionImage.setSource(endpoints["getDistribution"].url);
+    },
+
+    __testDataExported: function(data) {
+      sar.steps.Utils.downloadCSV(data, "TestData.csv");
     }
   }
 });

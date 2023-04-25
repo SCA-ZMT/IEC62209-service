@@ -2,11 +2,11 @@ name: iec62209-web
 key: simcore/services/dynamic/iec62209-web
 type: dynamic
 integration-version: 1.0.0
-version: 1.0.0
+version: 1.0.1
 description: >
-  SAR validation web service following [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
+  SAR System Validation web service following [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
 contact: bujard@itis.swiss
-thumbnail: https://via.placeholder.com/170x120.png
+thumbnail: https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/International_Electrotechnical_Commission_Logo.svg/240px-International_Electrotechnical_Commission_Logo.svg.png
 authors:
   - name: Cedric Bujard
     email: bujard@itis.swiss
@@ -29,18 +29,18 @@ authors:
 inputs: []
 outputs:
   output_1:
-    label: output_training_data
-    description: Training data
+    label: Training Data
+    description: Training Data
     type: data:*/*
   output_2:
-    label: output_model
+    label: Model
     description: Model
     type: data:*/*
   output_3:
-    label: output_test_data
-    description: Test data
+    label: Test Data
+    description: Test Data
     type: data:*/*
   output_4:
-      label: output_critical_tests_data
-      description: Critical tests data
-      type: data:*/*
+    label: Critical Test Data
+    description: Critical Test Data
+    type: data:*/*

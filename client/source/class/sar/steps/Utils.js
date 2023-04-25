@@ -26,12 +26,10 @@ qx.Class.define("sar.steps.Utils", {
         "PAPR (db)",
         "BW (MHz)",
         "d (mm)",
-        "O (*)",
+        "θ (°)",
         "x (mm)",
         "y (mm)",
-        // "SAR 1g (W/Kg)",
         "SAR 10g (W/Kg)",
-        // "U 1g (dB)",
         "U 10g (dB)",
       ]);
       const custom = {
@@ -59,6 +57,48 @@ qx.Class.define("sar.steps.Utils", {
       }
     },
 
+    testDataTable: function() {
+      const tableModel = new qx.ui.table.model.Simple();
+      tableModel.setColumns([
+        "no.",
+        "antenna",
+        "freq. (MHz)",
+        "Pin (dBm)",
+        "mod.",
+        "PAPR (db)",
+        "BW (MHz)",
+        "d (mm)",
+        "θ (°)",
+        "x (mm)",
+        "y (mm)",
+        "SAR 10g (W/Kg)",
+        "U 10g (dB)",
+      ]);
+      const custom = {
+        tableColumnModel: function(obj) {
+          return new qx.ui.table.columnmodel.Resize(obj);
+        }
+      };
+      const table = new qx.ui.table.Table(tableModel, custom).set({
+        selectable: true,
+        statusBarVisible: false,
+        showCellFocusIndicator: false,
+        forceLineHeight: false
+      });
+      table.setColumnWidth(0, 10);
+      return table;
+    },
+
+    populateTestDataTable: function(table, data) {
+      const tableModel = table.getTableModel();
+      if ("headings" in data) {
+        // tableModel.setColumns(data["headings"]);
+      }
+      if ("rows" in data) {
+        tableModel.setData(data["rows"]);
+      }
+    },
+
     downloadCSV: function (data, fileName) {
       const blob = new Blob([data], {
         type: "text/csv"
@@ -71,12 +111,9 @@ qx.Class.define("sar.steps.Utils", {
     },
 
     downloadJson: function (data, fileName) {
-      const blob = new Blob([data], {
-        type: "text/json"
-      });
-      const url = window.URL.createObjectURL(blob);
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
       const a = document.createElement("a");
-      a.setAttribute("href", url);
+      a.setAttribute("href", dataStr);
       a.setAttribute("download", fileName);
       a.click();
     },
@@ -170,7 +207,7 @@ qx.Class.define("sar.steps.Utils", {
         label: "Acceptance criteria"
       }, {
         id: "normalizedRMSError",
-        label: "Norm. RME Error 10.2% < 25%"
+        label: "Norm. RMS Error 10.2% < 25%"
       }].forEach((entry, idx) => {
         const label = new qx.ui.basic.Label(entry.label + ":");
         modelViewerLayout.add(label, {
@@ -186,28 +223,6 @@ qx.Class.define("sar.steps.Utils", {
         }
       });
       return modelViewerLayout;
-    },
-
-    sarSelectBox: function() {
-      const selectBox = new qx.ui.form.SelectBox();
-      [{
-        id: "sar1g",
-        text: "SAR 1g",
-      }, {
-        id: "sar10g",
-        text: "SAR 10g",
-      }, {
-        id: "both",
-        text: "SAR 1g & 10g",
-      }].forEach((sarEntry, idx) => {
-        const listItem = new qx.ui.form.ListItem(sarEntry.text);
-        listItem.id = sarEntry.id;
-        selectBox.add(listItem);
-        if (idx === 2) {
-          selectBox.setSelection([listItem]);
-        }
-      });
-      return selectBox;
     },
 
     addMeasurementAreaToForm: function(form) {
@@ -245,13 +260,15 @@ qx.Class.define("sar.steps.Utils", {
     },
 
     createImageViewer: function(source) {
-      const distributionImage = new qx.ui.basic.Image().set({
+      const image = new qx.ui.basic.Image().set({
         maxWidth: 600,
-        source,
         scale: true,
         alignX: "center"
       });
-      return distributionImage;
+      if (source) {
+        image.setSource(source);
+      }
+      return image;
     },
 
     csvToJson: function(csvString) {

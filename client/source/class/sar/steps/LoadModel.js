@@ -15,7 +15,7 @@ qx.Class.define("sar.steps.LoadModel", {
   extend: sar.steps.StepBase,
 
   events: {
-    "dataSet": "qx.event.type.Data"
+    "modelSet": "qx.event.type.Data"
   },
 
   members: {
@@ -25,7 +25,7 @@ qx.Class.define("sar.steps.LoadModel", {
 
     // overriden
     _getDescriptionText: function() {
-      return "Load the model that will be used in the coming 4 steps"
+      return "Load Model"
     },
 
     _createOptions: function() {
@@ -82,7 +82,7 @@ qx.Class.define("sar.steps.LoadModel", {
       });
       req.addEventListener("error", e => console.error(e));
       req.addEventListener("abort", e => console.error(e));
-      req.open("POST", "/load-model", true);
+      req.open("POST", "/load-model/load", true);
       req.send(formData);
 
       const newModel = {
@@ -109,7 +109,7 @@ qx.Class.define("sar.steps.LoadModel", {
       this._optionsLayout.remove(this.__modelViewer);
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(model);
       this._optionsLayout.add(modelViewer);
-      this.fireDataEvent("dataSet", model);
+      this.fireDataEvent("modelSet", model);
     }
   }
 });

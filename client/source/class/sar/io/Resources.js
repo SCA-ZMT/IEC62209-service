@@ -78,15 +78,15 @@ qx.Class.define("sar.io.Resources", {
         endpoints: {
           create: {
             method: "POST",
-            url: "/analysis-creation/training-data:load"
-          },
-          create: {
-            method: "POST",
             url: "/analysis-creation/create"
           },
           xport: {
-            method: "GET",
+            method: "POST",
             url: "/analysis-creation/xport"
+          },
+          getVariogram: {
+            method: "GET",
+            url: "/analysis-creation/variogram"
           },
         }
       }
@@ -121,14 +121,16 @@ qx.Class.define("sar.io.Resources", {
             value: "application/json"
           }];
           headers.forEach(item => request.setRequestHeader(item.key, item.value));
-          request.setRequestHeader("Content-Type", "application/json;text/csv;");
+          request.setRequestHeader("Content-Type", "application/json;text/csv;image/png");
         });
 
-        // OM: not sure about this one
+        // OM: get routes properly
+        /*
         const endPointExists = Object.keys(res.__routes__P_172_2).includes(endpoint);
         if (!endPointExists) {
           reject(Error(`Error while fetching ${resource}: the endpoint is not defined`));
         }
+        */
 
         res.addListenerOnce(endpoint + "Success", e => {
           const response = e.getRequest().getResponse();

@@ -40,41 +40,10 @@ qx.Class.define("sar.steps.ConfirmModel", {
       optionsLayout.add(stepLayout);
 
       let row = 0;
-      const loadTestButton = new qx.ui.form.Button("Load Test Data");
-      stepLayout.add(loadTestButton, {
-        row,
-        column: 0
-      });
-      row++;
-
-      /*
-      const sarSelectBox = sar.steps.Utils.sarSelectBox(null, false);
-      stepLayout.add(sarSelectBox, {
-        row,
-        column: 0
-      });
-
-      const sarSelected = new qx.ui.basic.Label().set({
-        alignY: "middle",
-        rich: true,
-        wrap: true,
-        selectable: true
-      });
-      sarSelectBox.addListener("changeSelection", e => {
-        const listItem = e.getData()[0];
-        sarSelected.setValue(listItem.getLabel())
-      }, this);
-      stepLayout.add(sarSelected, {
-        row,
-        column: 1
-      });
-      row++;
-      */
-
-      const createButton = new qx.ui.form.Button("Confirm").set({
+      const confirmButton = new qx.ui.form.Button("Confirm").set({
         allowGrowY: false
       });
-      stepLayout.add(createButton, {
+      stepLayout.add(confirmButton, {
         row,
         column: 0
       });
