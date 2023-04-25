@@ -15,23 +15,52 @@ qx.Class.define("sar.steps.Utils", {
   type: "static",
 
   statics: {
-    trainingDataTable: function() {
+    TRAINING_DATA_COLUMNS: {
+      number: {
+        label: "no."
+      },
+      antenna: {
+        label: "antenna"
+      },
+      frequency: {
+        label: "f (MHz)"
+      },
+      power: {
+        label: "Pf (dBm)"
+      },
+      modulation: {
+        label: "Mod"
+      },
+      par: {
+        label: "PAPR (dB)"
+      },
+      bandwidth: {
+        label: "BW (MHz)"
+      },
+      distance: {
+        label: "s (mm)"
+      },
+      angle: {
+        label: "θ (°)"
+      },
+      x: {
+        label: "x (mm)"
+      },
+      y: {
+        label: "y (mm)"
+      },
+      sar10g: {
+        label: "SAR 10g (W/Kg)"
+      },
+      U1g: {
+        label: "u 10g (dB)"
+      },
+    },
+
+    createTrainingDataTable: function() {
       const tableModel = new qx.ui.table.model.Simple();
-      tableModel.setColumns([
-        "no.",
-        "antenna",
-        "freq. (MHz)",
-        "Pin (dBm)",
-        "mod.",
-        "PAPR (db)",
-        "BW (MHz)",
-        "d (mm)",
-        "θ (°)",
-        "x (mm)",
-        "y (mm)",
-        "SAR 10g (W/Kg)",
-        "U 10g (dB)",
-      ]);
+      const trainingDataColNames = Object.values(this.TRAINING_DATA_COLUMNS).map(col => col.label);
+      tableModel.setColumns(trainingDataColNames);
       const custom = {
         tableColumnModel: function(obj) {
           return new qx.ui.table.columnmodel.Resize(obj);
@@ -43,16 +72,29 @@ qx.Class.define("sar.steps.Utils", {
         showCellFocusIndicator: false,
         forceLineHeight: false
       });
-      table.setColumnWidth(0, 10);
       return table;
     },
 
     populateTrainingDataTable: function(table, data) {
       const tableModel = table.getTableModel();
+      // Some fields do not need to be displayed: filter them out
+      const filterOutIdxs = [];
       if ("headings" in data) {
-        // tableModel.setColumns(data["headings"]);
+        data["headings"].forEach((headerId, idx) => {
+          if (!Object.keys(this.TRAINING_DATA_COLUMNS).includes(headerId)) {
+            filterOutIdxs.push(idx);
+          }
+        })
       }
+      const filterOutIdxsR = filterOutIdxs.reverse();
       if ("rows" in data) {
+        for (let i=0; i<data["rows"].length; i++) {
+          filterOutIdxsR.forEach(filterOutIdx => {
+            if (data["rows"][i].length > filterOutIdx) {
+              data["rows"][i].splice(filterOutIdx, 1);
+            }
+          });
+        }
         tableModel.setData(data["rows"]);
       }
     },
@@ -99,28 +141,28 @@ qx.Class.define("sar.steps.Utils", {
       }
     },
 
-    downloadCSV: function (data, fileName) {
+    downloadCSV: function (data, filename) {
       const blob = new Blob([data], {
         type: "text/csv"
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.setAttribute("href", url);
-      a.setAttribute("download", fileName);
+      a.setAttribute("download", filename);
       a.click();
     },
 
-    downloadJson: function (data, fileName) {
+    downloadJson: function (data, filename) {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
       const a = document.createElement("a");
       a.setAttribute("href", dataStr);
-      a.setAttribute("download", fileName);
+      a.setAttribute("download", filename);
       a.click();
     },
 
     postFile: function(file, path, successCbk, failureCbk, context) {
-      const fileName = file.name;
-      console.log("submitFile", fileName);
+      const filename = file.name;
+      console.log("submitFile", filename);
       
       const formData = new FormData();
       formData.append("file", file);
@@ -158,29 +200,27 @@ qx.Class.define("sar.steps.Utils", {
 
     modelEditor: function() {
       const form = new qx.ui.form.Form();
-
-      form.addGroupHeader("Model information")
-
+      form.addGroupHeader("Model information");
+      const filename = new qx.ui.form.TextField().set({
+        value: "Model.json"
+      });
+      form.add(filename, "Filename", null, "filename");
       const systemName = new qx.ui.form.TextField().set({
         value: "cSAR3D"
       });
       form.add(systemName, "System name", null, "systemName");
-
       const phantomType = new qx.ui.form.TextField().set({
         value: "Flat HSL"
       });
       form.add(phantomType, "Phantom type", null, "phantomType");
-
       const hardwareVersion = new qx.ui.form.TextField().set({
         value: "SD C00 F01 AC"
       });
       form.add(hardwareVersion, "Hardware version", null, "hardwareVersion");
-
       const softwareVersion = new qx.ui.form.TextField().set({
         value: "V5.2.0"
       });
       form.add(softwareVersion, "Software version", null, "softwareVersion");
-
       const formRenderer = new qx.ui.form.renderer.Single(form);
       return formRenderer;
     },
@@ -191,6 +231,9 @@ qx.Class.define("sar.steps.Utils", {
         allowGrowX: false
       });
       [{
+        id: "filename",
+        label: "Filename"
+      }, {
         id: "systemName",
         label: "System name"
       }, {
@@ -230,13 +273,13 @@ qx.Class.define("sar.steps.Utils", {
       const xMin = new qx.ui.form.Spinner().set({
         minimum: 80,
         maximum: 1000,
-        value: 120
+        value: 100
       });
       form.add(xMin, "x", null, "measAreaX");
       const yMin = new qx.ui.form.Spinner().set({
         minimum: 160,
         maximum: 1000,
-        value: 240
+        value: 200
       });
       form.add(yMin, "y", null, "measAreaY");
       return [
@@ -269,6 +312,20 @@ qx.Class.define("sar.steps.Utils", {
         image.setSource(source);
       }
       return image;
+    },
+
+    createGenerateReportButton: function() {
+      const button = new sar.widget.FetchButton("Generate Report").set({
+        enabled: false
+      });
+      button.addListener("execute", () => {
+        button.setFetching(true);
+        sar.io.Resources.fetch(resourceName, "getReport")
+          .then(data => console.log(data))
+          .catch(err => console.error(err))
+          .finally(() => button.setFetching(false));
+      });
+      return button;
     },
 
     csvToJson: function(csvString) {

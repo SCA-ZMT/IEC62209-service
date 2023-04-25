@@ -12,34 +12,20 @@
 ************************************************************************ */
 
 qx.Class.define("sar.steps.LoadCriticalData", {
-  extend: sar.steps.StepBase,
-
-  properties: {
-    criticalData: {
-      check: "Object",
-      init: null,
-      nullable: true,
-      apply: "__applyCriticalData"
-    }
-  },
+  extend: sar.steps.LoadData,
 
   events: {
     "criticalDataSet": "qx.event.type.Data"
   },
 
   members: {
-    __input: null,
-    __loadModelButton: null,
-    __dataTable: null,
-
     // overriden
     _getDescriptionText: function() {
       return "Load Critical Data"
     },
 
-    _createOptions: function() {
-      const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
-
+    // overriden
+    _getFileInput: function() {
       const fileInput = this.__fileInput = new sar.widget.FileInput("Load Critical data...", ["csv"]);
       fileInput.addListener("selectionChanged", () => {
         const file = fileInput.getFile();
@@ -47,39 +33,7 @@ qx.Class.define("sar.steps.LoadCriticalData", {
           this.__submitFile(file);
         }
       });
-      optionsLayout.add(fileInput);
-
-      const resetBtn = this.__resetBtn = new qx.ui.form.Button("Reset Critical data").set({
-        allowGrowX: false
-      });
-      resetBtn.addListener("execute", () => this.setCriticalData(null));
-      optionsLayout.add(resetBtn);
-
-      return optionsLayout;
-    },
-
-    _createResults: function() {
-      const resultsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
-
-      const resultsTabView = new qx.ui.tabview.TabView().set({
-        contentPadding: 10
-      });
-      resultsLayout.add(resultsTabView);
-
-      const dataView = this.__createDataView();
-      resultsTabView.add(dataView);
-
-      return resultsLayout;
-    },
-
-    __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.testDataTable();
-      const layout = new qx.ui.layout.VBox();
-      const tabPage = new qx.ui.tabview.Page("Data").set({
-        layout
-      });
-      tabPage.add(dataTable);
-      return tabPage;
+      return fileInput;
     },
 
     __submitFile: function(file) {
@@ -87,27 +41,20 @@ qx.Class.define("sar.steps.LoadCriticalData", {
       sar.steps.Utils.postFile(file, "/critical-data/load", successCallback, null, this);
     },
 
-    _applyModel: function(model) {
-      console.log("model", model);
+    // overriden
+    _getDataTable: function() {
+      return sar.steps.Utils.testDataTable();
     },
 
-    __applyCriticalData: function(testData) {
-      if (testData) {
-        this.__fileInput.exclude();
-        this.__resetBtn.show();
-      } else {
-        this.__fileInput.show();
-        this.__resetBtn.exclude();
-      }
+    // overriden
+    _applyStepData: function(criticalData) {
+      this.base(arguments, criticalData);
 
-      if (testData) {
-        this.__popoluateTable(testData);
-      }
-      this.fireDataEvent("criticalDataSet", testData);
+      this.fireDataEvent("criticalDataSet", criticalData);
     },
 
     __popoluateTable: function(data) {
-      sar.steps.Utils.populateTestDataTable(this.__dataTable, data);
+      sar.steps.Utils.populateTestDataTable(this._dataTable, data);
     },
   }
 });

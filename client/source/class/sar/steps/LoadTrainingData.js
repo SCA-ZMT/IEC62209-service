@@ -12,98 +12,50 @@
 ************************************************************************ */
 
 qx.Class.define("sar.steps.LoadTrainingData", {
-  extend: sar.steps.StepBase,
-
-  properties: {
-    trainingData: {
-      check: "Object",
-      init: null,
-      nullable: true,
-      apply: "__applyTrainingData"
-    }
-  },
+  extend: sar.steps.LoadData,
 
   events: {
     "trainingDataSet": "qx.event.type.Data"
   },
 
   members: {
-    __input: null,
-    __loadModelButton: null,
-    __dataTable: null,
-
     // overriden
     _getDescriptionText: function() {
       return "Load Training Data";
     },
 
-    _createOptions: function() {
-      const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
-
-      const fileInput = this.__fileInput = new sar.widget.FileInput("Load Training data...", ["csv"]);
+    // overriden
+    _getFileInput: function() {
+      const fileInput = this._fileInput = new sar.widget.FileInput("Load Training data...", ["csv"]);
       fileInput.addListener("selectionChanged", () => {
         const file = fileInput.getFile();
         if (file) {
           this.__submitFile(file);
         }
       });
-      optionsLayout.add(fileInput);
-
-      const resetBtn = this.__resetBtn = new qx.ui.form.Button("Reset Training data").set({
-        allowGrowX: false
-      });
-      resetBtn.addListener("execute", () => this.setTrainingData(null));
-      optionsLayout.add(resetBtn);
-
-      return optionsLayout;
-    },
-
-    _createResults: function() {
-      const resultsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
-
-      const resultsTabView = new qx.ui.tabview.TabView().set({
-        contentPadding: 10
-      });
-      resultsLayout.add(resultsTabView);
-
-      const dataView = this.__createDataView();
-      resultsTabView.add(dataView);
-
-      return resultsLayout;
-    },
-
-    __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.trainingDataTable();
-      const layout = new qx.ui.layout.VBox();
-      const tabPage = new qx.ui.tabview.Page("Data").set({
-        layout
-      });
-      tabPage.add(dataTable);
-      return tabPage;
+      return fileInput;
     },
 
     __submitFile: function(file) {
-      const successCallback = resp => this.setTrainingData(resp);
+      const successCallback = resp => this.setStepData(resp);
       sar.steps.Utils.postFile(file, "/training-data/load", successCallback, null, this);
     },
 
-    __applyTrainingData: function(trainingData) {
-      if (trainingData) {
-        this.__fileInput.exclude();
-        this.__resetBtn.show();
-      } else {
-        this.__fileInput.show();
-        this.__resetBtn.exclude();
-      }
+    // overriden
+    _getDataTable: function() {
+      return sar.steps.Utils.createTrainingDataTable();
+    },
 
-      if (trainingData) {
-        this.__popoluateTable(trainingData);
-      }
+    // overriden
+    _applyStepData: function(trainingData) {
+      this.base(arguments, trainingData);
+
       this.fireDataEvent("trainingDataSet", trainingData);
     },
 
-    __popoluateTable: function(data) {
-      sar.steps.Utils.populateTrainingDataTable(this.__dataTable, data);
+    // overriden
+    _popoluateTable: function(data) {
+      sar.steps.Utils.populateTrainingDataTable(this._dataTable, data);
     },
   }
 });

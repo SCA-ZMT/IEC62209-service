@@ -17,7 +17,10 @@ qx.Class.define("sar.steps.AnalysisCreation", {
   members: {
     __createButton: null,
     __exportButton: null,
-    __variogramImage: null,
+    __reportButton: null,
+    __semivariogramImage: null,
+    __marginalsImage: null,
+    __deviationsImage: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -146,12 +149,32 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       row++;
 
+      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("analysisCreation");
+      stepLayout.add(reportButton, {
+        row,
+        column: 0,
+        colSpan: 2
+      });
+      row++;
+
       return optionsLayout;
     },
 
-    __createVariogramView: function() {
-      const variogramImage = sar.steps.Utils.createImageViewer();
-      const tabPage = sar.steps.Utils.createTabPage("Variogram", variogramImage);
+    __createSemivariogramView: function() {
+      const semivariogramImage = this.__semivariogramImage = sar.steps.Utils.createImageViewer();
+      const tabPage = sar.steps.Utils.createTabPage("Semi-variogram", semivariogramImage);
+      return tabPage;
+    },
+
+    __createMarginalsView: function() {
+      const marginalsImage = this.__marginalsImage = sar.steps.Utils.createImageViewer();
+      const tabPage = sar.steps.Utils.createTabPage("Marginals", marginalsImage);
+      return tabPage;
+    },
+
+    __createDeviationsView: function() {
+      const deviationsImage = this.__deviationsImage = sar.steps.Utils.createImageViewer();
+      const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
       return tabPage;
     },
 
@@ -163,8 +186,14 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       resultsLayout.add(resultsTabView);
 
-      const variogramView = this.__variogramImage = this.__createVariogramView()
+      const variogramView = this.__createSemivariogramView()
       resultsTabView.add(variogramView);
+
+      const marginalsView = this.__createMarginalsView()
+      resultsTabView.add(marginalsView);
+
+      const deviationsView = this.__createDeviationsView()
+      resultsTabView.add(deviationsView);
 
       return resultsLayout;
     },
@@ -175,16 +204,31 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     },
 
     __fetchResults: function() {
-      this.__populateVariogramImage();
+      this.__populateSemivariogramImage();
+      this.__populateMarginalsImage();
+      this.__populateDeviationsImage();
     },
 
-    __populateVariogramImage: function() {
+    __populateSemivariogramImage: function() {
       const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
-      this.__variogramImage.setSource(endpoints["getVariogram"].url);
+      this.__semivariogramImage.setSource(endpoints["getSemivariogram"].url);
+    },
+
+    __populateMarginalsImage: function() {
+      const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
+      this.__marginalsImage.setSource(endpoints["getMarginals"].url);
+    },
+
+    __populateDeviationsImage: function() {
+      const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
+      this.__deviationsImage.setSource(endpoints["getDeviations"].url);
     },
 
     __modelExported: function(data) {
-      sar.steps.Utils.downloadJson(data, "Model.json");
+      const filename = ("metadata" in data && "filename" in data["metadata"]) ? data["metadata"]["filename"] : "Model.json";
+      sar.steps.Utils.downloadJson(data, filename);
+
+      this.__reportButton.setEnabled(false);
     }
   }
 });

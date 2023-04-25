@@ -41,7 +41,7 @@ qx.Class.define("sar.widget.MainView", {
     __builLayout: function() {
       const introLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(20));
       const introTitle = new qx.ui.basic.Label().set({
-        value: "IEC 62209-3 Validation Procedure",
+        value: "SAR System Validation Procedure",
         font: "text-30"
       });
       introLayout.add(introTitle)
@@ -230,10 +230,10 @@ qx.Class.define("sar.widget.MainView", {
     },
 
     __initStates: function() {
-      this.__loadTrainingData.setTrainingData(null);
-      this.__loadTestData.setTestData(null);
-      this.__loadCriticalData.setCriticalData(null);
-      this.__loadModel.setModel(null);
+      this.__loadTrainingData.setStepData(null);
+      this.__loadModel.setStepData(null);
+      this.__loadTestData.setStepData(null);
+      this.__loadCriticalData.setStepData(null);
     },
 
     __trainingDataSet: function(trainingData) {

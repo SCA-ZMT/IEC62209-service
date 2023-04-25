@@ -69,10 +69,10 @@ qx.Class.define("sar.widget.FileInput", {
 
     __attachEventHandlers: function() {
       this.__input.addListener("change", () => {
-        const fileNames = [];
+        const filenames = [];
         const files = this.__input.getDomElement().files;
         for (let i=0; i<files.length; i++) {
-          fileNames.push(files[i].name);
+          filenames.push(files[i].name);
         }
         this.fireEvent("selectionChanged");
       }, this);

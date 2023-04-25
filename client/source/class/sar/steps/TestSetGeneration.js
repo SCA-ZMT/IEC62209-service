@@ -90,9 +90,9 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       sar.steps.Utils.addMeasurementAreaToForm(form);
 
       const sampleSize = new qx.ui.form.Spinner().set({
-        minimum: 40,
-        maximum: 40,
-        value: 40
+        minimum: 50,
+        maximum: 50,
+        value: 50
       });
       form.add(sampleSize, "Sample size");
 

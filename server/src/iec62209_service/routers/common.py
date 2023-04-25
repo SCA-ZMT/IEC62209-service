@@ -165,7 +165,7 @@ class ModelInterface:
             raise Exception("No model loaded")
         gfres: tuple = cls.work.goodfit_test()
         return {
-            "Acceptance criteria": str(gfres[0]).lower(),
+            "Acceptance criteria": 'Pass' if gfres[0] else 'Fail',
             "Normalized RMS error": f"{gfres[1]:.3f}",
         }
 

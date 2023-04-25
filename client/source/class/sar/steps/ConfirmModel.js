@@ -15,6 +15,8 @@ qx.Class.define("sar.steps.ConfirmModel", {
   extend: sar.steps.StepBase,
 
   members: {
+    __reportButton: null,
+
     // overriden
     _getDescriptionText: function() {
       return "\
@@ -86,12 +88,20 @@ qx.Class.define("sar.steps.ConfirmModel", {
       });
       row++;
 
+      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("confirmModel");
+      stepLayout.add(reportButton, {
+        row,
+        column: 0,
+        colSpan: 2
+      });
+      row++;
+
       return optionsLayout;
     },
 
     __createQQView: function() {
-      const marginalsImage = sar.steps.Utils.createImageViewer("sar/plots/step3_qq.png")
-      const tabPage = sar.steps.Utils.createTabPage("QQ plot", marginalsImage);
+      const qqImage = sar.steps.Utils.createImageViewer("sar/plots/step3_qq.png")
+      const tabPage = sar.steps.Utils.createTabPage("QQ plot", qqImage);
       return tabPage;
     },
 
@@ -102,8 +112,8 @@ qx.Class.define("sar.steps.ConfirmModel", {
     },
 
     __createResidualsView: function() {
-      const marginalsImage = sar.steps.Utils.createImageViewer("sar/plots/step3_residuals.png")
-      const tabPage = sar.steps.Utils.createTabPage("Residuals", marginalsImage);
+      const residualsImage = sar.steps.Utils.createImageViewer("sar/plots/step3_residuals.png")
+      const tabPage = sar.steps.Utils.createTabPage("Residuals", residualsImage);
       return tabPage;
     },
 
@@ -121,16 +131,16 @@ qx.Class.define("sar.steps.ConfirmModel", {
       });
       resultsLayout.add(resultsTabView);
 
-      const qqView = this.__createQQView()
+      const qqView = this.__createQQView();
       resultsTabView.add(qqView);
 
-      const deviationsView = this.__createDeviationsView()
+      const deviationsView = this.__createDeviationsView();
       resultsTabView.add(deviationsView);
-
-      const residualsView = this.__createResidualsView()
+      /*
+      const residualsView = this.__createResidualsView();
       resultsTabView.add(residualsView);
-
-      const variogramView = this.__createSemivariogramView()
+      */
+      const variogramView = this.__createSemivariogramView();
       resultsTabView.add(variogramView);
 
       return resultsLayout;

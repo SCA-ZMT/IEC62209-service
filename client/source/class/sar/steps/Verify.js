@@ -15,6 +15,8 @@ qx.Class.define("sar.steps.Verify", {
   extend: sar.steps.StepBase,
 
   members: {
+    __reportButton: null,
+
     // overriden
     _getDescriptionText: function() {
       return "\
@@ -54,6 +56,14 @@ qx.Class.define("sar.steps.Verify", {
       stepLayout.add(acceptanceTitle, {
         row,
         column: 1
+      });
+      row++;
+
+      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("verify");
+      stepLayout.add(reportButton, {
+        row,
+        column: 0,
+        colSpan: 2
       });
       row++;
 

@@ -95,7 +95,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.trainingDataTable();
+      const dataTable = this.__dataTable = sar.steps.Utils.createTrainingDataTable();
       const layout = new qx.ui.layout.VBox();
       const tabPage = new qx.ui.tabview.Page("Data").set({
         layout
