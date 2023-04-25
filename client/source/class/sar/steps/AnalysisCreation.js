@@ -72,7 +72,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         column: 1
       });
       const rmsErrorTitle = new qx.ui.basic.Label().set({
-        value: "Normalized RMS error 10.2%<25%:",
+        value: "Norm. RMS error 10.2%<25%:",
         alignX: "right",
         textAlign: "right",
       });

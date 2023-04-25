@@ -44,6 +44,8 @@ qx.Class.define("sar.widget.FileInput", {
     this._add(this.__selectBtn);
 
     this.__attachEventHandlers();
+
+    this.hideInputWidget();
   },
 
   properties: {
@@ -81,6 +83,7 @@ qx.Class.define("sar.widget.FileInput", {
 
     hideInputWidget: function() {
       this.__input.setStyle("display", "none");
+      this.__input.setStyle("opacity", 0.01);
     },
 
     getValue: function() {

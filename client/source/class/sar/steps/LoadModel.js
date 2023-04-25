@@ -76,25 +76,16 @@ qx.Class.define("sar.steps.LoadModel", {
         // transferComplete
         if (req.status == 200) {
           console.log("transferComplete");
+          const newModel = JSON.parse(req.responseText);
+          this.setModel(newModel);
         } else if (req.status == 400) {
           console.error("transferFailed");
         }
       });
       req.addEventListener("error", e => console.error(e));
       req.addEventListener("abort", e => console.error(e));
-      req.open("POST", "/load-model/load", true);
+      req.open("POST", "/model/load", true);
       req.send(formData);
-
-      const newModel = {
-        "filename": "fileName",
-        "systemName": "cSAR3D",
-        "phantomType": "Flat HSL",
-        "hardwareVersion": "SD C00 F01 AC",
-        "softwareVersion": "V5.2.0",
-        "acceptanceCriteria": "Pass",
-        "normalizedRMSError": "Pass",
-      }
-      this.setModel(newModel);
     },
 
     _applyModel: function(model) {
