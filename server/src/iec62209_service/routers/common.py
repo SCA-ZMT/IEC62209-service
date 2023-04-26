@@ -83,6 +83,22 @@ class DataSetInterface:
             self.rows.append(row)
         self.config = config
 
+    @classmethod
+    def from_dict(cls, data: dict):
+        dataset = cls()
+        for key in data:
+            dataset.headings.append(key)
+        if len(dataset.headings) == 0:
+            raise Exception("Empty or ill-formed data")
+
+        nrows = len(data[dataset.headings[0]])
+        for n in range(nrows):
+            row = []
+            for heading in dataset.headings:
+                row.append(data[heading][n])
+            dataset.rows.append(row)
+        return dataset
+
 
 ### Interfaces to publication-IEC62209
 
@@ -115,6 +131,10 @@ class ModelInterface:
         return cls.work.data.get("initsample") is not None
 
     @classmethod
+    def has_test_sample(cls) -> bool:
+        return cls.work.data.get("testsample") is not None
+
+    @classmethod
     def has_model(cls) -> bool:
         try:
             return cls.work.data.get("model") is not None
@@ -130,8 +150,20 @@ class ModelInterface:
     def load_init_sample(cls, filename) -> dict:
         sample = cls.work.load_init_sample(filename, "sard10g")
         if not cls.has_init_sample():
-            raise Exception("Empty sample")
-        if sample.size() == 0:
+            raise Exception("Failed to load sample")
+        if sample.data.values.size() == 0:
+            raise Exception(f"Failed to load data, or {filename} is empty")
+        return {
+            "headings": sample.data.columns.tolist(),
+            "rows": sample.data.values.tolist(),
+        }
+
+    @classmethod
+    def load_test_sample(cls, filename) -> dict:
+        sample = cls.work.load_test_sample(filename, "sard10g")
+        if not cls.has_test_sample():
+            raise Exception("Failed to load sample")
+        if sample.data.values.size() == 0:
             raise Exception(f"Failed to load data, or {filename} is empty")
         return {
             "headings": sample.data.columns.tolist(),
@@ -142,6 +174,11 @@ class ModelInterface:
     def get_metadata(cls) -> ModelMetadata:
         cls.raise_if_no_model()
         return cls.work.model_metadata()
+
+    @classmethod
+    def get_model_sample_data(cls) -> dict:
+        cls.raise_if_no_model()
+        return cls.work.data.get("model").sample.to_json()["data"]
 
     @classmethod
     def dump_model_to_json(cls):

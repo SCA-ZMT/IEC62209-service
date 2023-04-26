@@ -254,7 +254,7 @@ qx.Class.define("sar.steps.Utils", {
     postFile: function(file, path, successCbk, failureCbk, context) {
       const filename = file.name;
       console.log("submitFile", filename);
-      
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -341,7 +341,7 @@ qx.Class.define("sar.steps.Utils", {
         label: "Acceptance criteria"
       }, {
         id: "normalizedRMSError",
-        label: "Norm. RMS Error 10.2%<25%"
+        label: "Norm. RMS Error"
       }].forEach((entry, idx) => {
         const titleLabel = new qx.ui.basic.Label(entry.label + ":");
         modelViewerLayout.add(titleLabel, {
@@ -424,18 +424,18 @@ qx.Class.define("sar.steps.Utils", {
 
       // const array = csv.toString().split("\r");
       const array = csvString.split("\r");
-  
+
       // All the rows of the CSV will be
       // converted to JSON objects which
       // will be added to result in an array
       let result = [];
-      
+
       // The array[0] contains all the
       // header columns so we store them
       // in headers array
       // let headers = array[0].split(", ")
       let headers = array[0].split(",");
-      
+
       // Since headers are separated, we
       // need to traverse remaining n-1 rows.
       for (let i = 1; i < array.length - 1; i++) {
