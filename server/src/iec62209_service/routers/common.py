@@ -1,6 +1,8 @@
 from enum import Enum
+from os import remove
+from tempfile import NamedTemporaryFile
 
-from iec62209.work import Model, Work
+from iec62209.work import Model, Work, add_zvar, load_measured_sample
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
@@ -148,7 +150,18 @@ class ModelInterface:
 
     @classmethod
     def load_init_sample(cls, filename) -> dict:
-        sample = cls.work.load_init_sample(filename, "sard10g")
+        tmp = NamedTemporaryFile(delete=False)
+        try:
+            measured = load_measured_sample(filename)
+            add_zvar(measured, "10g")
+            measured.to_csv(tmp.name)
+            sample = cls.work.load_init_sample(tmp.name, "sard10g")
+        except TypeError as te:
+            raise Exception(
+                "Please make sure that numbers are not formatted (e.g. to percentages)"
+            )
+        finally:
+            remove(tmp.name)
         if not cls.has_init_sample():
             raise Exception("Failed to load sample")
         if sample.data.values.size == 0:

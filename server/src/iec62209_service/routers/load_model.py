@@ -24,6 +24,8 @@ async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
 
         meta = ModelInterface.get_metadata()
         loaded = ModelMetadata(**meta)
+        # fix filename
+        loaded.filename = file.filename
         metadata = loaded.dict()
 
         datadict: dict = ModelInterface.get_model_sample_data()
