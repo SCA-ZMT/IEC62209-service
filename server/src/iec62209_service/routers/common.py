@@ -151,7 +151,7 @@ class ModelInterface:
         sample = cls.work.load_init_sample(filename, "sard10g")
         if not cls.has_init_sample():
             raise Exception("Failed to load sample")
-        if sample.data.values.size() == 0:
+        if sample.data.values.size == 0:
             raise Exception(f"Failed to load data, or {filename} is empty")
         return {
             "headings": sample.data.columns.tolist(),
@@ -163,7 +163,7 @@ class ModelInterface:
         sample = cls.work.load_test_sample(filename, "sard10g")
         if not cls.has_test_sample():
             raise Exception("Failed to load sample")
-        if sample.data.values.size() == 0:
+        if sample.data.values.size == 0:
             raise Exception(f"Failed to load data, or {filename} is empty")
         return {
             "headings": sample.data.columns.tolist(),
