@@ -1,5 +1,5 @@
 from enum import Enum
-from os import remove
+from math import fabs
 from tempfile import NamedTemporaryFile
 
 from iec62209.work import Model, Work, add_zvar, load_measured_sample
@@ -156,7 +156,8 @@ class ModelInterface:
             add_zvar(measured, "10g")
             measured.to_csv(tmp.name)
             sample = cls.work.load_init_sample(tmp.name, "sard10g")
-        except TypeError as te:
+            SampleInterface.trainingSet = DataSetInterface.from_dict(dict(sample.data))
+        except TypeError:
             raise Exception(
                 "Please make sure that numbers are not formatted (e.g. to percentages)"
             )
@@ -176,6 +177,7 @@ class ModelInterface:
     @classmethod
     def load_test_sample(cls, filename) -> dict:
         sample = cls.work.load_test_sample(filename, "sard10g")
+        SampleInterface.testSet = DataSetInterface.from_dict(dict(sample.data))
         if not cls.has_test_sample():
             raise Exception("Failed to load sample")
         if sample.data.values.size == 0:
@@ -226,12 +228,25 @@ class ModelInterface:
     def goodfit_test(cls) -> dict:
         if not cls.has_model():
             raise Exception("No model loaded")
+
+        dataok = True
+        initsample = SampleInterface.trainingSet
+        if initsample is not None:
+            mpecol = initsample.headings.index("mpe10g")
+            sardcol = initsample.headings.index("sard10g")
+            for row in initsample.rows:
+                if fabs(row[sardcol]) > row[mpecol]:
+                    dataok = False
+                    break
+
         gfres: tuple = cls.work.goodfit_test()
-        ok: bool = gfres[0]
+        gfok: bool = gfres[0]
+
         return {
-            "Acceptance criteria": "Pass" if ok else "Fail",
+            "Acceptance criteria": "Pass" if dataok else "Fail",
             "Normalized RMS error": f"{float((gfres[1]) * 100):.1f} "
-            + ("< 25%" if ok else "> 25%"),
+            + ("< 25% " if gfok else "> 25% ")
+            + ("(Pass)" if gfok else "(Fail)"),
         }
 
     @classmethod

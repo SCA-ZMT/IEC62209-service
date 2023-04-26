@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 from .common import ModelInterface
 
-router = APIRouter(prefix="test-data", tags=["test-data"])
+router = APIRouter(prefix="/test-data", tags=["test-data"])
 
 
 @router.get("/reset")
