@@ -8,7 +8,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from .common import ModelInterface, ModelMetadata
+from .common import ModelInterface, ModelMetadata, SampleInterface
 
 router = APIRouter(prefix="/analysis-creation", tags=["analysis-creation"])
 
@@ -22,7 +22,7 @@ async def analysis_creation_reset() -> Response:
 async def analysis_creation_create() -> JSONResponse:
     end_status = status.HTTP_200_OK
     try:
-        if not ModelInterface.has_sample():
+        if not ModelInterface.has_init_sample():
             raise Exception("no sample loaded")
         ModelInterface.make_model()
         response = ModelInterface.goodfit_test()
@@ -73,6 +73,8 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
         ModelInterface.raise_if_no_model()
         data = ModelInterface.dump_model_to_json()
         data["metadata"] = dict(metadata)
+        if SampleInterface.trainingSet.config.sampleSize > 0:
+            data["metadata"] = metadata | dict(SampleInterface.trainingSet.config)
         response = jdumps(data)
     except Exception as e:
         response = {"error": str(e)}

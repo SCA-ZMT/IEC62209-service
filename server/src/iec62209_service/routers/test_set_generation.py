@@ -1,7 +1,12 @@
 from os.path import dirname, realpath
 
 from fastapi import APIRouter, status
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+)
 
 from .common import SampleConfig, SampleInterface
 
@@ -35,6 +40,14 @@ async def test_set_distribution() -> FileResponse:
         dirname(realpath(__file__)) + "/../../../../assets/mwl.png",
         media_type="image/png",
     )
+
+
+@router.get("/xport", response_class=PlainTextResponse)
+async def test_set_xport() -> PlainTextResponse:
+    text = str(SampleInterface.testSet.headings).strip("[]")
+    for row in SampleInterface.testSet.rows:
+        text += "\n" + str(row).strip("[]")
+    return PlainTextResponse(text)
 
 
 @router.get("/reset")
