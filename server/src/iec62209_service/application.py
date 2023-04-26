@@ -12,7 +12,9 @@ from ._meta import (
 from .api import router
 from .routers import (
     analysis_creation,
+    confirm_model,
     load_model,
+    load_test_data,
     load_training_data,
     meta,
     test_set_generation,
@@ -47,6 +49,8 @@ def create_app():
     app.include_router(analysis_creation.router)
     app.include_router(load_model.router)
     app.include_router(test_set_generation.router)
+    app.include_router(load_test_data.router)
+    app.include_router(confirm_model.router)
 
     # static files
     app.mount("/", StaticFiles(directory=settings.CLIENT_OUTPUT_DIR), name="static")
