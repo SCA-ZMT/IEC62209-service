@@ -100,25 +100,25 @@ qx.Class.define("sar.steps.ConfirmModel", {
     },
 
     __createQQView: function() {
-      const qqImage = sar.steps.Utils.createImageViewer("sar/plots/step3_qq.png")
+      const qqImage = sar.steps.Utils.createImageViewer()
       const tabPage = sar.steps.Utils.createTabPage("QQ plot", qqImage);
       return tabPage;
     },
 
     __createDeviationsView: function() {
-      const deviationsImage = sar.steps.Utils.createImageViewer("sar/plots/step3_deviations.png")
+      const deviationsImage = sar.steps.Utils.createImageViewer()
       const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
       return tabPage;
     },
 
     __createResidualsView: function() {
-      const residualsImage = sar.steps.Utils.createImageViewer("sar/plots/step3_residuals.png")
+      const residualsImage = sar.steps.Utils.createImageViewer()
       const tabPage = sar.steps.Utils.createTabPage("Residuals", residualsImage);
       return tabPage;
     },
 
     __createSemivariogramView: function() {
-      const semivariogramImage = sar.steps.Utils.createImageViewer("sar/plots/step3_semivariogram.png")
+      const semivariogramImage = sar.steps.Utils.createImageViewer()
       const tabPage = sar.steps.Utils.createTabPage("Semivariogram", semivariogramImage);
       return tabPage;
     },

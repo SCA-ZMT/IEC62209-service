@@ -71,7 +71,7 @@ qx.Class.define("sar.steps.Verify", {
     },
 
     __createDeviationsView: function() {
-      const deviationsImage = sar.steps.Utils.createImageViewer("sar/plots/step3_deviations.png")
+      const deviationsImage = sar.steps.Utils.createImageViewer()
       const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
       return tabPage;
     },

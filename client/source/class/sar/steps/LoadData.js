@@ -43,7 +43,7 @@ qx.Class.define("sar.steps.LoadData", {
       const resetBtn = this._resetBtn = new qx.ui.form.Button("Reset data").set({
         allowGrowX: false
       });
-      resetBtn.addListener("execute", () => this.setStepData(null));
+      resetBtn.addListener("execute", () => this._resetPressed());
       optionsLayout.add(resetBtn);
 
       return optionsLayout;
@@ -85,8 +85,16 @@ qx.Class.define("sar.steps.LoadData", {
       sar.steps.Utils.populateDataTable(this._dataTable, data);
     },
 
+    __emptyTable: function() {
+      sar.steps.Utils.emptyDataTable(this._dataTable);
+    },
+
     _applyModel: function(model) {
       console.log("model", model);
+    },
+
+    _resetPressed: function() {
+      this.setStepData(null);
     },
 
     _applyStepData: function(testData) {
@@ -100,6 +108,8 @@ qx.Class.define("sar.steps.LoadData", {
 
       if (testData) {
         this._popoluateTable(testData);
+      } else {
+        this.__emptyTable();
       }
     },
   }

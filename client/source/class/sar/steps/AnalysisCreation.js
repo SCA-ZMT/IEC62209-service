@@ -49,6 +49,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
 
       let row = 0;
       const createButton = this.__createButton = new sar.widget.FetchButton("Create & Analyze").set({
+        alignY: "middle",
         allowGrowY: false
       });
       stepLayout.add(createButton, {
@@ -63,13 +64,18 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       const acceptanceTitle = new qx.ui.basic.Label().set({
         value: "Acceptance criteria:",
         alignX: "right",
+        alignY: "middle",
         textAlign: "right",
       });
       resultsLayout.add(acceptanceTitle, {
         row: 0,
         column: 0
       });
-      const acceptanceValue = new qx.ui.basic.Label();
+      const acceptanceValue = new qx.ui.basic.Label().set({
+        font: "text-16",
+        alignY: "middle",
+      });
+      sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
       resultsLayout.add(acceptanceValue, {
         row: 0,
         column: 1
@@ -77,13 +83,17 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       const rmsErrorTitle = new qx.ui.basic.Label().set({
         value: "Norm. RMS error:",
         alignX: "right",
+        alignY: "middle",
         textAlign: "right",
       });
       resultsLayout.add(rmsErrorTitle, {
         row: 1,
         column: 0
       });
-      const rmsErrorValue = new qx.ui.basic.Label();
+      const rmsErrorValue = new qx.ui.basic.Label().set({
+        font: "text-16",
+        alignY: "middle",
+      });
       resultsLayout.add(rmsErrorValue, {
         row: 1,
         column: 1
@@ -210,17 +220,17 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     },
 
     __populateSemivariogramImage: function() {
-      const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
+      const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
       this.__semivariogramImage.setSource(endpoints["getSemivariogram"].url);
     },
 
     __populateMarginalsImage: function() {
-      const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
+      const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
       this.__marginalsImage.setSource(endpoints["getMarginals"].url);
     },
 
     __populateDeviationsImage: function() {
-      const endpoints = sar.io.Resources.resources["analysisCreation"].endpoints;
+      const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
       this.__deviationsImage.setSource(endpoints["getDeviations"].url);
     },
 
@@ -228,7 +238,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       const filename = ("metadata" in data && "filename" in data["metadata"]) ? data["metadata"]["filename"] : "Model.json";
       sar.steps.Utils.downloadJson(data, filename);
 
-      this.__reportButton.setEnabled(false);
+      this.__reportButton.setEnabled(true);
     }
   }
 });

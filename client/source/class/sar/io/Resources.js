@@ -49,7 +49,7 @@ qx.Class.define("sar.io.Resources", {
   defer: function(statics) {
     statics.resources = {
       /*
-       * TRAINING SET GENERATION
+       * Training Set Generation
        */
       "trainingSetGeneration": {
         endpoints: {
@@ -68,6 +68,25 @@ qx.Class.define("sar.io.Resources", {
           getDistribution: {
             method: "GET",
             url: "/training-set-generation/distribution"
+          },
+          resetData: {
+            method: "GET",
+            url: "/training-set-generation/reset"
+          },
+        }
+      },
+      /*
+       * Load Training Data
+       */
+      "trainingData": {
+        endpoints: {
+          load: {
+            method: "POST",
+            url: "/training-data/load"
+          },
+          resetData: {
+            method: "GET",
+            url: "/training-data/reset"
           },
         }
       },
@@ -100,14 +119,115 @@ qx.Class.define("sar.io.Resources", {
             method: "GET",
             url: "/analysis-creation/report"
           },
+          resetData: {
+            method: "GET",
+            url: "/analysis-creation/reset"
+          },
         }
-      }
+      },
+      /*
+       * Load Model
+       */
+      "loadModel": {
+        endpoints: {
+          load: {
+            method: "POST",
+            url: "/model/load"
+          },
+          resetData: {
+            method: "GET",
+            url: "/model/reset"
+          },
+        }
+      },
+      /*
+       * Test Set Generation
+       */
+      "testSetGeneration": {
+        endpoints: {
+          generate: {
+            method: "POST",
+            url: "/test-set-generation/generate"
+          },
+          xport: {
+            method: "GET",
+            url: "/test-set-generation/xport"
+          },
+          getData: {
+            method: "GET",
+            url: "/test-set-generation/data"
+          },
+          getDistribution: {
+            method: "GET",
+            url: "/test-set-generation/distribution"
+          },
+          resetData: {
+            method: "GET",
+            url: "/test-set-generation/reset"
+          },
+        }
+      },
+      /*
+       * Load Test Data
+       */
+      "testData": {
+        endpoints: {
+          load: {
+            method: "POST",
+            url: "/test-data/load"
+          },
+          resetData: {
+            method: "GET",
+            url: "/test-data/reset"
+          },
+        }
+      },
+      /*
+       * Confirm Model
+       */
+      "confirmModel": {
+        endpoints: {
+        }
+      },
+      /*
+       * Search Space
+       */
+      "searchSpace": {
+        endpoints: {
+        }
+      },
+      /*
+       * Load Critical Data
+       */
+      "criticalData": {
+        endpoints: {
+          load: {
+            method: "POST",
+            url: "/critical-data/load"
+          },
+          resetData: {
+            method: "GET",
+            url: "/critical-data/reset"
+          },
+        }
+      },
+      /*
+       * Verify
+       */
+      "verify": {
+        endpoints: {
+        }
+      },
     }
   },
 
   statics: {
     fetch: function(resource, endpoint, params, options = {}) {
       return this.getInstance().fetch(resource, endpoint, params, options);
+    },
+
+    getEndPoints: function(resourceName) {
+      return this.getInstance().getEndPoints(resourceName);
     }
   },
 
@@ -174,6 +294,10 @@ qx.Class.define("sar.io.Resources", {
 
         res[endpoint](params.url || null, params.data || null);
       });
-    }
+    },
+
+    getEndPoints: function(resourceName) {
+      return this.self().resources[resourceName].endpoints;
+    },
   }
 });

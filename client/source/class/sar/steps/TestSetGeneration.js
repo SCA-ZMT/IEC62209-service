@@ -15,6 +15,8 @@ qx.Class.define("sar.steps.TestSetGeneration", {
   extend: sar.steps.StepBase,
 
   members: {
+    __xArea: null,
+    __yArea: null,
     __exportButton: null,
     __dataTable: null,
     __distributionImage: null,
@@ -87,35 +89,44 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       peakSelectBox.setEnabled(false);
       form.add(peakSelectBox, "Select 2-PEAK set");
 
-      sar.steps.Utils.addMeasurementAreaToForm(form);
+      const {
+        xArea,
+        yArea
+      } = sar.steps.Utils.addMeasurementAreaToForm(form);
+      this.__xArea = xArea;
+      this.__yArea = yArea;
 
       const sampleSize = new qx.ui.form.Spinner().set({
         minimum: 50,
         maximum: 50,
         value: 50
       });
-      form.add(sampleSize, "Sample size");
+      form.add(sampleSize, "Sample size", null, "sampleSize");
 
       const formRenderer = new qx.ui.form.renderer.Single(form);
       optionsLayout.add(formRenderer);
 
-      const createButton = new qx.ui.form.Button("Create Test data");
+      const createButton = new sar.widget.FetchButton("Create Test data");
       createButton.addListener("execute", () => {
-        createButton.setEnabled(false);
+        createButton.setFetching(true);
         const data = {};
+        const includeOnly = [
+          "measAreaX",
+          "measAreaY",
+          "sampleSize",
+        ];
         for (const [key, item] of Object.entries(form.getItems())) {
-          data[key] = item.getValue()
+          if (includeOnly.includes(key)) {
+            data[key] = item.getValue();
+          }
         }
         const params = {
-          data,
-          options: {
-            resolveWResponse: true
-          }
+          data
         };
         sar.io.Resources.fetch("testSetGeneration", "generate", params)
           .then(() => this.__testDataGenerated())
           .catch(err => console.error(err))
-          .finally(() => createButton.setEnabled(true));
+          .finally(() => createButton.setFetching(false));
       });
       optionsLayout.add(createButton);
 
@@ -130,6 +141,11 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       optionsLayout.add(exportButton);
 
       return optionsLayout;
+    },
+    
+    // overriden
+    _applyModel: function(modelMetadata) {
+      console.log("set area mimimums from", modelMetadata);
     },
 
     __createDataView: function() {
@@ -183,7 +199,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
     },
 
     __populateDistributionImage: function() {
-      const endpoints = sar.io.Resources.resources["testSetGeneration"].endpoints;
+      const endpoints = sar.io.Resources.getEndPoints("testSetGeneration");
       this.__distributionImage.setSource(endpoints["getDistribution"].url);
     },
 

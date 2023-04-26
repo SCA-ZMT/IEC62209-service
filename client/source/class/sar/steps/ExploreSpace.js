@@ -84,7 +84,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
     },
 
     __createDistributionView: function() {
-      const distributionImage = sar.steps.Utils.createImageViewer("sar/plots/step0_distribution.png")
+      const distributionImage = sar.steps.Utils.createImageViewer()
       const tabPage = sar.steps.Utils.createTabPage("Distribution", distributionImage);
       return tabPage;
     },

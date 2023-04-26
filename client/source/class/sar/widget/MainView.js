@@ -42,7 +42,8 @@ qx.Class.define("sar.widget.MainView", {
       const introLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(20));
       const introTitle = new qx.ui.basic.Label().set({
         value: "SAR System Validation Procedure",
-        font: "text-30"
+        font: "text-30",
+        minWidth: 450,
       });
       introLayout.add(introTitle)
       const infoButton = new qx.ui.basic.Image().set({
@@ -99,7 +100,9 @@ qx.Class.define("sar.widget.MainView", {
       }].forEach(sectionInfo => {
         const sectionLabel = new qx.ui.basic.Label().set({
           value: sectionInfo.label,
-          font: "text-18"
+          font: "text-18",
+          textAlign: "center",
+          minWidth: sectionInfo.colSpan>1 ? 220 : null,
         });
         stepsLayout.add(sectionLabel, {
           row: 0,

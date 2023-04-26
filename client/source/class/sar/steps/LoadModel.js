@@ -49,24 +49,27 @@ qx.Class.define("sar.steps.LoadModel", {
     },
 
     __submitFile: function(file) {
+      const endpoints = sar.io.Resources.getEndPoints("loadModel");
       const successCallback = resp => this.setStepData(resp);
-      sar.steps.Utils.postFile(file, "/model/load", successCallback, null, this);
-    },
-
-    _applyStepData: function(model) {
-      this.base(arguments, model);
-
-      this._optionsLayout.remove(this.__modelViewer);
-      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(model);
-      this._optionsLayout.add(modelViewer);
-
-      this.fireDataEvent("modelSet", model);
+      sar.steps.Utils.postFile(file, endpoints["load"].url, successCallback, null, this);
     },
 
     // overriden
-    _popoluateTable: function(data) {
-      console.log("model", data);
-      this.base(arguments, data);
+    _resetPressed: function() {
+      this.base(arguments);
+      sar.io.Resources.fetch("loadModel", "resetData");
+    },
+
+    _applyStepData: function(resp) {
+      this.base(arguments, resp ? resp["data"] : null);
+
+      if (resp && "metadata" in resp) {
+        this._optionsLayout.remove(this.__modelViewer);
+        const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(resp["metadata"]);
+        this._optionsLayout.add(modelViewer);
+      }
+
+      this.fireDataEvent("modelSet", (resp && "metadata" in resp) ? resp["metadata"] : null);
     },
   }
 });

@@ -23,7 +23,7 @@ qx.Class.define("sar.steps.StepBase", {
     grid.setColumnFlex(1, 1);
     grid.setRowFlex(0, 0);
     grid.setRowFlex(1, 1);
-    grid.setColumnMinWidth(0, 500);
+    grid.setColumnMinWidth(0, 300);
     grid.setColumnMaxWidth(0, 500);
     this._setLayout(grid);
 

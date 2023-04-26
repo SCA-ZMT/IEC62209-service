@@ -36,6 +36,10 @@ qx.Class.define("sar.steps.Utils", {
         ids: ["modulation"],
         label: "Mod"
       },
+      description: {
+        ids: ["description"],
+        label: "Description"
+      },
       par: {
         ids: ["par"],
         label: "PAPR (dB)"
@@ -60,54 +64,20 @@ qx.Class.define("sar.steps.Utils", {
         ids: ["y"],
         label: "y (mm)"
       },
+      sar1g: {
+        ids: ["sar1g"],
+        label: "SAR 1g (W/Kg)"
+      },
       sar10g: {
         ids: ["sar10g"],
         label: "SAR 10g (W/Kg)"
       },
+      u1g: {
+        ids: ["u1g"],
+        label: "u 1g (dB)"
+      },
       u10g: {
         ids: ["u10g"],
-        label: "u 10g (dB)"
-      },
-    },
-
-    TRAINING_DATA_COLUMNS: {
-      number: {
-        label: "no."
-      },
-      antenna: {
-        label: "antenna"
-      },
-      frequency: {
-        label: "f (MHz)"
-      },
-      power: {
-        label: "Pf (dBm)"
-      },
-      modulation: {
-        label: "Mod"
-      },
-      par: {
-        label: "PAPR (dB)"
-      },
-      bandwidth: {
-        label: "BW (MHz)"
-      },
-      distance: {
-        label: "s (mm)"
-      },
-      angle: {
-        label: "θ (°)"
-      },
-      x: {
-        label: "x (mm)"
-      },
-      y: {
-        label: "y (mm)"
-      },
-      sar10g: {
-        label: "SAR 10g (W/Kg)"
-      },
-      u10g: {
         label: "u 10g (dB)"
       },
     },
@@ -148,87 +118,9 @@ qx.Class.define("sar.steps.Utils", {
       }
     },
 
-    createTrainingDataTable: function() {
-      const tableModel = new qx.ui.table.model.Simple();
-      const trainingDataColNames = Object.values(this.TRAINING_DATA_COLUMNS).map(col => col.label);
-      tableModel.setColumns(trainingDataColNames);
-      const custom = {
-        tableColumnModel: function(obj) {
-          return new qx.ui.table.columnmodel.Resize(obj);
-        }
-      };
-      const table = new qx.ui.table.Table(tableModel, custom).set({
-        selectable: true,
-        statusBarVisible: false,
-        showCellFocusIndicator: false,
-        forceLineHeight: false
-      });
-      return table;
-    },
-
-    populateTrainingDataTable: function(table, data) {
-      const tableModel = table.getTableModel();
-      // Some fields do not need to be displayed: filter them out
-      const filterOutIdxs = [];
-      if ("headings" in data) {
-        data["headings"].forEach((headerId, idx) => {
-          if (!Object.keys(this.TRAINING_DATA_COLUMNS).includes(headerId)) {
-            filterOutIdxs.push(idx);
-          }
-        })
-      }
-      const filterOutIdxsR = filterOutIdxs.reverse();
-      if ("rows" in data) {
-        for (let i=0; i<data["rows"].length; i++) {
-          filterOutIdxsR.forEach(filterOutIdx => {
-            if (data["rows"][i].length > filterOutIdx) {
-              data["rows"][i].splice(filterOutIdx, 1);
-            }
-          });
-        }
-        tableModel.setData(data["rows"]);
-      }
-    },
-
-    createdTestDataTable: function() {
-      const tableModel = new qx.ui.table.model.Simple();
-      tableModel.setColumns([
-        "no.",
-        "antenna",
-        "freq. (MHz)",
-        "Pin (dBm)",
-        "mod.",
-        "PAPR (db)",
-        "BW (MHz)",
-        "d (mm)",
-        "θ (°)",
-        "x (mm)",
-        "y (mm)",
-        "SAR 10g (W/Kg)",
-        "U 10g (dB)",
-      ]);
-      const custom = {
-        tableColumnModel: function(obj) {
-          return new qx.ui.table.columnmodel.Resize(obj);
-        }
-      };
-      const table = new qx.ui.table.Table(tableModel, custom).set({
-        selectable: true,
-        statusBarVisible: false,
-        showCellFocusIndicator: false,
-        forceLineHeight: false
-      });
-      table.setColumnWidth(0, 10);
-      return table;
-    },
-
-    populateTestDataTable: function(table, data) {
-      const tableModel = table.getTableModel();
-      if ("headings" in data) {
-        // tableModel.setColumns(data["headings"]);
-      }
-      if ("rows" in data) {
-        tableModel.setData(data["rows"]);
+    emptyDataTable: function(table) {
+      if (table.getTableModel()) {
+        table.getTableModel().setData([]);
       }
     },
 
@@ -276,15 +168,49 @@ qx.Class.define("sar.steps.Utils", {
             const resp = JSON.parse(req.responseText);
             successCbk.call(context, resp);
           }
-        } else if (req.status == 400) {
+        } else {
           console.error("transferFailed");
           if (failureCbk) {
             failureCbk.call();
+          } else {
+            const resp = JSON.parse(req.responseText);
+            if ("error" in resp) {
+              console.error();
+              const flashMessage = new sar.widget.FlashMessage(resp.error);
+              const win = new qx.ui.window.Window("Error loading data").set({
+                layout: new qx.ui.layout.VBox(0),
+                contentPadding: 20,
+                resizable: false,
+                showClose: true,
+                showMaximize: false,
+                showMinimize: false,
+                modal: true,
+                width: 500
+              });
+              win.getChildControl("captionbar").set({
+                backgroundColor: "red"
+              });
+              win.add(flashMessage), {
+                flex: 1
+              };
+              win.center();
+              win.open();
+              flashMessage.addListener("closeMessage", () => win.close());
+              setTimeout(() => win.close(), 10000);
+            } else {
+              console.error(resp);
+            }
           }
         }
       });
-      req.addEventListener("error", e => console.error(e));
-      req.addEventListener("abort", e => console.error(e));
+      [
+        "error",
+        "abort"
+      ].forEach(errEv => {
+        req.addEventListener(errEv, e => {
+          console.error(e);
+        });
+      });
       req.open("POST", path, true);
       req.send(formData);
     },
@@ -349,11 +275,15 @@ qx.Class.define("sar.steps.Utils", {
           column: 0
         });
         if (data && entry.id in data && data[entry.id]) {
-          const valueLabel = new qx.ui.basic.Label(data[entry.id]);
+          const valueLabel = new qx.ui.basic.Label();
           modelViewerLayout.add(valueLabel, {
             row: idx,
             column: 1
           });
+          if (entry.id === "acceptanceCriteria") {
+            sar.steps.Utils.decoratePassFailLabel(valueLabel);
+          }
+          valueLabel.setValue(data[entry.id]);
         }
       });
       return modelViewerLayout;
@@ -361,22 +291,36 @@ qx.Class.define("sar.steps.Utils", {
 
     addMeasurementAreaToForm: function(form) {
       form.addGroupHeader("Measurement area (mm)");
-      const xMin = new qx.ui.form.Spinner().set({
+      const xArea = new qx.ui.form.Spinner().set({
         minimum: 80,
         maximum: 1000,
         value: 100
       });
-      form.add(xMin, "x", null, "measAreaX");
-      const yMin = new qx.ui.form.Spinner().set({
+      form.add(xArea, "x", null, "measAreaX");
+      const yArea = new qx.ui.form.Spinner().set({
         minimum: 160,
         maximum: 1000,
         value: 200
       });
-      form.add(yMin, "y", null, "measAreaY");
-      return [
-        xMin,
-        yMin
-      ]
+      form.add(yArea, "y", null, "measAreaY");
+      return {
+        xArea,
+        yArea
+      }
+    },
+
+    decoratePassFailLabel: function(label) {
+      label.addListener("changeValue", e => {
+        label.resetTextColor();
+        const newValue = e.getData();
+        if (newValue) {
+          if (newValue === "Pass") {
+            label.setTextColor("blue");
+          } else if (newValue === "Fail") {
+            label.setTextColor("red");
+          }
+        }
+      });
     },
 
     createTabPage: function(title, widget) {
@@ -405,7 +349,7 @@ qx.Class.define("sar.steps.Utils", {
       return image;
     },
 
-    createGenerateReportButton: function() {
+    createGenerateReportButton: function(resourceName) {
       const button = new sar.widget.FetchButton("Generate Report").set({
         enabled: false
       });
@@ -417,80 +361,6 @@ qx.Class.define("sar.steps.Utils", {
           .finally(() => button.setFetching(false));
       });
       return button;
-    },
-
-    csvToJson: function(csvString) {
-      // https://www.geeksforgeeks.org/how-to-convert-csv-to-json-file-having-comma-separated-values-in-node-js/
-
-      // const array = csv.toString().split("\r");
-      const array = csvString.split("\r");
-
-      // All the rows of the CSV will be
-      // converted to JSON objects which
-      // will be added to result in an array
-      let result = [];
-
-      // The array[0] contains all the
-      // header columns so we store them
-      // in headers array
-      // let headers = array[0].split(", ")
-      let headers = array[0].split(",");
-
-      // Since headers are separated, we
-      // need to traverse remaining n-1 rows.
-      for (let i = 1; i < array.length - 1; i++) {
-        let obj = {}
-
-        // Create an empty object to later add
-        // values of the current row to it
-        // Declare string str as current array
-        // value to change the delimiter and
-        // store the generated string in a new
-        // string s
-        let str = array[i]
-        let s = ''
-
-        // By Default, we get the comma separated
-        // values of a cell in quotes " " so we
-        // use flag to keep track of quotes and
-        // split the string accordingly
-        // If we encounter opening quote (")
-        // then we keep commas as it is otherwise
-        // we replace them with pipe |
-        // We keep adding the characters we
-        // traverse to a String s
-        let flag = 0
-        for (let ch of str) {
-            if (ch === '"' && flag === 0) {
-                flag = 1
-            }
-            else if (ch === '"' && flag == 1) flag = 0
-            if (ch === ', ' && flag === 0) ch = '|'
-            if (ch !== '"') s += ch
-        }
-
-        // Split the string using pipe delimiter |
-        // and store the values in a properties array
-        // let properties = s.split("|")
-        let properties = s.split(",")
-
-        // For each header, if the value contains
-        // multiple comma separated data, then we
-        // store it in the form of array otherwise
-        // directly the value is stored
-        for (let j in headers) {
-            if (properties[j].includes(", ")) {
-                obj[headers[j]] = properties[j]
-                    .split(", ").map(item => item.trim())
-            }
-            else obj[headers[j]] = properties[j]
-        }
-
-        // Add the generated object to our
-        // result array
-        result.push(obj)
-      }
-      return result;
     }
   }
 });

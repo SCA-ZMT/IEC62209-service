@@ -161,7 +161,9 @@ class ModelInterface:
                 "Please make sure that numbers are not formatted (e.g. to percentages)"
             )
         finally:
-            remove(tmp.name)
+            # SCA: Make it Windows compatible
+            # remove(tmp.name)
+            ...
         if not cls.has_init_sample():
             raise Exception("Failed to load sample")
         if sample.data.values.size == 0:

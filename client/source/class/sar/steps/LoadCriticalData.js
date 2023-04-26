@@ -37,8 +37,15 @@ qx.Class.define("sar.steps.LoadCriticalData", {
     },
 
     __submitFile: function(file) {
+      const endpoints = sar.io.Resources.getEndPoints("criticalData");
       const successCallback = resp => this.setCriticalData(resp);
-      sar.steps.Utils.postFile(file, "/critical-data/load", successCallback, null, this);
+      sar.steps.Utils.postFile(file, endpoints["load"].url, successCallback, null, this);
+    },
+
+    // overriden
+    _resetPressed: function() {
+      this.base(arguments);
+      sar.io.Resources.fetch("criticalData", "resetData");
     },
 
     // overriden
