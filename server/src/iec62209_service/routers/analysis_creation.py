@@ -1,7 +1,12 @@
 from json import dumps as jdumps
 
 from fastapi import APIRouter, status
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
+from fastapi.responses import (
+    JSONResponse,
+    PlainTextResponse,
+    Response,
+    StreamingResponse,
+)
 
 from .common import ModelInterface, ModelMetadata
 
@@ -32,7 +37,7 @@ async def analysis_creation_variogram():
     try:
         ModelInterface.raise_if_no_model()
         buf = ModelInterface.plot_model()
-        return FileResponse(buf, media_type="image/png")
+        return StreamingResponse(buf, media_type="image/png")
     except Exception as e:
         return JSONResponse(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -66,9 +71,9 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
     end_status = status.HTTP_200_OK
     try:
         ModelInterface.raise_if_no_model()
-        meta = metadata.dict()
         data = ModelInterface.dump_model_to_json()
-        response = f'{{"metadata": {jdumps(meta)}, "model": {jdumps(data)} }}'
+        data["metadata"] = dict(metadata)
+        response = jdumps(data)
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -1,4 +1,5 @@
-from json import loads as jloads
+from os import remove
+from tempfile import NamedTemporaryFile
 
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.responses import JSONResponse, Response
@@ -12,33 +13,25 @@ router = APIRouter(prefix="/model", tags=["model"])
 async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
     response = {}
     end_status = status.HTTP_200_OK
+    tmp = NamedTemporaryFile(delete=False)
     try:
-        contents = jloads(file.file.read())
-        try:
-            meta = contents.get("metadata")
-        except:
-            # dummy
-            meta = {
-                "systemName": "Test Metadata",
-                "phantomType": "here goes the phantom name",
-                "hardwareVersion": "metadata is still missing",
-                "softwareVersion": "the best version",
-                "acceptanceCriteria": "full marks",
-                "normalizedRMSError": "3.14159",
-            }
-        model = contents.get("model")
-        if meta is None or model is None:
-            raise Exception(f"Failed to load model from {file.filename}")
+        tmp.write(file.file.read())
+        tmp.close()
 
+        ModelInterface.load_model_from_json(tmp.name)
+
+        ModelInterface.raise_if_no_model()
+
+        meta = ModelInterface.get_metadata()
         loaded = ModelMetadata(**meta)
-        loaded.filename = file.filename
         response = loaded.dict()
 
     except Exception as e:
         response = {"message": str(e)}
-        end_status = status.HTTP_400_BAD_REQUEST
+        end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     finally:
         file.file.close()
+        remove(tmp.name)
 
     return JSONResponse(response, status_code=end_status)
 

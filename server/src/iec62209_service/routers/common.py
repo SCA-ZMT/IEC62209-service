@@ -1,6 +1,6 @@
 from enum import Enum
 
-from iec62209.work import Work
+from iec62209.work import Model, Work
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
@@ -23,8 +23,8 @@ class IsLoaded:
 class SampleConfig(BaseModel):
     fRangeMin: int
     fRangeMax: int
-    fAreaX: int
-    fAreaY: int
+    measAreaX: int
+    measAreaY: int
     sampleSize: int
 
 
@@ -41,7 +41,7 @@ class ModelMetadata(BaseModel):
 ### Helper classes
 
 
-class TrainingSetGeneration:
+class DataSetInterface:
     def __init__(self):
         # headings = ['no.', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
         self.headings = []
@@ -54,17 +54,7 @@ class TrainingSetGeneration:
     def to_dict(self) -> dict:
         return {"headings": self.headings, "rows": self.rows}
 
-
-### Interfaces to publication-IEC62209
-
-
-class SampleInterface:
-    trainingSet = TrainingSetGeneration()
-
-    @classmethod
-    def generate_sample(cls, config: SampleConfig) -> TrainingSetGeneration:
-        cls.trainingSet.clear()
-
+    def generate(self, config: SampleConfig):
         w = Work()
         w.generate_sample(config.sampleSize, show=False, save_to=None)
         headings = w.data["sample"].data.columns.tolist()
@@ -75,14 +65,22 @@ class SampleInterface:
         if "no." not in headings:
             headings = ["no."] + headings
             need_to_add_ids = True
-        cls.trainingSet.headings = headings
+        self.headings = headings
+        self.rows = []
         idx: int = 1
         for row in values:
             if need_to_add_ids:
                 row = [idx] + row
                 idx += 1
-            cls.trainingSet.rows.append(row)
-        return cls.trainingSet.to_dict()
+            self.rows.append(row)
+
+
+### Interfaces to publication-IEC62209
+
+
+class SampleInterface:
+    testSet = DataSetInterface()
+    trainingSet = DataSetInterface()
 
 
 class ModelInterface:
@@ -134,8 +132,7 @@ class ModelInterface:
     @classmethod
     def get_metadata(cls) -> ModelMetadata:
         cls.raise_if_no_model()
-        model = cls.work.data.get("model")
-        return ModelMetadata(model["metadata"])
+        return cls.work.model_metadata()
 
     @classmethod
     def dump_model_to_json(cls):
@@ -143,6 +140,11 @@ class ModelInterface:
         if model is None:
             raise Exception("no model has been created")
         return model.to_json()
+
+    @classmethod
+    def load_model_from_json(cls, json):
+        cls.clear()
+        cls.work.load_model(json)
 
     @classmethod
     def make_model(cls):
@@ -164,9 +166,11 @@ class ModelInterface:
         if not cls.has_model():
             raise Exception("No model loaded")
         gfres: tuple = cls.work.goodfit_test()
+        ok: bool = gfres[0]
         return {
-            "Acceptance criteria": 'Pass' if gfres[0] else 'Fail',
-            "Normalized RMS error": f"{gfres[1]:.3f}",
+            "Acceptance criteria": "Pass" if ok else "Fail",
+            "Normalized RMS error": f"{float((gfres[1]) * 100):.1f} "
+            + ("< 25%" if ok else "> 25%"),
         }
 
     @classmethod
