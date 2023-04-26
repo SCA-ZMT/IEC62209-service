@@ -21,11 +21,11 @@ class IsLoaded:
 
 
 class SampleConfig(BaseModel):
-    fRangeMin: int
-    fRangeMax: int
-    measAreaX: int
-    measAreaY: int
-    sampleSize: int
+    fRangeMin: int = 0
+    fRangeMax: int = 0
+    measAreaX: int = 0
+    measAreaY: int = 0
+    sampleSize: int = 0
 
 
 class ModelMetadata(BaseModel):
@@ -46,6 +46,7 @@ class DataSetInterface:
         # headings = ['no.', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
         self.headings = []
         self.rows = []
+        self.config = SampleConfig()
 
     def clear(self):
         self.headings = []
@@ -55,8 +56,15 @@ class DataSetInterface:
         return {"headings": self.headings, "rows": self.rows}
 
     def generate(self, config: SampleConfig):
+        self.config = SampleConfig()
         w = Work()
-        w.generate_sample(config.sampleSize, show=False, save_to=None)
+        w.generate_sample(
+            size=config.sampleSize,
+            xmax=0.5 * config.measAreaX,
+            ymax=0.5 * config.measAreaY,
+            show=False,
+            save_to=None,
+        )
         headings = w.data["sample"].data.columns.tolist()
         values = w.data["sample"].data.values.tolist()
         if not isinstance(headings, list) or not isinstance(values, list):
@@ -73,6 +81,7 @@ class DataSetInterface:
                 row = [idx] + row
                 idx += 1
             self.rows.append(row)
+        self.config = config
 
 
 ### Interfaces to publication-IEC62209
@@ -102,7 +111,7 @@ class ModelInterface:
         cls.work.clear_sample()
 
     @classmethod
-    def has_sample(cls) -> bool:
+    def has_init_sample(cls) -> bool:
         return cls.work.data.get("initsample") is not None
 
     @classmethod
@@ -120,7 +129,7 @@ class ModelInterface:
     @classmethod
     def load_init_sample(cls, filename) -> dict:
         sample = cls.work.load_init_sample(filename, "sard10g")
-        if not cls.has_sample():
+        if not cls.has_init_sample():
             raise Exception("Empty sample")
         if sample.size() == 0:
             raise Exception(f"Failed to load data, or {filename} is empty")
