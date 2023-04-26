@@ -28,7 +28,7 @@ async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
 
     except Exception as e:
         response = {"message": str(e)}
-        end_status = status.HTTP_400_BAD_REQUEST
+        end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     finally:
         file.file.close()
         remove(tmp.name)
