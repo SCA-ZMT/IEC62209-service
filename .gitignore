@@ -198,5 +198,6 @@ cython_debug/
 !.dockerignore
 !.gitignore
 
+!.github/workflows/build-and-push.yaml
 
 .osparc/docker-compose.yml

@@ -1,0 +1,20 @@
+# .gitignore template for skeleton-based apps
+/compiled
+/qx_packages
+.package-cache.json
+
+# npm modules
+node_modules/
+
+# qooxdoo's compilation output folder
+source-output/
+build-output/
+compiled/
+contrib/
+
+# qooxdoo packages folder and json config file
+qx_packages
+.qooxdoo
+
+# translations for the moment ignored
+*.po

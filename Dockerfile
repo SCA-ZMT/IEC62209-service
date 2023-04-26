@@ -2,13 +2,12 @@ FROM python:3.10-slim-buster as base
 
 LABEL maintainer=pcrespov
 
+ENV LANG=C.UTF-8 \
+    PYTHONDONTWRITEBYTECODE=1
 
 ENV SC_USER_ID=8004 \
     SC_USER_NAME=scu \
-    LANG=C.UTF-8 \
-    PYTHONDONTWRITEBYTECODE=1 \
     VIRTUAL_ENV=/home/scu/.venv
-
 
 RUN adduser \
     --uid ${SC_USER_ID} \
@@ -52,16 +51,18 @@ RUN which pip \
 
 WORKDIR /build
 
-COPY --chown=scu:scu client client
-RUN cd client \
-    && npm install \
-    npx qx compile --debug --clean
-
-
 COPY --chown=scu:scu server server
 RUN cd server \
     && pip --no-cache-dir install -r requirements.txt \
     && pip --no-cache-dir install .
+
+
+COPY --chown=scu:scu client client
+RUN cd client \
+    && npm install \
+    && npx qx compile --debug --clean
+
+
 
 
 # --------------------------Production stage -------------------

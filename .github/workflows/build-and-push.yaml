@@ -1,0 +1,41 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      #- name: Login to Docker Hub
+      #  uses: docker/login-action@v1
+      #  with:
+      #    username: ${{ env.DOCKER_USERNAME }}
+      #    password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Run Makefile
+        run: |
+          cd .osparc
+          make info
+          make compose
+          make build-nc
+          docker images
+
+      #- name: Build and push Docker image
+      #  uses: docker/build-push-action@v2
+      #  with:
+      #    context: .
+      #    push: true
+      #    tags: ${{ env.IMAGE_NAME }}:latest

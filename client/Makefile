@@ -2,8 +2,9 @@ include ../scripts/common.Makefile
 
 
 info: ## info on tools
-	 which node
-	 node --version
+	 @which node
+	 # expected >=v16
+	 @node --version
 
 .PHONY: install
 install: ## installs nodejs
