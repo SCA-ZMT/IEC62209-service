@@ -42,20 +42,10 @@ qx.Class.define("sar.steps.LoadTrainingData", {
     },
 
     // overriden
-    _getDataTable: function() {
-      return sar.steps.Utils.createTrainingDataTable();
-    },
-
-    // overriden
     _applyStepData: function(trainingData) {
       this.base(arguments, trainingData);
 
       this.fireDataEvent("trainingDataSet", trainingData);
-    },
-
-    // overriden
-    _popoluateTable: function(data) {
-      sar.steps.Utils.populateTrainingDataTable(this._dataTable, data);
     },
   }
 });

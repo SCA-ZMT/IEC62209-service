@@ -42,19 +42,10 @@ qx.Class.define("sar.steps.LoadCriticalData", {
     },
 
     // overriden
-    _getDataTable: function() {
-      return sar.steps.Utils.testDataTable();
-    },
-
-    // overriden
     _applyStepData: function(criticalData) {
       this.base(arguments, criticalData);
 
       this.fireDataEvent("criticalDataSet", criticalData);
-    },
-
-    __popoluateTable: function(data) {
-      sar.steps.Utils.populateTestDataTable(this._dataTable, data);
     },
   }
 });

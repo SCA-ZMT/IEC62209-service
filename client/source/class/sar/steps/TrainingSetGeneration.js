@@ -95,7 +95,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.createTrainingDataTable();
+      const dataTable = this.__dataTable = sar.steps.Utils.createDataTable();
       const layout = new qx.ui.layout.VBox();
       const tabPage = new qx.ui.tabview.Page("Data").set({
         layout
@@ -141,7 +141,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __popoluateTable: function(data) {
-      sar.steps.Utils.populateTrainingDataTable(this.__dataTable, data);
+      sar.steps.Utils.populateDataTable(this.__dataTable, data);
     },
 
     __populateDistributionImage: function() {

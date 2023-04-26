@@ -15,6 +15,61 @@ qx.Class.define("sar.steps.Utils", {
   type: "static",
 
   statics: {
+    COLUMN_ALIASES: {
+      number: {
+        ids: ["number", "no."],
+        label: "no."
+      },
+      antenna: {
+        ids: ["antenna"],
+        label: "antenna"
+      },
+      frequency: {
+        ids: ["frequency"],
+        label: "f (MHz)"
+      },
+      power: {
+        ids: ["power"],
+        label: "Pf (dBm)"
+      },
+      modulation: {
+        ids: ["modulation"],
+        label: "Mod"
+      },
+      par: {
+        ids: ["par"],
+        label: "PAPR (dB)"
+      },
+      bandwidth: {
+        ids: ["bandwidth"],
+        label: "BW (MHz)"
+      },
+      distance: {
+        ids: ["distance"],
+        label: "s (mm)"
+      },
+      angle: {
+        ids: ["angle"],
+        label: "θ (°)"
+      },
+      x: {
+        ids: ["x"],
+        label: "x (mm)"
+      },
+      y: {
+        ids: ["y"],
+        label: "y (mm)"
+      },
+      sar10g: {
+        ids: ["sar10g"],
+        label: "SAR 10g (W/Kg)"
+      },
+      u10g: {
+        ids: ["u10g"],
+        label: "u 10g (dB)"
+      },
+    },
+
     TRAINING_DATA_COLUMNS: {
       number: {
         label: "no."
@@ -52,9 +107,45 @@ qx.Class.define("sar.steps.Utils", {
       sar10g: {
         label: "SAR 10g (W/Kg)"
       },
-      U1g: {
+      u10g: {
         label: "u 10g (dB)"
       },
+    },
+
+    __getAliasFromId: function(id) {
+      const entryFound = Object.entries(this.COLUMN_ALIASES).find(entry => entry[1].ids.includes(id));
+      if (entryFound) {
+        return entryFound[1].label;
+      }
+      return id;
+    },
+
+    createDataTable: function() {
+      const table = new qx.ui.table.Table().set({
+        selectable: true,
+        statusBarVisible: false,
+        showCellFocusIndicator: false,
+        forceLineHeight: false
+      });
+      return table;
+    },
+
+    populateDataTable: function(table, data) {
+      const tableModel = new qx.ui.table.model.Simple();
+      const columnLabels = [];
+      if ("headings" in data) {
+        data["headings"].forEach(headerId => {
+          columnLabels.push(this.__getAliasFromId(headerId));
+        });
+      }
+      tableModel.setColumns(columnLabels);
+      table.setTableModel(tableModel);
+      for (let i=0; i<columnLabels.length; i++) {
+        table.setColumnWidth(i, 70);
+      }
+      if ("rows" in data) {
+        tableModel.setData(data["rows"]);
+      }
     },
 
     createTrainingDataTable: function() {
@@ -99,7 +190,7 @@ qx.Class.define("sar.steps.Utils", {
       }
     },
 
-    testDataTable: function() {
+    createdTestDataTable: function() {
       const tableModel = new qx.ui.table.model.Simple();
       tableModel.setColumns([
         "no.",

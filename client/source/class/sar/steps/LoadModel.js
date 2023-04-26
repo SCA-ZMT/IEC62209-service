@@ -53,11 +53,6 @@ qx.Class.define("sar.steps.LoadModel", {
       sar.steps.Utils.postFile(file, "/model/load", successCallback, null, this);
     },
 
-    // overriden
-    _getDataTable: function() {
-      return sar.steps.Utils.testDataTable();
-    },
-
     _applyStepData: function(model) {
       this.base(arguments, model);
 
@@ -71,6 +66,7 @@ qx.Class.define("sar.steps.LoadModel", {
     // overriden
     _popoluateTable: function(data) {
       console.log("model", data);
+      this.base(arguments, data);
     },
   }
 });

@@ -133,7 +133,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
     },
 
     __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.testDataTable();
+      const dataTable = this.__dataTable = sar.steps.Utils.createDataTable();
       const layout = new qx.ui.layout.VBox();
       const tabPage = new qx.ui.tabview.Page("Data").set({
         layout
@@ -179,7 +179,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
     },
 
     __popoluateTable: function(data) {
-      sar.steps.Utils.populateTestDataTable(this.__dataTable, data);
+      sar.steps.Utils.populateDataTable(this.__dataTable, data);
     },
 
     __populateDistributionImage: function() {

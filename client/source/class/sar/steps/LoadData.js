@@ -78,7 +78,11 @@ qx.Class.define("sar.steps.LoadData", {
     },
 
     _getDataTable: function() {
-      throw new Error("Abstract method called!");
+      return sar.steps.Utils.createDataTable();
+    },
+
+    _popoluateTable: function(data) {
+      sar.steps.Utils.populateDataTable(this._dataTable, data);
     },
 
     _applyModel: function(model) {
@@ -97,10 +101,6 @@ qx.Class.define("sar.steps.LoadData", {
       if (testData) {
         this._popoluateTable(testData);
       }
-    },
-
-    _popoluateTable: function(data) {
-      throw new Error("Abstract method called!");
     },
   }
 });
