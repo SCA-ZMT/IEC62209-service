@@ -270,6 +270,19 @@ class ModelInterface:
         return True
 
     @classmethod
+    def residuals_test(cls) -> dict:
+        cls.raise_if_no_model()
+        if len(cls.residuals) == 0:
+            raise Exception("Residuals have not been calculated")
+        swres, qqres = cls.work.resid_test(cls.residuals)
+        return {
+            "Acceptance criteria": str(swres[0]),
+            "p-value": f"{swres[1]:.3f}",
+            "QQ location": f"{qqres[1]:.3f}",
+            "QQ scale": f"{qqres[2]:.3f}",
+        }
+
+    @classmethod
     def plot_residuals(cls):
         if len(cls.residuals) == 0:
             raise Exception("Residuals have not been calculated")

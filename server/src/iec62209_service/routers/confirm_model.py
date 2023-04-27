@@ -14,7 +14,7 @@ async def confirm_model() -> JSONResponse:
         # storing these for later
         if not ModelInterface.compute_residuals():
             raise Exception("Error computing residuals")
-        response = ModelInterface.residuals
+        response = ModelInterface.residuals_test()
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
