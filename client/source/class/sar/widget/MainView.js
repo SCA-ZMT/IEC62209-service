@@ -44,6 +44,7 @@ qx.Class.define("sar.widget.MainView", {
         value: "SAR System Validation Procedure",
         font: "text-30",
         minWidth: 450,
+        minHeight: 37,
       });
       introLayout.add(introTitle)
       const infoButton = new qx.ui.basic.Image().set({
@@ -170,8 +171,6 @@ qx.Class.define("sar.widget.MainView", {
         if (section.label.includes("Load")) {
           stepButton.getContentElement().setStyles({
             "border-radius": "32px",
-            "border-width": "1px",
-            "border-style": "double"
           });
         }
         section.step.stepButton = stepButton;

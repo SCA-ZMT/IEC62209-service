@@ -117,7 +117,7 @@ qx.Class.define("sar.io.Resources", {
           },
           getReport: {
             method: "GET",
-            url: "/analysis-creation/report"
+            url: "/analysis-creation/pdf"
           },
           resetData: {
             method: "GET",
@@ -187,6 +187,26 @@ qx.Class.define("sar.io.Resources", {
        */
       "confirmModel": {
         endpoints: {
+          confirm: {
+            method: "GET",
+            url: "/confirm-model/confirm"
+          },
+          getQQPlot: {
+            method: "GET",
+            url: "/confirm-model/qqplot"
+          },
+          getDeviations: {
+            method: "GET",
+            url: "/confirm-model/deviations"
+          },
+          getSemivariogram: {
+            method: "GET",
+            url: "/confirm-model/semivariogram"
+          },
+          getReport: {
+            method: "GET",
+            url: "/confirm-model/pdf"
+          },
         }
       },
       /*

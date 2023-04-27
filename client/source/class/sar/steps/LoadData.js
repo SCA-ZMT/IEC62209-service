@@ -43,7 +43,10 @@ qx.Class.define("sar.steps.LoadData", {
       const resetBtn = this._resetBtn = new qx.ui.form.Button("Reset data").set({
         allowGrowX: false
       });
-      resetBtn.addListener("execute", () => this._resetPressed());
+      resetBtn.addListener("execute", () => {
+        fileInput.resetValue();
+        this._resetPressed();
+      });
       optionsLayout.add(resetBtn);
 
       return optionsLayout;

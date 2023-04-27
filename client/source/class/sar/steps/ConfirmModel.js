@@ -16,6 +16,9 @@ qx.Class.define("sar.steps.ConfirmModel", {
 
   members: {
     __reportButton: null,
+    __qqImage: null,
+    __deviationsImage: null,
+    __semivariogramImage: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -42,7 +45,8 @@ qx.Class.define("sar.steps.ConfirmModel", {
       optionsLayout.add(stepLayout);
 
       let row = 0;
-      const confirmButton = new qx.ui.form.Button("Confirm").set({
+      const confirmButton = new sar.widget.FetchButton("Confirm").set({
+        alignY: "middle",
         allowGrowY: false
       });
       stepLayout.add(confirmButton, {
@@ -54,37 +58,94 @@ qx.Class.define("sar.steps.ConfirmModel", {
       const resultsLayout = new qx.ui.container.Composite(resultsGrid).set({
         allowGrowX: false
       });
+      // titles
       const acceptanceTitle = new qx.ui.basic.Label().set({
-        value: "Acceptance criteria:"
+        value: "Acceptance criteria:",
+        alignX: "right",
+        alignY: "middle",
+        textAlign: "right",
       });
       resultsLayout.add(acceptanceTitle, {
         row: 0,
         column: 0
       });
       const normalityTitle = new qx.ui.basic.Label().set({
-        value: "Normality: 0.293 > 0.05:"
+        value: "Normality: 0.293 > 0.05:",
+        alignX: "right",
+        alignY: "middle",
+        textAlign: "right",
       });
       resultsLayout.add(normalityTitle, {
         row: 1,
         column: 0
       });
       const qqLocationTitle = new qx.ui.basic.Label().set({
-        value: "QQ location: -0.049 ∈ [-1, 1]:"
+        value: "QQ location: -0.049 ∈ [-1, 1]:",
+        alignX: "right",
+        alignY: "middle",
+        textAlign: "right",
       });
       resultsLayout.add(qqLocationTitle, {
         row: 2,
         column: 0
       });
       const qqScaleTitle = new qx.ui.basic.Label().set({
-        value: "QQ scale: 0.944 ∈ [0.5, 1.5]:"
+        value: "QQ scale: 0.944 ∈ [0.5, 1.5]:",
+        alignX: "right",
+        alignY: "middle",
+        textAlign: "right",
       });
       resultsLayout.add(qqScaleTitle, {
         row: 3,
         column: 0
       });
+      // values
+      const acceptanceValue = new qx.ui.basic.Label().set({
+        font: "text-16",
+        alignY: "middle",
+      });
+      sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
+      resultsLayout.add(acceptanceValue, {
+        row: 0,
+        column: 1
+      });
+      const normalityValue = new qx.ui.basic.Label();
+      resultsLayout.add(normalityValue, {
+        row: 1,
+        column: 1
+      });
+      const qqLocationValue = new qx.ui.basic.Label();
+      resultsLayout.add(qqLocationValue, {
+        row: 2,
+        column: 1
+      });
+      const qqScaleValue = new qx.ui.basic.Label();
+      resultsLayout.add(qqScaleValue, {
+        row: 3,
+        column: 1
+      });
       stepLayout.add(resultsLayout, {
         row,
         column: 1
+      });
+      confirmButton.addListener("execute", () => {
+        confirmButton.setFetching(true);
+        acceptanceValue.setValue("");
+        normalityValue.setValue("");
+        qqLocationValue.setValue("");
+        qqScaleValue.setValue("");
+        sar.io.Resources.fetch("confirmModel", "confirm")
+          .then(data => {
+            if ("Acceptance criteria" in data) {
+              acceptanceValue.setValue(data["Acceptance criteria"]);
+            }
+            normalityValue.setValue("");
+            qqLocationValue.setValue("");
+            qqScaleValue.setValue("");
+            this.__modelConfirmed();
+          })
+          .catch(err => console.error(err))
+          .finally(() => confirmButton.setFetching(false));
       });
       row++;
 
@@ -100,25 +161,25 @@ qx.Class.define("sar.steps.ConfirmModel", {
     },
 
     __createQQView: function() {
-      const qqImage = sar.steps.Utils.createImageViewer()
+      const qqImage = this.__qqImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("QQ plot", qqImage);
       return tabPage;
     },
 
     __createDeviationsView: function() {
-      const deviationsImage = sar.steps.Utils.createImageViewer()
+      const deviationsImage = this.__deviationsImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
       return tabPage;
     },
 
     __createResidualsView: function() {
-      const residualsImage = sar.steps.Utils.createImageViewer()
+      const residualsImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Residuals", residualsImage);
       return tabPage;
     },
 
     __createSemivariogramView: function() {
-      const semivariogramImage = sar.steps.Utils.createImageViewer()
+      const semivariogramImage = this.__semivariogramImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Semivariogram", semivariogramImage);
       return tabPage;
     },
@@ -144,6 +205,32 @@ qx.Class.define("sar.steps.ConfirmModel", {
       resultsTabView.add(variogramView);
 
       return resultsLayout;
-    }
+    },
+
+    __modelConfirmed: function() {
+      this.__reportButton.setEnabled(true);
+      this.__fetchResults();
+    },
+
+    __fetchResults: function() {
+      this.__populateQQImage();
+      this.__populateDeviationsImage();
+      this.__populateSemivariogramImage();
+    },
+
+    __populateQQImage: function() {
+      const endpoints = sar.io.Resources.getEndPoints("confirmModel");
+      this.__qqImage.setSource(endpoints["getQQPlot"].url);
+    },
+
+    __populateDeviationsImage: function() {
+      const endpoints = sar.io.Resources.getEndPoints("confirmModel");
+      this.__deviationsImage.setSource(endpoints["getDeviations"].url);
+    },
+
+    __populateSemivariogramImage: function() {
+      const endpoints = sar.io.Resources.getEndPoints("confirmModel");
+      this.__semivariogramImage.setSource(endpoints["getSemivariogram"].url);
+    },
   }
 });

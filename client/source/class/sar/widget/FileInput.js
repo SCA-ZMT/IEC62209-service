@@ -68,17 +68,8 @@ qx.Class.define("sar.widget.FileInput", {
     __selectBtn: null,
 
     __attachEventHandlers: function() {
-      this.__input.addListener("change", () => {
-        const filenames = [];
-        const files = this.__input.getDomElement().files;
-        for (let i=0; i<files.length; i++) {
-          filenames.push(files[i].name);
-        }
-        this.fireEvent("selectionChanged");
-      }, this);
-      this.__selectBtn.addListener("execute", () => {
-        this.__input.getDomElement().click();
-      }, this);
+      this.__input.addListener("change", () => this.fireEvent("selectionChanged"), this);
+      this.__selectBtn.addListener("execute", () => this.__input.getDomElement().click(), this);
     },
 
     hideInputWidget: function() {
@@ -93,6 +84,10 @@ qx.Class.define("sar.widget.FileInput", {
 
     getFile: function() {
       return this.__input.getDomElement().files.item(0);
+    },
+
+    resetValue: function() {
+      this.__input.getDomElement().value = "";
     }
   }
 });
