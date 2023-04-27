@@ -11,6 +11,7 @@ router = APIRouter(prefix="/training-data", tags=["training-data"])
 
 @router.get("/reset")
 async def training_data_clear():
+    # this is correct: here we should reset the whole model
     ModelInterface.clear()
 
 

@@ -6,16 +6,16 @@ from fastapi.responses import JSONResponse
 
 from .common import ModelInterface, SampleInterface
 
-router = APIRouter(prefix="/test-data", tags=["test-data"])
+router = APIRouter(prefix="/critical-data", tags=["critical-data"])
 
 
 @router.get("/reset")
-async def test_data_reset():
-    SampleInterface.testSet.clear()
+async def critical_data_reset():
+    SampleInterface.criticalSet.clear()
 
 
 @router.post("/load", response_class=JSONResponse)
-async def test_data_load(file: UploadFile = File(...)) -> JSONResponse:
+async def critical_data_load(file: UploadFile = File(...)) -> JSONResponse:
     response = {}
     end_status = status.HTTP_200_OK
     try:
@@ -23,7 +23,7 @@ async def test_data_load(file: UploadFile = File(...)) -> JSONResponse:
         tmp = NamedTemporaryFile(delete=False)
         tmp.write(file.file.read())
         tmp.close()
-        response = ModelInterface.load_test_sample(tmp.name)
+        response = ModelInterface.load_critical_sample(tmp.name)
         remove(tmp.name)
     except Exception as e:
         response = {"error": str(e)}

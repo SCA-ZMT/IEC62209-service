@@ -13,6 +13,7 @@ from .api import router
 from .routers import (
     analysis_creation,
     confirm_model,
+    load_critical_data,
     load_model,
     load_test_data,
     load_training_data,
@@ -53,6 +54,7 @@ def create_app():
     app.include_router(load_test_data.router)
     app.include_router(confirm_model.router)
     app.include_router(search_space.router)
+    app.include_router(load_critical_data.router)
 
     # static files
     app.mount("/", StaticFiles(directory=settings.CLIENT_OUTPUT_DIR), name="static")
