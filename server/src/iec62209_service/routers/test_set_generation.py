@@ -1,11 +1,10 @@
-from os.path import dirname, realpath
-
 from fastapi import APIRouter, status
 from fastapi.responses import (
-    FileResponse,
     HTMLResponse,
     JSONResponse,
     PlainTextResponse,
+    Response,
+    StreamingResponse,
 )
 
 from .common import SampleConfig, SampleInterface
@@ -31,15 +30,18 @@ async def test_set_generate(config: SampleConfig) -> HTMLResponse:
 
 @router.get("/data", response_class=JSONResponse)
 async def test_set_data() -> JSONResponse:
-    return SampleInterface.testSet.to_dict()
+    return JSONResponse(SampleInterface.testSet.to_dict())
 
 
-@router.get("/distribution", response_class=FileResponse)
-async def test_set_distribution() -> FileResponse:
-    return FileResponse(
-        dirname(realpath(__file__)) + "/../../../../assets/mwl.png",
-        media_type="image/png",
-    )
+@router.get("/distribution", response_class=Response)
+async def test_set_distribution() -> Response:
+    try:
+        buf = SampleInterface.testSet.plot_distribution()
+        return StreamingResponse(buf, media_type="image/png")
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @router.get("/xport", response_class=PlainTextResponse)
