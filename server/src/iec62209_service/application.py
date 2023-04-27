@@ -21,6 +21,7 @@ from .routers import (
     search_space,
     test_set_generation,
     training_set_generation,
+    verify,
 )
 from .settings import ApplicationSettings
 
@@ -55,6 +56,7 @@ def create_app():
     app.include_router(confirm_model.router)
     app.include_router(search_space.router)
     app.include_router(load_critical_data.router)
+    app.include_router(verify.router)
 
     # static files
     app.mount("/", StaticFiles(directory=settings.CLIENT_OUTPUT_DIR), name="static")
