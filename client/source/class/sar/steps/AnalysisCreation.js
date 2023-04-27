@@ -82,19 +82,14 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         column: 0
       });
       // values
-      const acceptanceValue = new qx.ui.basic.Label().set({
-        font: "text-16",
-        alignY: "middle",
-      });
+      const acceptanceValue = new qx.ui.basic.Label();
       sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
       resultsLayout.add(acceptanceValue, {
         row: 0,
         column: 1
       });
-      const rmsErrorValue = new qx.ui.basic.Label().set({
-        font: "text-16",
-        alignY: "middle",
-      });
+      const rmsErrorValue = new qx.ui.basic.Label();
+      sar.steps.Utils.decoratePassFailLabel(rmsErrorValue);
       resultsLayout.add(rmsErrorValue, {
         row: 1,
         column: 1

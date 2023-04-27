@@ -214,6 +214,18 @@ qx.Class.define("sar.io.Resources", {
        */
       "searchSpace": {
         endpoints: {
+          search: {
+            method: "POST",
+            url: "/search-space/search"
+          },
+          xport: {
+            method: "GET",
+            url: "/search-space/xport"
+          },
+          getDistribution: {
+            method: "GET",
+            url: "/search-space/distribution"
+          },
         }
       },
       /*

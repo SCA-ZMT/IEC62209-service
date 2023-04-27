@@ -26,7 +26,7 @@ async def confirm_model() -> JSONResponse:
 async def confirm_model_qqplot() -> Response:
     try:
         buf = ModelInterface.plot_residuals()
-        StreamingResponse(buf, media_type="image/png")
+        return StreamingResponse(buf, media_type="image/png")
     except Exception as e:
         return Response(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR

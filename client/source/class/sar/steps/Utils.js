@@ -280,7 +280,7 @@ qx.Class.define("sar.steps.Utils", {
             row: idx,
             column: 1
           });
-          if (entry.id === "acceptanceCriteria") {
+          if (["acceptanceCriteria", "normalizedRMSError"].includes(entry.id)) {
             sar.steps.Utils.decoratePassFailLabel(valueLabel);
           }
           valueLabel.setValue(data[entry.id]);
@@ -310,13 +310,17 @@ qx.Class.define("sar.steps.Utils", {
     },
 
     decoratePassFailLabel: function(label) {
+      label.set({
+        font: "text-16",
+        alignY: "middle",
+      });
       label.addListener("changeValue", e => {
         label.resetTextColor();
         const newValue = e.getData();
         if (newValue) {
-          if (newValue === "Pass") {
+          if (newValue.includes("Pass")) {
             label.setTextColor("blue");
-          } else if (newValue === "Fail") {
+          } else if (newValue.includes("Fail")) {
             label.setTextColor("red");
           }
         }

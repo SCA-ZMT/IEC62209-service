@@ -100,10 +100,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
         column: 0
       });
       // values
-      const acceptanceValue = new qx.ui.basic.Label().set({
-        font: "text-16",
-        alignY: "middle",
-      });
+      const acceptanceValue = new qx.ui.basic.Label();
       sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
       resultsLayout.add(acceptanceValue, {
         row: 0,
@@ -139,9 +136,15 @@ qx.Class.define("sar.steps.ConfirmModel", {
             if ("Acceptance criteria" in data) {
               acceptanceValue.setValue(data["Acceptance criteria"]);
             }
-            normalityValue.setValue("");
-            qqLocationValue.setValue("");
-            qqScaleValue.setValue("");
+            if ("Normality" in data) {
+              normalityValue.setValue(data["Normality"]);
+            }
+            if ("QQ location" in data) {
+              qqLocationValue.setValue(data["QQ location"]);
+            }
+            if ("QQ scale" in data) {
+              qqScaleValue.setValue(data["QQ scale"]);
+            }
             this.__modelConfirmed();
           })
           .catch(err => console.error(err))
