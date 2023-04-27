@@ -264,9 +264,23 @@ class ModelInterface:
         return cls.fig2png(fig)
 
     @classmethod
-    def compute_residuals(cls):
+    def compute_residuals(cls) -> bool:
         cls.raise_if_no_model()
-        return cls.work.compute_resid()
+        cls.residuals = cls.work.compute_resid()
+        return True
+
+    @classmethod
+    def residuals_test(cls) -> dict:
+        cls.raise_if_no_model()
+        if len(cls.residuals) == 0:
+            raise Exception("Residuals have not been calculated")
+        swres, qqres = cls.work.resid_test(cls.residuals)
+        return {
+            "Acceptance criteria": str(swres[0]),
+            "p-value": f"{swres[1]:.3f}",
+            "QQ location": f"{qqres[1]:.3f}",
+            "QQ scale": f"{qqres[2]:.3f}",
+        }
 
     @classmethod
     def plot_residuals(cls):
@@ -274,3 +288,9 @@ class ModelInterface:
             raise Exception("Residuals have not been calculated")
         fig = cls.work.resid_plot(cls.residuals)
         return cls.fig2png(fig)
+
+    @classmethod
+    def explore_space(cls, iters: int = 2):
+        cls.raise_if_no_model()
+        cls.work.explore(iters, show=False, save_to=None)
+        return cls.work.data["critsample"].data.values.tolist()

@@ -17,6 +17,7 @@ from .routers import (
     load_test_data,
     load_training_data,
     meta,
+    search_space,
     test_set_generation,
     training_set_generation,
 )
@@ -51,6 +52,7 @@ def create_app():
     app.include_router(test_set_generation.router)
     app.include_router(load_test_data.router)
     app.include_router(confirm_model.router)
+    app.include_router(search_space.router)
 
     # static files
     app.mount("/", StaticFiles(directory=settings.CLIENT_OUTPUT_DIR), name="static")
