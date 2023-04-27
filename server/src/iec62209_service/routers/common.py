@@ -112,6 +112,7 @@ class SampleInterface:
 
 class ModelInterface:
     work: Work = Work()
+    residuals = []
 
     @staticmethod
     def fig2png(fig):
@@ -127,6 +128,7 @@ class ModelInterface:
         cls.work.clear()
         cls.work.clear_model()
         cls.work.clear_sample()
+        cls.residuals = []
 
     @classmethod
     def has_init_sample(cls) -> bool:
@@ -224,20 +226,25 @@ class ModelInterface:
             fig = model.plot_variogram(ax=ax)
             return cls.fig2png(fig)
 
+    @staticmethod
+    def acceptance_criteria(data: DataSetInterface) -> bool:
+        dataok = True
+        if data is not None:
+            mpecol = data.headings.index("mpe10g")
+            sardcol = data.headings.index("sard10g")
+            for row in data.rows:
+                if fabs(row[sardcol]) > row[mpecol]:
+                    dataok = False
+                    break
+        return dataok
+
     @classmethod
     def goodfit_test(cls) -> dict:
         if not cls.has_model():
             raise Exception("No model loaded")
 
-        dataok = True
         initsample = SampleInterface.trainingSet
-        if initsample is not None:
-            mpecol = initsample.headings.index("mpe10g")
-            sardcol = initsample.headings.index("sard10g")
-            for row in initsample.rows:
-                if fabs(row[sardcol]) > row[mpecol]:
-                    dataok = False
-                    break
+        dataok = ModelInterface.acceptance_criteria(initsample)
 
         gfres: tuple = cls.work.goodfit_test()
         gfok: bool = gfres[0]
@@ -254,4 +261,16 @@ class ModelInterface:
         if not cls.has_model():
             raise Exception("No model loaded")
         fig = cls.work.goodfit_plot()
+        return cls.fig2png(fig)
+
+    @classmethod
+    def compute_residuals(cls):
+        cls.raise_if_not_model()
+        return cls.work.compute_resid()
+
+    @classmethod
+    def plot_residuals(cls):
+        if len(cls.residuals) == 0:
+            raise Exception("Residuals have not been calculated")
+        fig = cls.work.resid_plot(cls.residuals)
         return cls.fig2png(fig)

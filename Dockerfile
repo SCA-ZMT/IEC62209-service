@@ -19,6 +19,10 @@ RUN adduser \
 
 ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 
+RUN apt-get update && apt-get install -y \
+    texlive \
+    texlive-latex-extra
+
 EXPOSE 8000
 
 # -------------------------- Build stage -------------------
