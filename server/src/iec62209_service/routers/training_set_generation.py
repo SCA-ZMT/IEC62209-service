@@ -1,7 +1,10 @@
-from os.path import dirname, realpath
-
 from fastapi import APIRouter, status
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import (
+    JSONResponse,
+    PlainTextResponse,
+    Response,
+    StreamingResponse,
+)
 
 from .common import SampleConfig, SampleInterface, SarFiltering
 
@@ -19,17 +22,20 @@ async def training_set_reset():
     SampleInterface.trainingSet.clear()
 
 
-@router.get("/distribution", response_class=FileResponse)
-async def training_set_distribution() -> FileResponse:
-    return FileResponse(
-        dirname(realpath(__file__)) + "/../../../../assets/mwl.png",
-        media_type="image/png",
-    )
+@router.get("/distribution", response_class=Response)
+async def training_set_distribution() -> Response:
+    try:
+        buf = SampleInterface.trainingSet.plot_distribution()
+        return StreamingResponse(buf, media_type="image/png")
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @router.get("/data", response_class=JSONResponse)
 async def training_set_data() -> JSONResponse:
-    return SampleInterface.trainingSet
+    return JSONResponse(SampleInterface.trainingSet.to_dict())
 
 
 @router.get("/xport", response_class=PlainTextResponse)

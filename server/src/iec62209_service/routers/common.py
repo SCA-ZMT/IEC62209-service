@@ -2,9 +2,14 @@ from enum import Enum
 from math import fabs
 from tempfile import NamedTemporaryFile
 
-from iec62209.plot import plot_sample_marginals
+from iec62209.plot import (
+    plot_sample_deviations,
+    plot_sample_distribution,
+    plot_sample_marginals,
+)
 from iec62209.work import Model, Work, add_zvar, load_measured_sample
 from matplotlib import pyplot as plt
+from pandas import DataFrame
 from pydantic import BaseModel
 
 ### pydantic MODELS
@@ -44,19 +49,34 @@ class ModelMetadata(BaseModel):
 ### Helper classes
 
 
+def fig2png(fig):
+    import io
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    return buf
+
+
 class DataSetInterface:
     def __init__(self):
         # headings = ['no.', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
+        self.sample: DataFrame = None
         self.headings = []
         self.rows = []
         self.config = SampleConfig()
 
     def clear(self):
+        self.sample = None
         self.headings = []
         self.rows = []
+        self.config = SampleConfig()
+
+    def __dict__(self) -> dict:
+        return {"headings": self.headings, "rows": self.rows}
 
     def to_dict(self) -> dict:
-        return {"headings": self.headings, "rows": self.rows}
+        return self.__dict__()
 
     def generate(self, config: SampleConfig):
         self.config = SampleConfig()
@@ -68,6 +88,7 @@ class DataSetInterface:
             show=False,
             save_to=None,
         )
+        self.sample = w.data["sample"]
         headings = w.data["sample"].data.columns.tolist()
         values = w.data["sample"].data.values.tolist()
         if not isinstance(headings, list) or not isinstance(values, list):
@@ -87,8 +108,11 @@ class DataSetInterface:
         self.config = config
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dataframe(cls, sample: DataFrame):
         dataset = cls()
+        dataset.sample = sample
+        # we convert to json here to avoid issues when jsonifying numpy data types
+        data = dict(sample.to_json()["data"])
         for key in data:
             dataset.headings.append(key)
         if len(dataset.headings) == 0:
@@ -102,6 +126,24 @@ class DataSetInterface:
             dataset.rows.append(row)
         return dataset
 
+    def plot_marginals(self):
+        if self.sample is None:
+            raise Exception("Sample not loaded")
+        fig = plot_sample_marginals(self.sample)
+        return fig2png(fig)
+
+    def plot_deviations(self):
+        if self.sample is None:
+            raise Exception("Sample not loaded")
+        fig = plot_sample_deviations(self.sample)
+        return fig2png(fig)
+
+    def plot_distribution(self):
+        if self.sample is None:
+            raise Exception("Sample not loaded")
+        fig = plot_sample_distribution(self.sample)
+        return fig2png(fig)
+
 
 ### Interfaces to publication-IEC62209
 
@@ -109,20 +151,12 @@ class DataSetInterface:
 class SampleInterface:
     testSet = DataSetInterface()
     trainingSet = DataSetInterface()
+    criticalSet = DataSetInterface()
 
 
 class ModelInterface:
     work: Work = Work()
     residuals = []
-
-    @staticmethod
-    def fig2png(fig):
-        import io
-
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png")
-        buf.seek(0)
-        return buf
 
     @classmethod
     def clear(cls):
@@ -159,7 +193,7 @@ class ModelInterface:
             add_zvar(measured, "10g")
             measured.to_csv(tmp.name)
             sample = cls.work.load_init_sample(tmp.name, "sard10g")
-            SampleInterface.trainingSet = DataSetInterface.from_dict(dict(sample.data))
+            SampleInterface.trainingSet = DataSetInterface.from_dataframe(sample)
         except TypeError:
             raise Exception(
                 "Please make sure that numbers are not formatted (e.g. to percentages)"
@@ -180,7 +214,7 @@ class ModelInterface:
     @classmethod
     def load_test_sample(cls, filename) -> dict:
         sample = cls.work.load_test_sample(filename, "sard10g")
-        SampleInterface.testSet = DataSetInterface.from_dict(dict(sample.data))
+        SampleInterface.testSet = DataSetInterface.from_dataframe(sample)
         if not cls.has_test_sample():
             raise Exception("Failed to load sample")
         if sample.data.values.size == 0:
@@ -196,11 +230,6 @@ class ModelInterface:
         return cls.work.model_metadata()
 
     @classmethod
-    def get_model_sample_data(cls) -> dict:
-        cls.raise_if_no_model()
-        return cls.work.data.get("model").sample.to_json()["data"]
-
-    @classmethod
     def dump_model_to_json(cls):
         model: Model = cls.work.data.get("model")
         if model is None:
@@ -211,6 +240,9 @@ class ModelInterface:
     def load_model_from_json(cls, json):
         cls.clear()
         cls.work.load_model(json)
+        SampleInterface.trainingSet = DataSetInterface.from_dataframe(
+            cls.work.data.get("model").sample
+        )
 
     @classmethod
     def make_model(cls):
@@ -225,15 +257,7 @@ class ModelInterface:
                 left=0.07, right=0.95, bottom=0.05, top=0.95, wspace=0.2, hspace=0.2
             )
             fig = model.plot_variogram(ax=ax)
-            return cls.fig2png(fig)
-
-    @classmethod
-    def plot_initsample_marginals(cls):
-        if not cls.has_init_sample():
-            raise Exception("Training sample not loaded")
-        sample = cls.work.data.get("initsample")
-        fig = plot_sample_marginals(sample)
-        return cls.fig2png(fig)
+            return fig2png(fig)
 
     @staticmethod
     def acceptance_criteria(data: DataSetInterface) -> bool:
@@ -270,7 +294,7 @@ class ModelInterface:
         if not cls.has_model():
             raise Exception("No model loaded")
         fig = cls.work.goodfit_plot()
-        return cls.fig2png(fig)
+        return fig2png(fig)
 
     @classmethod
     def compute_residuals(cls) -> bool:
@@ -296,13 +320,15 @@ class ModelInterface:
         if len(cls.residuals) == 0:
             raise Exception("Residuals have not been calculated")
         fig = cls.work.resid_plot(cls.residuals)
-        return cls.fig2png(fig)
+        return fig2png(fig)
 
     @classmethod
-    def explore_space(cls, iters: int = 2) -> dict:
+    def explore_space(cls, iters: int = 3) -> dict:
         cls.raise_if_no_model()
         cls.work.explore(iters, show=False, save_to=None)
-        return {
-            "headings": cls.work.data["critsample"].data.columns.tolist(),
-            "rows": cls.work.data["critsample"].data.values.tolist(),
-        }
+        critsample = cls.work.data["critsample"]
+        critsample.data = critsample.data[critsample.data["pass"] > 0.05]
+        critsample.data = critsample.data.drop("sard10g", axis=1)
+        critsample.data = critsample.data.drop("err", axis=1)
+        SampleInterface.criticalSet = DataSetInterface.from_dataframe(critsample)
+        return SampleInterface.criticalSet.to_dict()

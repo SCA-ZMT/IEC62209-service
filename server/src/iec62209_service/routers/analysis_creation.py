@@ -62,7 +62,8 @@ async def analysis_creation_variogram():
 async def analysis_creation_deviations():
     try:
         ModelInterface.raise_if_no_model()
-
+        buf = SampleInterface.trainingSet.plot_deviations()
+        return StreamingResponse(buf, media_type="image/png")
     except Exception as e:
         return Response(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -73,7 +74,7 @@ async def analysis_creation_deviations():
 async def analysis_creation_marginals():
     try:
         ModelInterface.raise_if_no_model()
-        buf = ModelInterface.plot_initsample_marginals()
+        buf = SampleInterface.trainingSet.plot_marginals()
         return StreamingResponse(buf, media_type="image/png")
     except Exception as e:
         return Response(
