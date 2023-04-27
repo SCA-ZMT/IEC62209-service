@@ -12,7 +12,8 @@ async def confirm_model() -> JSONResponse:
     end_status = status.HTTP_200_OK
     try:
         # storing these for later
-        ModelInterface.compute_residuals()
+        if not ModelInterface.compute_residuals():
+            raise Exception("Error computing residuals")
         response = ModelInterface.residuals
     except Exception as e:
         response = {"error": str(e)}

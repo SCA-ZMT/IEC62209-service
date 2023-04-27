@@ -264,9 +264,10 @@ class ModelInterface:
         return cls.fig2png(fig)
 
     @classmethod
-    def compute_residuals(cls):
-        cls.raise_if_not_model()
-        return cls.work.compute_resid()
+    def compute_residuals(cls) -> bool:
+        cls.raise_if_no_model()
+        cls.residuals = cls.work.compute_resid()
+        return True
 
     @classmethod
     def plot_residuals(cls):
@@ -274,3 +275,9 @@ class ModelInterface:
             raise Exception("Residuals have not been calculated")
         fig = cls.work.resid_plot(cls.residuals)
         return cls.fig2png(fig)
+
+    @classmethod
+    def explore_space(cls, iters: int = 2):
+        cls.raise_if_no_model()
+        cls.work.explore(iters, show=False, save_to=None)
+        return cls.work.data["critsample"].data.values.tolist()
