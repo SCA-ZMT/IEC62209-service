@@ -22,7 +22,7 @@ qx.Class.define("sar.steps.Utils", {
       },
       antenna: {
         ids: ["antenna"],
-        label: "antenna"
+        label: "Antenna"
       },
       frequency: {
         ids: ["frequency"],

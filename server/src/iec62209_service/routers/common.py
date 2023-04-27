@@ -265,7 +265,7 @@ class ModelInterface:
 
     @classmethod
     def compute_residuals(cls):
-        cls.raise_if_not_model()
+        cls.raise_if_no_model()
         return cls.work.compute_resid()
 
     @classmethod

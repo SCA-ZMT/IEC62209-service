@@ -17,9 +17,14 @@ qx.Class.define("sar.widget.StepButton", {
   construct: function(text, iconSrc) {
     this.base(arguments);
 
-    const width = 120;
-    const height = 120;
-    const padding = 10;
+    const width = 112;
+    const height = 112;
+    const padding = 6;
+    const grid = new qx.ui.layout.Grid(5, 5);
+    grid.setRowHeight(0, height-60);
+    grid.setRowHeight(1, 42); // two lines of text
+    this._setLayout(grid);
+
     this.set({
       width,
       height,
@@ -30,15 +35,10 @@ qx.Class.define("sar.widget.StepButton", {
     this.getContentElement().setStyles({
       "border-radius": "4px",
       "border-width": "1px",
-      "border-style": "double"
+      "border-style": "solid",
     });
 
     this.initIsActive();
-
-    const grid = new qx.ui.layout.Grid(5, 5);
-    grid.setRowHeight(0, height-60);
-    grid.setRowHeight(1, 40); // two lines of text
-    this._setLayout(grid);
 
     if (iconSrc) {
       const offset = iconSrc.includes(".svg") ? 5 : 0;
@@ -48,7 +48,7 @@ qx.Class.define("sar.widget.StepButton", {
         source: iconSrc,
         scale: true,
         alignX: "center",
-        alignY: "middle"
+        alignY: "bottom"
       });
       this._add(image, {
         row: 0,

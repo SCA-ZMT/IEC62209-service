@@ -15,7 +15,6 @@ qx.Class.define("sar.steps.AnalysisCreation", {
   extend: sar.steps.StepBase,
 
   members: {
-    __createButton: null,
     __exportButton: null,
     __reportButton: null,
     __semivariogramImage: null,
@@ -48,7 +47,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       optionsLayout.add(stepLayout);
 
       let row = 0;
-      const createButton = this.__createButton = new sar.widget.FetchButton("Create & Analyze").set({
+      const createButton = new sar.widget.FetchButton("Create & Analyze").set({
         alignY: "middle",
         allowGrowY: false
       });
@@ -61,6 +60,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       const resultsLayout = new qx.ui.container.Composite(resultsGrid).set({
         allowGrowX: false
       });
+      // titles
       const acceptanceTitle = new qx.ui.basic.Label().set({
         value: "Acceptance criteria:",
         alignX: "right",
@@ -71,15 +71,6 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         row: 0,
         column: 0
       });
-      const acceptanceValue = new qx.ui.basic.Label().set({
-        font: "text-16",
-        alignY: "middle",
-      });
-      sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
-      resultsLayout.add(acceptanceValue, {
-        row: 0,
-        column: 1
-      });
       const rmsErrorTitle = new qx.ui.basic.Label().set({
         value: "Norm. RMS error:",
         alignX: "right",
@@ -89,6 +80,16 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       resultsLayout.add(rmsErrorTitle, {
         row: 1,
         column: 0
+      });
+      // values
+      const acceptanceValue = new qx.ui.basic.Label().set({
+        font: "text-16",
+        alignY: "middle",
+      });
+      sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
+      resultsLayout.add(acceptanceValue, {
+        row: 0,
+        column: 1
       });
       const rmsErrorValue = new qx.ui.basic.Label().set({
         font: "text-16",

@@ -38,7 +38,7 @@ qx.Class.define("sar.steps.LoadTestData", {
 
     __submitFile: function(file) {
       const endpoints = sar.io.Resources.getEndPoints("testData");
-      const successCallback = resp => this.setTestData(resp);
+      const successCallback = resp => this.setStepData(resp);
       sar.steps.Utils.postFile(file, endpoints["load"].url, successCallback, null, this);
     },
 
