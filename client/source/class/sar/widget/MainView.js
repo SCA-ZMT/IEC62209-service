@@ -66,11 +66,11 @@ qx.Class.define("sar.widget.MainView", {
           modal: true,
           width: 750
         });
-        const introPage = new sar.widget.IntroPage();
+        const introPage = new sar.widget.InfoPage();
         win.add(introPage), {
           flex: 1
         };
-        win.center();
+        win.moveTo(285, 80);
         win.open();
       });
       introLayout.add(infoButton)

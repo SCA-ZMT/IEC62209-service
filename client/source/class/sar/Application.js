@@ -40,7 +40,6 @@ qx.Class.define("sar.Application", {
       const scroll = new qx.ui.container.Scroll();
       scroll.add(mainLayout);
 
-      // this.__addIntroPage();
       const mainView = new sar.widget.MainView();
       this.__mainLayout.add(mainView);
 
@@ -58,18 +57,6 @@ qx.Class.define("sar.Application", {
       qx.bom.Stylesheet.includeFile(qx.util.ResourceManager.getInstance().toUri(
         "common/common.css"
       ));
-    },
-
-    __addIntroPage: function() {
-      this.__mainLayout.removeAll();
-
-      const introPage = new sar.widget.IntroPage();
-      this.__mainLayout.add(introPage);
-
-      introPage.addListener("optionSelected", e => {
-        const selection = e.getData();
-        this.__startingPointSelected(selection);
-      });
     },
 
     __startingPointSelected: function(optionNumber) {

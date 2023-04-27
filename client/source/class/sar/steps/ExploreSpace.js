@@ -15,6 +15,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
   extend: sar.steps.StepBase,
 
   members: {
+    __modelViewer: null,
     __exportButton: null,
     __dataTable: null,
     __distributionImage: null,
@@ -33,6 +34,9 @@ qx.Class.define("sar.steps.ExploreSpace", {
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true);
+      optionsLayout.add(modelViewer);
+
       const searchButton = new sar.widget.FetchButton("Search");
       searchButton.addListener("execute", () => {
         searchButton.setFetching(true);
@@ -48,7 +52,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
         enabled: false
       });
       exportButton.addListener("execute", () => {
-        searchButton.setFetching(true);
+        exportButton.setFetching(true);
         sar.io.Resources.fetch("searchSpace", "xport")
           .then(() => this.__searchSpaceExported())
           .catch(err => console.error(err))
@@ -93,6 +97,15 @@ qx.Class.define("sar.steps.ExploreSpace", {
       return resultsLayout;
     },
 
+    // overriden
+    _applyModel: function(modelMetadata) {
+      if (this.__modelViewer) {
+        this._optionsLayout.remove(this.__modelViewer);
+      }
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true);
+      this._optionsLayout.addAt(modelViewer, 0);
+    },
+
     __spaceSearched: function(data) {
       this.__exportButton.setEnabled(true);
       this.__fetchResults(data);
@@ -115,7 +128,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
       this.__distributionImage.setSource(endpoints["getDistribution"].url);
     },
 
-    __testDataExported: function(data) {
+    __searchSpaceExported: function(data) {
       sar.steps.Utils.downloadCSV(data, "SearchSpace.csv");
     }
   }

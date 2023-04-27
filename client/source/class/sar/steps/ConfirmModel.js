@@ -15,10 +15,10 @@ qx.Class.define("sar.steps.ConfirmModel", {
   extend: sar.steps.StepBase,
 
   members: {
+    __modelViewer: null,
     __reportButton: null,
     __qqImage: null,
     __deviationsImage: null,
-    __semivariogramImage: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -32,6 +32,9 @@ qx.Class.define("sar.steps.ConfirmModel", {
 
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
+
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true);
+      optionsLayout.add(modelViewer);
 
       const stepGrid = new qx.ui.layout.Grid(20, 20);
       stepGrid.setColumnFlex(0, 1);
@@ -70,7 +73,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
         column: 0
       });
       const normalityTitle = new qx.ui.basic.Label().set({
-        value: "Normality: 0.293 > 0.05:",
+        value: "Normality:",
         alignX: "right",
         alignY: "middle",
         textAlign: "right",
@@ -80,7 +83,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
         column: 0
       });
       const qqLocationTitle = new qx.ui.basic.Label().set({
-        value: "QQ location: -0.049 ∈ [-1, 1]:",
+        value: "QQ location:",
         alignX: "right",
         alignY: "middle",
         textAlign: "right",
@@ -90,7 +93,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
         column: 0
       });
       const qqScaleTitle = new qx.ui.basic.Label().set({
-        value: "QQ scale: 0.944 ∈ [0.5, 1.5]:",
+        value: "QQ scale:",
         alignX: "right",
         alignY: "middle",
         textAlign: "right",
@@ -181,12 +184,6 @@ qx.Class.define("sar.steps.ConfirmModel", {
       return tabPage;
     },
 
-    __createSemivariogramView: function() {
-      const semivariogramImage = this.__semivariogramImage = sar.steps.Utils.createImageViewer();
-      const tabPage = sar.steps.Utils.createTabPage("Semivariogram", semivariogramImage);
-      return tabPage;
-    },
-
     _createResults: function() {
       const resultsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
@@ -200,14 +197,17 @@ qx.Class.define("sar.steps.ConfirmModel", {
 
       const deviationsView = this.__createDeviationsView();
       resultsTabView.add(deviationsView);
-      /*
-      const residualsView = this.__createResidualsView();
-      resultsTabView.add(residualsView);
-      */
-      const variogramView = this.__createSemivariogramView();
-      resultsTabView.add(variogramView);
 
       return resultsLayout;
+    },
+
+    // overriden
+    _applyModel: function(modelMetadata) {
+      if (this.__modelViewer) {
+        this._optionsLayout.remove(this.__modelViewer);
+      }
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true);
+      this._optionsLayout.addAt(modelViewer, 0);
     },
 
     __modelConfirmed: function() {
@@ -218,7 +218,6 @@ qx.Class.define("sar.steps.ConfirmModel", {
     __fetchResults: function() {
       this.__populateQQImage();
       this.__populateDeviationsImage();
-      this.__populateSemivariogramImage();
     },
 
     __populateQQImage: function() {
@@ -229,11 +228,6 @@ qx.Class.define("sar.steps.ConfirmModel", {
     __populateDeviationsImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("confirmModel");
       this.__deviationsImage.setSource(endpoints["getDeviations"].url);
-    },
-
-    __populateSemivariogramImage: function() {
-      const endpoints = sar.io.Resources.getEndPoints("confirmModel");
-      this.__semivariogramImage.setSource(endpoints["getSemivariogram"].url);
     },
   }
 });

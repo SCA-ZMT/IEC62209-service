@@ -142,7 +142,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
 
       return optionsLayout;
     },
-    
+
     // overriden
     _applyModel: function(modelMetadata) {
       console.log("set area mimimums from", modelMetadata);

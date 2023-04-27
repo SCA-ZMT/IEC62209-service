@@ -94,10 +94,6 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         row: 1,
         column: 1
       });
-      resultsLayout.add(acceptanceValue, {
-        row: 0,
-        column: 1
-      });
       stepLayout.add(resultsLayout, {
         row,
         column: 1

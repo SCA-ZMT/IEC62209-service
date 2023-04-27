@@ -11,7 +11,7 @@
 
 ************************************************************************ */
 
-qx.Class.define("sar.widget.IntroPage", {
+qx.Class.define("sar.widget.InfoPage", {
   extend: qx.ui.core.Widget,
 
   construct: function() {
@@ -22,16 +22,22 @@ qx.Class.define("sar.widget.IntroPage", {
     this.builLayout();
   },
 
-  events: {
-    "optionSelected": "qx.event.type.Data"
-  },
-
   statics: {
     introLabel: function() {
       return new qx.ui.basic.Label().set({
         rich: true,
         wrap: true,
         selectable: true
+      });
+    },
+
+    linkLabel: function(label, url) {
+      const introLabel = this.introLabel();
+      introLabel.addListener("tap", () => window.open(url, "_blank"));
+      return introLabel.set({
+        value: "<u>"+label+"</>",
+        cursor: "pointer",
+        font: "text-16"
       });
     }
   },
@@ -61,20 +67,28 @@ qx.Class.define("sar.widget.IntroPage", {
           });
           this._add(control);
           break;
+        case "link-publication":
+          control = this.self().linkLabel("- Link to the Publication", "https://github.com/ITISFoundation/publication-IEC62209");
+          this._add(control);
+          break;
         case "link-documentation":
-          control = this.self().introLabel().set({
-            value: "- Link to Documentation",
-            font: "text-16"
-          });
+          control = this.self().linkLabel("- Link to the Documentation", "https://raw.githubusercontent.com/ITISFoundation/IEC62209-service/main/assets/Documentation.pdf");
           this._add(control);
           break;
         case "link-samples":
+          control = this.self().linkLabel("- Link to the Samples", "https://raw.githubusercontent.com/ITISFoundation/IEC62209-service/main/assets/Samples.zip");
+          this._add(control);
+          break;
+        case "contact-email": {
+          const email = "support@sarvalidation.site";
           control = this.self().introLabel().set({
-            value: "- Link to Samples",
-            font: "text-16"
+            value: `Contact email <a href="mailto:${email}" style='color: black' target='_blank'>${email}</a>`,
+            font: "text-16",
+            selectable: true,
           });
           this._add(control);
           break;
+        }
       }
       return control || this.base(arguments, id);
     },
@@ -83,8 +97,10 @@ qx.Class.define("sar.widget.IntroPage", {
       this.getChildControl("title");
       this.getChildControl("subtitle");
       this.getChildControl("description");
+      this.getChildControl("link-publication");
       this.getChildControl("link-documentation");
       this.getChildControl("link-samples");
+      this.getChildControl("contact-email");
     }
   }
 });
