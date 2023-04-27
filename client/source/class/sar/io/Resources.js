@@ -199,10 +199,6 @@ qx.Class.define("sar.io.Resources", {
             method: "GET",
             url: "/confirm-model/deviations"
           },
-          getSemivariogram: {
-            method: "GET",
-            url: "/confirm-model/semivariogram"
-          },
           getReport: {
             method: "GET",
             url: "/confirm-model/pdf"
