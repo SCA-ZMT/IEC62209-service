@@ -1,12 +1,9 @@
-from fastapi import APIRouter, status
-from fastapi.responses import (
-    JSONResponse,
-    PlainTextResponse,
-    Response,
-    StreamingResponse,
-)
+from tempfile import NamedTemporaryFile
 
-from .common import SampleConfig, SampleInterface, SarFiltering
+from fastapi import APIRouter, status
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+
+from .common import SampleConfig, SampleInterface
 
 router = APIRouter(
     prefix="/training-set-generation",
@@ -38,19 +35,11 @@ async def training_set_data() -> JSONResponse:
     return JSONResponse(SampleInterface.trainingSet.to_dict())
 
 
-@router.get("/xport", response_class=PlainTextResponse)
-async def training_set_xport() -> PlainTextResponse:
-    need_extra_colums = False
-    headings = SampleInterface.trainingSet.headings
-    if "sar_1g" not in headings:
-        need_extra_colums = True
-        headings += [SarFiltering.SAR10G.lower(), "u10g"]
-    text = str(SampleInterface.trainingSet.headings).strip("[]")
-    for row in SampleInterface.trainingSet.rows:
-        if need_extra_colums:
-            row += [0, 0]
-        text += "\n" + str(row).strip("[]")
-    return PlainTextResponse(text)
+@router.get("/xport", response_class=FileResponse)
+async def training_set_xport() -> FileResponse:
+    tmp = NamedTemporaryFile(delete=False)
+    SampleInterface.trainingSet.export_to_csv(tmp.name)
+    return FileResponse(tmp.name, media_type="text/csv")
 
 
 @router.post("/generate", response_class=JSONResponse)
@@ -59,8 +48,9 @@ async def training_set_generate(config: SampleConfig) -> JSONResponse:
     end_status = status.HTTP_200_OK
     try:
         SampleInterface.trainingSet.generate(config)
+        SampleInterface.trainingSet.add_columns(["sar10g", "u10g"])
     except Exception as e:
-        message = f"The IEC62209 package raised an exception: {e}"
+        message = {"error": f"The IEC62209 package raised an exception: {e}"}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     return JSONResponse(message, status_code=end_status)

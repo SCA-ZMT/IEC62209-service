@@ -1,8 +1,10 @@
+from tempfile import NamedTemporaryFile
+
 from fastapi import APIRouter, status
 from fastapi.responses import (
+    FileResponse,
     HTMLResponse,
     JSONResponse,
-    PlainTextResponse,
     Response,
     StreamingResponse,
 )
@@ -44,12 +46,11 @@ async def test_set_distribution() -> Response:
         )
 
 
-@router.get("/xport", response_class=PlainTextResponse)
-async def test_set_xport() -> PlainTextResponse:
-    text = str(SampleInterface.testSet.headings).strip("[]")
-    for row in SampleInterface.testSet.rows:
-        text += "\n" + str(row).strip("[]")
-    return PlainTextResponse(text)
+@router.get("/xport", response_class=FileResponse)
+async def test_set_xport() -> FileResponse:
+    tmp = NamedTemporaryFile(delete=False)
+    SampleInterface.testSet.export_to_csv(tmp.name)
+    return FileResponse(tmp.name, media_type="text/csv")
 
 
 @router.get("/reset")

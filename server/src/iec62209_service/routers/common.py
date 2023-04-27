@@ -7,7 +7,7 @@ from iec62209.plot import (
     plot_sample_distribution,
     plot_sample_marginals,
 )
-from iec62209.work import Model, Work, add_zvar, load_measured_sample
+from iec62209.work import Model, Work, add_zvar, load_measured_sample, save_sample
 from matplotlib import pyplot as plt
 from pandas import DataFrame
 from pydantic import BaseModel
@@ -78,6 +78,15 @@ class DataSetInterface:
     def to_dict(self) -> dict:
         return self.__dict__()
 
+    def add_columns(self, cols: list[str]):
+        if self.sample is None:
+            raise Exception("Sample data not present")
+        for col in cols:
+            self.headings.append(col)
+            self.sample.data[col] = 0
+            for row in self.rows:
+                row.append(0)
+
     def generate(self, config: SampleConfig):
         self.config = SampleConfig()
         w = Work()
@@ -143,6 +152,9 @@ class DataSetInterface:
             raise Exception("Sample not loaded")
         fig = plot_sample_distribution(self.sample)
         return fig2png(fig)
+
+    def export_to_csv(self, filename):
+        save_sample(self.sample, filename)
 
 
 ### Interfaces to publication-IEC62209
@@ -328,6 +340,7 @@ class ModelInterface:
         cls.work.explore(iters, show=False, save_to=None)
         critsample = cls.work.data["critsample"]
         critsample.data = critsample.data[critsample.data["pass"] > 0.05]
+        critsample.data["pass"] = critsample.data["pass"].apply(lambda x: x * 100.0)
         critsample.data = critsample.data.drop("sard10g", axis=1)
         critsample.data = critsample.data.drop("err", axis=1)
         SampleInterface.criticalSet = DataSetInterface.from_dataframe(critsample)
