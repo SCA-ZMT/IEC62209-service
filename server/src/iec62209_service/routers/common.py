@@ -246,9 +246,32 @@ class ModelInterface:
     @classmethod
     def load_critical_sample(cls, filename) -> dict:
         cls.raise_if_no_model()
-        cls.work.init_critsample()
-        cls.work.data["critsample"] = Sample.from_csv(filename)
-        SampleInterface.criticalSet.from_dataframe(cls.work.data["critsample"].data)
+        tmp = NamedTemporaryFile()
+        try:
+            measured = load_measured_sample(filename)
+            add_zvar(measured, "10g")
+            measured.to_csv(tmp.name)
+            cls.work.init_critsample()
+            xvar = [
+                "frequency",
+                "power",
+                "par",
+                "bandwidth",
+                "distance",
+                "angle",
+                "x",
+                "y",
+            ]
+            cls.work.data["critsample"] = Sample.from_csv(
+                tmp.name, xvar=xvar, zvar=["sard10g"]
+            )
+            SampleInterface.criticalSet = DataSetInterface.from_dataframe(
+                cls.work.data["critsample"]
+            )
+        finally:
+            ...
+            # remove(tmp.name)
+        return SampleInterface.criticalSet.to_dict()
 
     @classmethod
     def get_metadata(cls) -> ModelMetadata:
@@ -357,6 +380,6 @@ class ModelInterface:
         critsample.data["pass"] = critsample.data["pass"].apply(lambda x: x * 100.0)
         critsample.data = critsample.data.drop("sard10g", axis=1)
         critsample.data = critsample.data.drop("err", axis=1)
-        names = critsample.data.columns
         SampleInterface.criticalSet = DataSetInterface.from_dataframe(critsample)
+        SampleInterface.criticalSet.add_columns(["sar10g", "u10g"])
         return SampleInterface.criticalSet.to_dict()
