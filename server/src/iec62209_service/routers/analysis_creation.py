@@ -1,16 +1,30 @@
+from importlib.resources import files
 from json import dumps as jdumps
+from pathlib import Path
+from subprocess import PIPE, run
+from tempfile import TemporaryDirectory
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import (
+    FileResponse,
     JSONResponse,
     PlainTextResponse,
     Response,
     StreamingResponse,
 )
 
+from .. import reports
 from .common import ModelInterface, ModelMetadata, SampleInterface
 
 router = APIRouter(prefix="/analysis-creation", tags=["analysis-creation"])
+
+
+def create_temp_folder():
+    tmpdir = TemporaryDirectory(ignore_cleanup_errors=True)
+    try:
+        yield tmpdir
+    finally:
+        tmpdir.cleanup()
 
 
 @router.get("/reset", response_class=Response)
@@ -81,4 +95,24 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     return PlainTextResponse(
         response, media_type="application/json", status_code=end_status
+    )
+
+
+@router.post("/pdf", response_class=Response)
+async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
+
+    with open(Path(tmp.name) / "report.tex", "w") as tex:
+        tex.write(files(reports).joinpath("gpi-creation.tex").read_text())
+
+    rerun = True
+    while rerun:
+        proc = run(
+            ["pdflatex", "-interaction=nonstopmode", "report.tex"],
+            cwd=tmp.name,
+            stdout=PIPE,
+        )
+        rerun = proc.stdout.find(b"Rerun") != -1
+
+    return FileResponse(
+        (Path(tmp.name) / "report.pdf").as_posix(), media_type="application/pdf"
     )
