@@ -73,6 +73,8 @@ async def analysis_creation_deviations():
 async def analysis_creation_marginals():
     try:
         ModelInterface.raise_if_no_model()
+        buf = ModelInterface.plot_initsample_marginals()
+        return StreamingResponse(buf, media_type="image/png")
     except Exception as e:
         return Response(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR

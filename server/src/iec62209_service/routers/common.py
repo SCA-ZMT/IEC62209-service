@@ -2,6 +2,7 @@ from enum import Enum
 from math import fabs
 from tempfile import NamedTemporaryFile
 
+from iec62209.plot import plot_sample_marginals
 from iec62209.work import Model, Work, add_zvar, load_measured_sample
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
@@ -226,6 +227,14 @@ class ModelInterface:
             fig = model.plot_variogram(ax=ax)
             return cls.fig2png(fig)
 
+    @classmethod
+    def plot_initsample_marginals(cls):
+        if not cls.has_init_sample():
+            raise Exception("Training sample not loaded")
+        sample = cls.work.data.get("initsample")
+        fig = plot_sample_marginals(sample)
+        return cls.fig2png(fig)
+
     @staticmethod
     def acceptance_criteria(data: DataSetInterface) -> bool:
         dataok = True
@@ -276,8 +285,8 @@ class ModelInterface:
             raise Exception("Residuals have not been calculated")
         swres, qqres = cls.work.resid_test(cls.residuals)
         return {
-            "Acceptance criteria": str(swres[0]),
-            "p-value": f"{swres[1]:.3f}",
+            "Acceptance criteria": "Pass" if swres[0] else "Fail",
+            "Normality": f"{swres[1]:.3f}",
             "QQ location": f"{qqres[1]:.3f}",
             "QQ scale": f"{qqres[2]:.3f}",
         }
@@ -290,7 +299,10 @@ class ModelInterface:
         return cls.fig2png(fig)
 
     @classmethod
-    def explore_space(cls, iters: int = 2):
+    def explore_space(cls, iters: int = 2) -> dict:
         cls.raise_if_no_model()
         cls.work.explore(iters, show=False, save_to=None)
-        return cls.work.data["critsample"].data.values.tolist()
+        return {
+            "headings": cls.work.data["critsample"].data.columns.tolist(),
+            "rows": cls.work.data["critsample"].data.values.tolist(),
+        }
