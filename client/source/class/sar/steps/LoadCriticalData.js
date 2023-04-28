@@ -21,7 +21,10 @@ qx.Class.define("sar.steps.LoadCriticalData", {
   members: {
     // overriden
     _getDescriptionText: function() {
-      return "Load Critical Data"
+      return "\
+        Complete the SAR measurements on the measurement system using the exported file from the 'Search Space' window, \
+        and fill in the sar10g and u10g fields. Then load this data using the button below.\
+      "
     },
 
     // overriden

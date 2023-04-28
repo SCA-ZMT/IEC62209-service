@@ -23,6 +23,8 @@ qx.Class.define("sar.steps.Verify", {
     // overriden
     _getDescriptionText: function() {
       return "\
+        Select the 'Verify' button to evaluate whether the critical test set passes the acceptance criteria in IEC 62209-3. \
+        Then select 'Generate Report' to export a PDF report of the findings.\
       "
     },
 

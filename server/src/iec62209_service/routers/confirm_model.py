@@ -1,6 +1,12 @@
-from fastapi import APIRouter, status
-from fastapi.responses import JSONResponse, Response, StreamingResponse
+from importlib.resources import files
+from os import mkdir
+from pathlib import Path
+from shutil import copyfile
 
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+
+from ..reports import texutils
 from ..utils.common import ModelInterface, SampleInterface
 
 router = APIRouter(prefix="/confirm-model", tags=["confirm-model"])
@@ -14,7 +20,14 @@ async def confirm_model() -> JSONResponse:
         # storing these for later
         if not ModelInterface.compute_residuals():
             raise Exception("Error computing residuals")
-        response = ModelInterface.residuals_test()
+        (swres, qqres) = ModelInterface.residuals_test()
+        response = {
+            "Acceptance criteria": "Pass" if swres[0] else "Fail",
+            "Normality": f"{swres[1]:.3f}",
+            "QQ location": f"{qqres[1]:.3f}",
+            "QQ scale": f"{qqres[2]:.3f}",
+        }
+
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -42,3 +55,72 @@ async def confirm_model_deviations() -> Response:
         return Response(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@router.get("/pdf", response_class=Response)
+async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
+    from .. import reports
+    from ..reports import tables
+    from ..reports.texutils import typeset
+
+    texpath = Path(tmp.name)
+
+    # images
+
+    imgpath = texpath / "images"
+    mkdir(imgpath.as_posix())
+
+    with open(imgpath / "model-confirm-acceptance.png", "wb") as img:
+        img.write(SampleInterface.testSet.plot_deviations().getvalue())
+
+    with open(imgpath / "model-confirm-qqplot.png", "wb") as img:
+        img.write(ModelInterface.plot_residuals().getvalue())
+
+    # tables
+
+    accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.testSet)
+    (swres, qqres) = ModelInterface.residuals_test()
+    percent: float = 100 * swres[1]
+    location: float = qqres[1]
+    scale: float = qqres[2]
+
+    with open(texpath / "metadata.tex", "w") as fout:
+        fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
+
+    with open(texpath / "summary.tex", "w") as fout:
+        fout.write(
+            tables.write_confirmation_summary_tex(accepted, percent, location, scale)
+        )
+
+    with open(texpath / "sample_parameters.tex", "w") as fout:
+        fout.write(
+            tables.write_sample_parameters_tex(
+                SampleInterface.testSet.config, texutils.ReportStage.CONFIRMATION
+            )
+        )
+
+    with open(texpath / "acceptance.tex", "w") as fout:
+        fout.write(tables.write_sample_acceptance_tex(accepted))
+
+    with open(texpath / "normality.tex", "w") as fout:
+        fout.write(tables.write_normality_tex(percent))
+
+    with open(texpath / "similarity.tex", "w") as fout:
+        fout.write(tables.write_similarity_tex(location, scale))
+
+    with open(texpath / "sample_table.tex", "w") as fout:
+        fout.write(
+            tables.write_sample_table_tex(
+                SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
+            )
+        )
+
+    # typeset report
+
+    mainres = files(reports).joinpath("confirmation.tex")
+    maintex = "report.tex"
+    copyfile(mainres, texpath / maintex)
+
+    mainpdf = texpath / typeset(texpath, maintex)
+
+    return FileResponse(mainpdf, media_type="application/pdf")

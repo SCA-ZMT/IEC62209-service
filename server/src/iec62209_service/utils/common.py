@@ -1,5 +1,6 @@
 from enum import Enum
 from math import fabs
+from os import remove
 from tempfile import NamedTemporaryFile
 
 from iec62209.plot import (
@@ -17,6 +18,8 @@ from iec62209.work import (
 )
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
+
+plt.rc("font", size=14)
 
 
 class SarFiltering(str, Enum):
@@ -231,9 +234,8 @@ class ModelInterface:
                 "Please make sure that numbers are not formatted (e.g. to percentages)"
             )
         finally:
-            # SCA: Make it Windows compatible
-            # remove(tmp.name)
-            ...
+            remove(tmp.name)
+
         if not cls.has_init_sample():
             raise Exception("Failed to load sample")
         if sample.data.values.size == 0:
@@ -245,8 +247,20 @@ class ModelInterface:
 
     @classmethod
     def load_test_sample(cls, filename) -> dict:
-        sample = cls.work.load_test_sample(filename, "sard10g")
-        SampleInterface.testSet = DataSetInterface.from_dataframe(sample)
+        tmp = NamedTemporaryFile(delete=False)
+        try:
+            measured = load_measured_sample(filename)
+            add_zvar(measured, "10g")
+            measured.to_csv(tmp.name)
+            sample = cls.work.load_test_sample(tmp.name, "sard10g")
+            SampleInterface.testSet = DataSetInterface.from_dataframe(sample)
+        except TypeError:
+            raise Exception(
+                "Please make sure that numbers are not formatted (e.g. to percentages)"
+            )
+        finally:
+            remove(tmp.name)
+
         if not cls.has_test_sample():
             raise Exception("Failed to load sample")
         if sample.data.values.size == 0:
@@ -282,8 +296,7 @@ class ModelInterface:
                 cls.work.data["critsample"]
             )
         finally:
-            ...
-            # remove(tmp.name)
+            remove(tmp.name)
         return SampleInterface.criticalSet.to_dict()
 
     @classmethod
@@ -360,17 +373,12 @@ class ModelInterface:
         return True
 
     @classmethod
-    def residuals_test(cls) -> dict:
+    def residuals_test(cls) -> tuple:
         cls.raise_if_no_model()
         if len(cls.residuals) == 0:
             raise Exception("Residuals have not been calculated")
         swres, qqres = cls.work.resid_test(cls.residuals)
-        return {
-            "Acceptance criteria": "Pass" if swres[0] else "Fail",
-            "Normality": f"{swres[1]:.3f}",
-            "QQ location": f"{qqres[1]:.3f}",
-            "QQ scale": f"{qqres[2]:.3f}",
-        }
+        return (swres, qqres)
 
     @classmethod
     def plot_residuals(cls):
