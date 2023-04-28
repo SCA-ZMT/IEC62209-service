@@ -134,6 +134,10 @@ qx.Class.define("sar.steps.Verify", {
       this.__populateDeviationsImage();
     },
 
+    resetResults: function() {
+      this.__deviationsImage.resetSource();
+    },
+
     __populateDeviationsImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("verify");
       this.__deviationsImage.setSource(endpoints["getDeviations"].url);

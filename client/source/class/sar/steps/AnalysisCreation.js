@@ -211,6 +211,12 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       this.__populateDeviationsImage();
     },
 
+    resetResults: function() {
+      this.__semivariogramImage.resetSource();
+      this.__marginalsImage.resetSource();
+      this.__deviationsImage.resetSource();
+    },
+
     __populateSemivariogramImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
       this.__semivariogramImage.setSource(endpoints["getSemivariogram"].url);

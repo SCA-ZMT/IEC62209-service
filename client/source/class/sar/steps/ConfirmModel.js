@@ -220,6 +220,11 @@ qx.Class.define("sar.steps.ConfirmModel", {
       this.__populateDeviationsImage();
     },
 
+    resetResults: function() {
+      this.__qqImage.resetSource();
+      this.__deviationsImage.resetSource();
+    },
+
     __populateQQImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("confirmModel");
       this.__qqImage.setSource(endpoints["getQQPlot"].url);

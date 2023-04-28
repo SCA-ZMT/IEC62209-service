@@ -16,6 +16,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
 
   members: {
     __modelViewer: null,
+    __criticalsValue: null,
     __exportButton: null,
     __distributionImage: null,
 
@@ -36,6 +37,17 @@ qx.Class.define("sar.steps.ExploreSpace", {
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true);
       optionsLayout.add(modelViewer);
 
+      const stepGrid = new qx.ui.layout.Grid(20, 20);
+      stepGrid.setColumnFlex(0, 1);
+      stepGrid.setColumnFlex(1, 1);
+      stepGrid.setRowFlex(0, 0);
+      stepGrid.setRowFlex(1, 1);
+      stepGrid.setColumnMinWidth(0, 200);
+      const stepGridLayout = new qx.ui.container.Composite(stepGrid).set({
+        allowGrowX: false
+      });
+      optionsLayout.add(stepGridLayout);
+
       const searchButton = new sar.widget.FetchButton("Search");
       searchButton.addListener("execute", () => {
         searchButton.setFetching(true);
@@ -45,7 +57,36 @@ qx.Class.define("sar.steps.ExploreSpace", {
           .finally(() => searchButton.setFetching(false));
         
       });
-      optionsLayout.add(searchButton);
+      stepGridLayout.add(searchButton, {
+        row: 0,
+        column: 0
+      });
+
+      const resultsGrid = new qx.ui.layout.Grid(10, 10);
+      const resultsLayout = new qx.ui.container.Composite(resultsGrid).set({
+        allowGrowX: false
+      });
+      // titles
+      const criticalsTitle = new qx.ui.basic.Label().set({
+        value: "Critical test conditions found:",
+        alignX: "right",
+        alignY: "middle",
+        textAlign: "right",
+      });
+      resultsLayout.add(criticalsTitle, {
+        row: 0,
+        column: 0
+      });
+      // values
+      const criticalsValue = this.__criticalsValue = new qx.ui.basic.Label();
+      resultsLayout.add(criticalsValue, {
+        row: 0,
+        column: 1
+      });
+      stepGridLayout.add(resultsLayout, {
+        row: 0,
+        column: 1
+      });
 
       const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Critical tests").set({
         enabled: false
@@ -97,6 +138,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
 
     __spaceSearched: function(data) {
       this.__exportButton.setEnabled(true);
+      this.__criticalsValue.setValue((data && "rows" in data) ? data["rows"].length.toString() : "0");
       this.__fetchResults(data);
     },
 

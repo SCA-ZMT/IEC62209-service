@@ -68,15 +68,19 @@ qx.Class.define("sar.widget.InfoPage", {
           this._add(control);
           break;
         case "link-publication":
-          control = this.self().linkLabel("- Link to the Publication", "https://github.com/ITISFoundation/publication-IEC62209");
+          control = this.self().linkLabel("- Link to the Publication", "https://arxiv.org/abs/2211.12907");
+          this._add(control);
+          break;
+        case "link-publication-repo":
+          control = this.self().linkLabel("- Link to the Publication repository", "https://github.com/ITISFoundation/publication-IEC62209");
           this._add(control);
           break;
         case "link-documentation":
-          control = this.self().linkLabel("- Link to the Documentation", "https://raw.githubusercontent.com/ITISFoundation/IEC62209-service/main/assets/Documentation.pdf");
+          control = this.self().linkLabel("- Link to the Documentation", "https://github.com/ITISFoundation/IEC62209-service/blob/main/assets/Documenation.pdf");
           this._add(control);
           break;
         case "link-samples":
-          control = this.self().linkLabel("- Link to the Samples", "https://raw.githubusercontent.com/ITISFoundation/IEC62209-service/main/assets/Samples.zip");
+          control = this.self().linkLabel("- Link to the Samples", "https://github.com/ITISFoundation/IEC62209-service/blob/main/assets/Samples.zip");
           this._add(control);
           break;
         case "contact-email": {
@@ -98,6 +102,7 @@ qx.Class.define("sar.widget.InfoPage", {
       this.getChildControl("subtitle");
       this.getChildControl("description");
       this.getChildControl("link-publication");
+      this.getChildControl("link-publication-repo");
       this.getChildControl("link-documentation");
       this.getChildControl("link-samples");
       this.getChildControl("contact-email");

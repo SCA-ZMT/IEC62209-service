@@ -240,6 +240,9 @@ qx.Class.define("sar.widget.MainView", {
 
     __trainingDataSet: function(trainingData) {
       this.__analysisCreation.stepButton.setEnabled(Boolean(trainingData));
+      if (trainingData === null) {
+        this.__analysisCreation.resetResults();
+      }
     },
 
     __modelSet: function(model) {
@@ -265,10 +268,16 @@ qx.Class.define("sar.widget.MainView", {
 
     __testDataSet: function(testData) {
       this.__confirmModel.stepButton.setEnabled(Boolean(testData));
+      if (testData === null) {
+        this.__confirmModel.resetResults();
+      }
     },
 
     __criticalDataSet: function(criticalData) {
       this.__verify.stepButton.setEnabled(Boolean(criticalData));
+      if (criticalData === null) {
+        this.__verify.resetResults();
+      }
     }
   }
 });
