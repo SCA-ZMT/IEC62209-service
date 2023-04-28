@@ -3,7 +3,6 @@ from json import dumps as jdumps
 from os import mkdir
 from pathlib import Path
 from shutil import copyfile
-from tempfile import TemporaryDirectory
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import (
@@ -14,18 +13,10 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from .. import reports
+from ..reports import texutils
 from ..utils.common import Goodfit, ModelInterface, ModelMetadata, SampleInterface
 
 router = APIRouter(prefix="/analysis-creation", tags=["analysis-creation"])
-
-
-def create_temp_folder():
-    tmp = TemporaryDirectory(ignore_cleanup_errors=True)
-    try:
-        yield tmp
-    finally:
-        tmp.cleanup()
 
 
 @router.get("/reset", response_class=Response)
@@ -109,7 +100,8 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
 
 
 @router.get("/pdf", response_class=Response)
-async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
+async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
+    from .. import reports
     from ..reports import tables
     from ..reports.texutils import typeset
 
@@ -138,17 +130,17 @@ async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
         fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
 
     with open(texpath / "summary.tex", "w") as fout:
-        fout.write(tables.write_model_creation_summary_tex(ModelInterface.goodfit))
+        fout.write(tables.write_creation_summary_tex(ModelInterface.goodfit))
 
     with open(texpath / "sample_parameters.tex", "w") as fout:
         fout.write(
-            tables.write_sample_parameters_tex(SampleInterface.trainingSet.config)
+            tables.write_sample_parameters_tex(
+                SampleInterface.trainingSet.config, texutils.ReportStage.CREATION
+            )
         )
 
     with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(
-            tables.write_model_creation_acceptance_tex(ModelInterface.goodfit.accept)
-        )
+        fout.write(tables.write_sample_acceptance_tex(ModelInterface.goodfit.accept))
 
     with open(texpath / "gfres.tex", "w") as fout:
         fout.write(tables.write_model_fitting_tex(ModelInterface.goodfit.gfres))
