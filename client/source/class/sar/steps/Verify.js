@@ -94,7 +94,7 @@ qx.Class.define("sar.steps.Verify", {
           .finally(() => verifyButton.setFetching(false));
       });
 
-      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("verify");
+      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("verify", "VerificationReport.pdf");
       stepLayout.add(reportButton, {
         row,
         column: 0,

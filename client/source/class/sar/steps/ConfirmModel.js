@@ -155,7 +155,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
       });
       row++;
 
-      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("confirmModel");
+      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("confirmModel", "ModelConfirmationReport.pdf");
       stepLayout.add(reportButton, {
         row,
         column: 0,

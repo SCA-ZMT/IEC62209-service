@@ -139,6 +139,17 @@ qx.Class.define("sar.steps.Utils", {
       a.click();
     },
 
+    downloadPDF: function (data, filename) {
+      const blob = new Blob([data], {
+        type: "application/pdf"
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("href", url);
+      a.setAttribute("download", filename);
+      a.click();
+    },
+
     downloadJson: function (data, filename) {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
       const a = document.createElement("a");
@@ -419,14 +430,14 @@ qx.Class.define("sar.steps.Utils", {
       return image;
     },
 
-    createGenerateReportButton: function(resourceName) {
+    createGenerateReportButton: function(resourceName, filename) {
       const button = new sar.widget.FetchButton("Generate Report").set({
         enabled: false
       });
       button.addListener("execute", () => {
         button.setFetching(true);
         sar.io.Resources.fetch(resourceName, "getReport")
-          .then(data => console.log(data))
+          .then(data => sar.steps.Utils.downloadPDF(data, filename))
           .catch(err => console.error(err))
           .finally(() => button.setFetching(false));
       });

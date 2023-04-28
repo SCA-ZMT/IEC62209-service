@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.responses import JSONResponse, Response
 
-from ..utils.common import IsLoaded, ModelInterface, ModelMetadata, SampleInterface
+from ..utils.common import IsLoaded, ModelInterface, SampleInterface
 
 router = APIRouter(prefix="/model", tags=["model"])
 
@@ -22,8 +22,7 @@ async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
 
         ModelInterface.raise_if_no_model()
 
-        meta = ModelInterface.get_metadata()
-        loaded = ModelMetadata(**meta)
+        loaded = ModelInterface.get_metadata()
         # fix filename
         loaded.filename = file.filename
         metadata = loaded.dict()
