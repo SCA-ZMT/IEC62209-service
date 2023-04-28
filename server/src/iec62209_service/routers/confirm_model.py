@@ -109,7 +109,11 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
         fout.write(tables.write_similarity_tex(location, scale))
 
     with open(texpath / "sample_table.tex", "w") as fout:
-        fout.write(tables.write_sample_table_tex(SampleInterface.testSet))
+        fout.write(
+            tables.write_sample_table_tex(
+                SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
+            )
+        )
 
     # typeset report
 

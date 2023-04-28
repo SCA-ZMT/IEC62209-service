@@ -56,8 +56,20 @@ def write_confirmation_summary_tex(accepted: bool, percent: float, location: flo
     ]
     return '\n'.join(lines)
 
+def write_verification_summary_tex(accepted: bool) -> str:
+    res = "Pass" if accepted else "Fail"
+    lines = [
+        r"\begin{table}[ht]\centering",
+        r"\begin{tabular}{|l|c|c|c|}\hline",
+        r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcomes} & \textbf{Pass / Fail} \\\hline",
+        r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Table~\ref{tab:test}& \textbf{" + res + r"} \\\hline",
+        r"\end{tabular}\caption{Summary of the critical data space search outcomes for the measurement system described in Table~\ref{tab:system}.} \label{tab:summary}",
+        r"\end{table}"
+    ]
+    return '\n'.join(lines)
+
 def write_sample_parameters_tex(cfg: SampleConfig, stage: ReportStage) -> str:
-    stagestring = "relevant" if stage == ReportStage.CREATION else "confirmed"
+    stagestring = "relevant" if stage == ReportStage.CREATION else ("confirmed" if stage == ReportStage.CONFIRMATION else "critically examined")
     lines = [
         r"\begin{table}[h!]\centering",
         r"\begin{tabular}{|l|c|}\hline",
@@ -122,16 +134,21 @@ def write_similarity_tex(location: float, scale: float) -> str:
     ]
     return '\n'.join(lines)
 
-def write_sample_table_tex(ds: DataSetInterface) -> str:
+def write_sample_table_tex(ds: DataSetInterface, stage: ReportStage) -> str:
+    caption = "Training Data Set for 10-gram average SAR" if stage == ReportStage.CREATION else (
+        "Test configurations and measurement outcomes for 10-gram average SAR" if stage == ReportStage.CONFIRMATION else
+        "Critical Configurations and Measurement Outcomes for 10-gram average SAR"
+    )
+
     lines = [
         r"\begin{center}",
         r"\begin{longtable}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}",
-        r"\caption{Test configurations and measurement outcomes for 10-gram average SAR.} \label{tab:training} \\\hline",
+        r"\caption{" + caption + r".} \label{tab:training} \\\hline",
         r"&	$P_f$	&		&	PAPR	&	BW	&	$s$	&	$\theta$	&	$x$	&	$y$	&	$SAR$	&	$u_{s}$	&	$\Delta SAR$	&	$mpe$	&	Pass \\",
         r"ant.	&	(dB)	&	Mod	&	(dB)	&	(MHz)	&	(mm)	&	(°)	&	(mm)	&	(mm)	&	(W/kg)	&	(\%)	&	(dB)	&	(dB)	&	?	\\\hline",
         r"\endfirsthead",
         r"\multicolumn{14}{c}",
-        r"{{\tablename\ \thetable{} Test configurations and measurement outcomes for 10-gram average SAR -- continued from previous page}} \\\hline",
+        r"{{\tablename\ \thetable{} " + caption + r" -- continued from previous page}} \\\hline",
         r"&	$P_f$	&		&	PAPR	&	BW	&	$s$	&	$\theta$	&	$x$	&	$y$	&	$SAR$	&	$u_{s}$	&	$\Delta SAR$	&	$mpe$	&	Pass \\",
         r"antenna	&	(dB)	&	Mod	&	(dB)	&	(MHz)	&	(mm)	&	(°)	&	(mm)	&	(mm)	&	(W/kg)	&	(\%)	&	(dB)	&	(dB)	&	?	\\\hline",
         r"\endhead",

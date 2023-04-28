@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 class ReportStage(int, Enum):
     CREATION = 0
     CONFIRMATION = 1
-    VALIDATION = 2
+    VERIFICATION = 2
 
 
 def typeset(folder, main: str) -> str:

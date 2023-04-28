@@ -146,7 +146,11 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
         fout.write(tables.write_model_fitting_tex(ModelInterface.goodfit.gfres))
 
     with open(texpath / "sample_table.tex", "w") as fout:
-        fout.write(tables.write_sample_table_tex(SampleInterface.trainingSet))
+        fout.write(
+            tables.write_sample_table_tex(
+                SampleInterface.trainingSet, texutils.ReportStage.CREATION
+            )
+        )
 
     # typeset report
 
