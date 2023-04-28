@@ -222,6 +222,20 @@ qx.Class.define("sar.widget.MainView", {
         });
       }
 
+      const exploreSpace = this.__exploreSpace;
+      if (exploreSpace) {
+        exploreSpace.addListener("criticalsFound", e => {
+          const nCriticals = e.getData();
+          if (nCriticals === 0) {
+            // show passed
+            this.__verify.stepButton.setEnabled(true);
+            this.__verify.setAcceptanceValue("Pass");
+          } else {
+            this.__verify.resetAcceptanceValue();
+          }
+        });
+      }
+
       const loadCriticalData = this.__loadCriticalData;
       if (loadCriticalData) {
         loadCriticalData.addListener("criticalDataSet", e => {

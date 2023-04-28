@@ -15,22 +15,22 @@ qx.Class.define("sar.steps.Verify", {
   extend: sar.steps.StepBase,
 
   members: {
+    __modelViewer: null,
+    __acceptanceValue: null,
     __deviationsImage: null,
     __reportButton: null,
 
     // overriden
     _getDescriptionText: function() {
       return "\
-        Explores the space of the valid model to find the most critical regions of the test space, such that:\
-        <br>- the test cases are pulled toward the most extreme regions of the data pace,\
-        <br>- the test cases exert a repulsive force on each other to ensure even coverage of the critical regions,\
-        <br>- the test cases have meaningful coordinates.\
-        <br><br>The resulting test conditions, with the computed z-values and associated probabilities to pass the mpe value are saved as a csv file.\
       "
     },
 
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
+
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true, false);
+      optionsLayout.add(modelViewer);
 
       const stepGrid = new qx.ui.layout.Grid(20, 20);
       stepGrid.setColumnFlex(0, 1);
@@ -69,7 +69,7 @@ qx.Class.define("sar.steps.Verify", {
         column: 0
       });
       // values
-      const acceptanceValue = new qx.ui.basic.Label();
+      const acceptanceValue = this.__acceptanceValue = new qx.ui.basic.Label();
       sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
       resultsLayout.add(acceptanceValue, {
         row: 0,
@@ -86,7 +86,7 @@ qx.Class.define("sar.steps.Verify", {
         sar.io.Resources.fetch("verify", "verify")
           .then(data => {
             if ("Acceptance criteria" in data) {
-              acceptanceValue.setValue(data["Acceptance criteria"]);
+              this.setAcceptanceValue(data["Acceptance criteria"]);
             }
             this.__criticalDataAnalyzed();
           })
@@ -103,6 +103,18 @@ qx.Class.define("sar.steps.Verify", {
       row++;
 
       return optionsLayout;
+    },
+
+    setAcceptanceValue: function(val) {
+      if (this.__acceptanceValue) {
+        this.__acceptanceValue.setValue(val);
+      }
+    },
+
+    resetAcceptanceValue: function() {
+      if (this.__acceptanceValue) {
+        this.__acceptanceValue.resetValue();
+      }
     },
 
     __createDeviationsView: function() {
@@ -123,6 +135,15 @@ qx.Class.define("sar.steps.Verify", {
       resultsTabView.add(deviationsView);
 
       return resultsLayout;
+    },
+
+    // overriden
+    _applyModel: function(modelMetadata) {
+      if (this.__modelViewer) {
+        this._optionsLayout.remove(this.__modelViewer);
+      }
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true, false);
+      this._optionsLayout.addAt(modelViewer, 0);
     },
 
     __criticalDataAnalyzed: function() {

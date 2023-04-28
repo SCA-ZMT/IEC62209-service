@@ -98,9 +98,11 @@ qx.Class.define("sar.steps.TestSetGeneration", {
         enabled: false
       });
       exportButton.addListener("execute", () => {
+        exportButton.setFetching(true);
         sar.io.Resources.fetch("testSetGeneration", "xport")
           .then(data => this.__testDataExported(data))
-          .catch(err => console.error(err));
+          .catch(err => console.error(err))
+          .finally(() => exportButton.setFetching(false));
       });
       optionsLayout.add(exportButton);
 

@@ -261,7 +261,7 @@ qx.Class.define("sar.steps.Utils", {
       return formRenderer;
     },
 
-    modelViewer: function(data, withTitle = false) {
+    modelViewer: function(data, withTitle = false, long = true) {
       const modelViewerGrid = new qx.ui.layout.Grid(10, 10);
       const modelViewerLayout = new qx.ui.container.Composite(modelViewerGrid).set({
         allowGrowX: false
@@ -278,7 +278,7 @@ qx.Class.define("sar.steps.Utils", {
         });
         offset++;
       }
-      [{
+      const dataIds = [{
         id: "filename",
         label: "Filename"
       }, {
@@ -296,13 +296,18 @@ qx.Class.define("sar.steps.Utils", {
       }, {
         id: "softwareVersion",
         label: "Software version"
-      }, {
-        id: "acceptanceCriteria",
-        label: "Acceptance criteria"
-      }, {
-        id: "normalizedRMSError",
-        label: "Norm. RMS Error"
-      }].forEach((entry, idx) => {
+      }];
+      if (long) {
+        dataIds.push({
+          id: "acceptanceCriteria",
+          label: "Acceptance criteria"
+        });
+        dataIds.push({
+          id: "normalizedRMSError",
+          label: "Norm. RMS Error"
+        });
+      }
+      dataIds.forEach((entry, idx) => {
         const titleLabel = new qx.ui.basic.Label(entry.label + ":").set({
           alignX: "right",
           textAlign: "right",

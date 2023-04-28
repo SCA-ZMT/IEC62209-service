@@ -14,6 +14,10 @@
 qx.Class.define("sar.steps.ExploreSpace", {
   extend: sar.steps.StepBase,
 
+  events: {
+    "criticalsFound": "qx.event.type.Data"
+  },
+
   members: {
     __modelViewer: null,
     __criticalsValue: null,
@@ -28,13 +32,14 @@ qx.Class.define("sar.steps.ExploreSpace", {
         <br>- the test cases exert a repulsive force on each other to ensure even coverage of the critical regions,\
         <br>- the test cases have meaningful coordinates.\
         <br><br>The resulting test conditions, with the computed z-values and associated probabilities to pass the mpe value are saved as a csv file.\
+        <br><br>This process can take up to 5 minutes.\
       "
     },
 
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
-      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true);
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true, false);
       optionsLayout.add(modelViewer);
 
       const stepGrid = new qx.ui.layout.Grid(20, 20);
@@ -94,7 +99,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
       exportButton.addListener("execute", () => {
         exportButton.setFetching(true);
         sar.io.Resources.fetch("searchSpace", "xport")
-          .then(() => this.__searchSpaceExported())
+          .then(data => this.__searchSpaceExported(data))
           .catch(err => console.error(err))
           .finally(() => exportButton.setFetching(false));
         
@@ -132,13 +137,20 @@ qx.Class.define("sar.steps.ExploreSpace", {
       if (this.__modelViewer) {
         this._optionsLayout.remove(this.__modelViewer);
       }
-      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true);
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true, false);
       this._optionsLayout.addAt(modelViewer, 0);
     },
 
     __spaceSearched: function(data) {
       this.__exportButton.setEnabled(true);
-      this.__criticalsValue.setValue((data && "rows" in data) ? data["rows"].length.toString() : "0");
+      if (data && "rows" in data) {
+        const nCriticals = data["rows"].length;
+        this.__criticalsValue.setValue(nCriticals.toString());
+        this.fireDataEvent("criticalsFound", nCriticals);
+      } else {
+        this.__criticalsValue.resetValue();
+      }
+
       this.__fetchResults(data);
     },
 
