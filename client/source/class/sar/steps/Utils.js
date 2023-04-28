@@ -436,9 +436,47 @@ qx.Class.define("sar.steps.Utils", {
       });
       button.addListener("execute", () => {
         button.setFetching(true);
+        /*
         sar.io.Resources.fetch(resourceName, "getReport")
           .then(data => sar.steps.Utils.downloadPDF(data, filename))
           .catch(err => console.error(err))
+          .finally(() => button.setFetching(false));
+        */
+        // https://gist.github.com/devloco/5f779216c988438777b76e7db113d05c
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        const endpoints = sar.io.Resources.getEndPoints(resourceName);
+        fetch(endpoints["getReport"].url, {
+          method: "GET",
+          headers: headers
+        })
+          .then(async res => ({
+            filename,
+            blob: await res.blob()
+          }))
+          .then(resObj => {
+            // It is necessary to create a new blob object with mime-type explicitly set for all browsers except Chrome, but it works for Chrome too.
+            const newBlob = new Blob([resObj.blob], {
+              type: "application/pdf"
+            });
+
+            // MS Edge and IE don't allow using a blob object directly as link href, instead it is necessary to use msSaveOrOpenBlob
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+              window.navigator.msSaveOrOpenBlob(newBlob);
+            } else {
+              // For other browsers: create a link pointing to the ObjectURL containing the blob.
+              const objUrl = window.URL.createObjectURL(newBlob);
+
+              let link = document.createElement("a");
+              link.href = objUrl;
+              link.download = resObj.filename;
+              link.click();
+
+              // For Firefox it is necessary to delay revoking the ObjectURL.
+              setTimeout(() => window.URL.revokeObjectURL(objUrl), 250);
+            }
+          })
+          .catch(err => console.errror(err))
           .finally(() => button.setFetching(false));
       });
       return button;
