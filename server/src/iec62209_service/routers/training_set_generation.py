@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 from fastapi import APIRouter, status
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
-from .common import SampleConfig, SampleInterface
+from ..utils.common import SampleConfig, SampleInterface
 
 router = APIRouter(
     prefix="/training-set-generation",

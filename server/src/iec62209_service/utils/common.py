@@ -19,8 +19,6 @@ from matplotlib import pyplot as plt
 from pandas import DataFrame
 from pydantic import BaseModel
 
-### pydantic MODELS
-
 
 class SarFiltering(str, Enum):
     SAR1G = "SAR1G"
@@ -35,6 +33,15 @@ class IsLoaded:
         return {"isloaded": self.isloaded}
 
 
+class Goodfit:
+    def __init__(self, accept: bool, gfres: tuple):
+        self.accept: bool = accept
+        self.gfres: tuple = gfres
+
+
+### pydantic MODELS
+
+
 class SampleConfig(BaseModel):
     fRangeMin: int = 0
     fRangeMax: int = 0
@@ -46,6 +53,7 @@ class SampleConfig(BaseModel):
 class ModelMetadata(BaseModel):
     filename: str = ""
     systemName: str
+    manufacturer: str = ""
     phantomType: str
     hardwareVersion: str
     softwareVersion: str
@@ -321,7 +329,7 @@ class ModelInterface:
         return dataok
 
     @classmethod
-    def goodfit_test(cls) -> dict:
+    def goodfit_test(cls) -> Goodfit:
         if not cls.has_model():
             raise Exception("No model loaded")
 
@@ -329,14 +337,8 @@ class ModelInterface:
         dataok = ModelInterface.acceptance_criteria(initsample)
 
         gfres: tuple = cls.work.goodfit_test()
-        gfok: bool = gfres[0]
 
-        return {
-            "Acceptance criteria": "Pass" if dataok else "Fail",
-            "Normalized RMS error": f"{float((gfres[1]) * 100):.1f} "
-            + ("< 25% " if gfok else "> 25% ")
-            + ("(Pass)" if gfok else "(Fail)"),
-        }
+        return Goodfit(dataok, gfres)
 
     @classmethod
     def goodfit_plot(cls):
