@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.responses import JSONResponse
 
-from ..utils.common import IsLoaded, ModelInterface
+from ..utils.common import ModelInterface
 
 router = APIRouter(prefix="/training-data", tags=["training-data"])
 
@@ -35,8 +35,3 @@ async def training_data_load(
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse(response, status_code=end_status)
-
-
-@router.get("/isloaded", response_class=JSONResponse)
-async def training_data_isloaded():
-    return IsLoaded(ModelInterface.has_init_sample()).to_json()

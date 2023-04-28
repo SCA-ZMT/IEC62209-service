@@ -1,3 +1,4 @@
+from os import remove
 from tempfile import NamedTemporaryFile
 
 from fastapi import APIRouter, File, UploadFile, status
@@ -23,7 +24,14 @@ async def critical_data_load(file: UploadFile = File(...)) -> JSONResponse:
         tmp.write(file.file.read())
         tmp.close()
         response = ModelInterface.load_critical_sample(tmp.name)
-        # remove(tmp.name)
+        remove(tmp.name)
+
+        if not ModelInterface.model_covers_sample(SampleInterface.criticalSet):
+            SampleInterface.criticalSet.clear()
+            raise Exception(
+                "The critical data sample extends outside the range of the model"
+            )
+
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR

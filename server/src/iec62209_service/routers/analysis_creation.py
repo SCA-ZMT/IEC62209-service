@@ -99,9 +99,6 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
         ModelInterface.raise_if_no_model()
         ModelInterface.set_metadata(metadata)
         data = ModelInterface.dump_model_to_json()
-        # data["metadata"] = dict(metadata)
-        if SampleInterface.trainingSet.config.sampleSize > 0:
-            data["metadata"] = metadata | dict(SampleInterface.trainingSet.config)
         response = jdumps(data)
     except Exception as e:
         response = {"error": str(e)}
