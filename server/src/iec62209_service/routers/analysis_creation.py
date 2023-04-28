@@ -6,7 +6,13 @@ from shutil import copyfile
 from tempfile import TemporaryDirectory
 
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
+from fastapi.responses import (
+    FileResponse,
+    JSONResponse,
+    PlainTextResponse,
+    Response,
+    StreamingResponse,
+)
 
 from .. import reports
 from ..utils.common import Goodfit, ModelInterface, ModelMetadata, SampleInterface
