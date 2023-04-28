@@ -1,12 +1,12 @@
-from importlib.resources import as_file, files
+from importlib.resources import files
 from json import dumps as jdumps
+from os import mkdir
 from pathlib import Path
-from subprocess import PIPE, run
+from shutil import copyfile
 from tempfile import TemporaryDirectory
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import (
-    FileResponse,
     JSONResponse,
     PlainTextResponse,
     Response,
@@ -25,17 +25,6 @@ def create_temp_folder():
         yield tmp
     finally:
         tmp.cleanup()
-
-
-def typeset(folder, main: str):
-    rerun = True
-    while rerun:
-        proc = run(
-            ["pdflatex", "-interaction=nonstopmode", main],
-            cwd=folder,
-            stdout=PIPE,
-        )
-        rerun = proc.stdout.find(b"Rerun") != -1
 
 
 @router.get("/reset", response_class=Response)
@@ -107,8 +96,9 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
     end_status = status.HTTP_200_OK
     try:
         ModelInterface.raise_if_no_model()
+        ModelInterface.set_metadata(metadata)
         data = ModelInterface.dump_model_to_json()
-        data["metadata"] = dict(metadata)
+        # data["metadata"] = dict(metadata)
         if SampleInterface.trainingSet.config.sampleSize > 0:
             data["metadata"] = metadata | dict(SampleInterface.trainingSet.config)
         response = jdumps(data)
@@ -121,16 +111,70 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
 
 
 @router.get("/pdf", response_class=Response)
-async def analysis_creation_static_pdf(tmp=Depends(create_temp_folder)) -> Response:
-    mainres = files(reports).joinpath("gpi-creation.tex")
-    with as_file(mainres) as maintex:
-        with open(Path(tmp.name) / "report.tex", "w") as tex:
-            tex.write(maintex.read_text())
-
-    typeset(tmp.name, "report.tex")
-
-    return FileResponse((Path(tmp.name) / "report.pdf"), media_type="application/pdf")
-
-
 async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
-    ...
+    from io import BytesIO
+
+    from ..reports import tables
+    from ..reports.texutils import typeset
+
+    texpath = Path(tmp.name)
+
+    # print images
+
+    imgpath = texpath / "images"
+    mkdir(imgpath.as_posix())
+
+    with open(imgpath / "model-creation-distribution.png", "wb") as img:
+        img.write(SampleInterface.trainingSet.plot_distribution().getvalue())
+
+    with open(imgpath / "model-creation-acceptance.png", "wb") as img:
+        img.write(SampleInterface.trainingSet.plot_deviations().getvalue())
+
+    with open(imgpath / "model-creation-semivariogram.png", "wb") as img:
+        img.write(ModelInterface.plot_model().getvalue())
+
+    with open(imgpath / "model-creation-marginals.png", "wb") as img:
+        img.write(SampleInterface.trainingSet.plot_marginals().getvalue())
+
+    # print tables
+
+    with open(texpath / "metadata.tex", "w") as fout:
+        fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
+
+    with open(texpath / "summary.tex", "w") as fout:
+        fout.write(tables.write_model_creation_summary_tex(ModelInterface.goodfit))
+
+    with open(texpath / "sample_parameters.tex", "w") as fout:
+        fout.write(
+            tables.write_sample_parameters_tex(SampleInterface.trainingSet.config)
+        )
+
+    with open(texpath / "acceptance.tex", "w") as fout:
+        fout.write(
+            tables.write_model_creation_acceptance_tex(ModelInterface.goodfit.accept)
+        )
+
+    with open(texpath / "gfres.tex", "w") as fout:
+        fout.write(tables.write_model_fitting_tex(ModelInterface.goodfit.gfres))
+
+    with open(texpath / "sample_table.tex", "w") as fout:
+        fout.write(tables.write_sample_table_tex(SampleInterface.trainingSet))
+
+    # typeset report
+
+    mainres = files(reports).joinpath("creation.tex")
+    maintex = "report.tex"
+    copyfile(mainres, texpath / maintex)
+
+    buf = None
+    mainpdf = texpath / typeset(texpath, maintex)
+    with open(mainpdf, "rb") as fin:
+        buf = BytesIO(fin.read())
+
+    if buf is not None:
+        return StreamingResponse(buf, media_type="application/pdf")
+
+    return JSONResponse(
+        {"error": "Failed to generate pdf"},
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
