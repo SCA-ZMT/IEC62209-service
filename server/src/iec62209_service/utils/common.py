@@ -34,7 +34,7 @@ class IsLoaded:
 
 
 class Goodfit:
-    def __init__(self, accept: bool, gfres: tuple):
+    def __init__(self, accept: bool = False, gfres: tuple = (False, 0)):
         self.accept: bool = accept
         self.gfres: tuple = gfres
 
@@ -184,6 +184,7 @@ class SampleInterface:
 class ModelInterface:
     work: Work = Work()
     residuals = []
+    goodfit = Goodfit()
 
     @classmethod
     def clear(cls):
@@ -191,6 +192,7 @@ class ModelInterface:
         cls.work.clear_model()
         cls.work.clear_sample()
         cls.residuals = []
+        cls.goodfit = Goodfit()
 
     @classmethod
     def has_init_sample(cls) -> bool:
@@ -282,9 +284,14 @@ class ModelInterface:
         return SampleInterface.criticalSet.to_dict()
 
     @classmethod
+    def set_metadata(cls, md: ModelMetadata):
+        cls.raise_if_no_model()
+        cls.work.data.get("model").metadata = dict(md)
+
+    @classmethod
     def get_metadata(cls) -> ModelMetadata:
         cls.raise_if_no_model()
-        return cls.work.model_metadata()
+        return ModelMetadata.parse_obj(cls.work.model_metadata())
 
     @classmethod
     def dump_model_to_json(cls):
@@ -338,7 +345,8 @@ class ModelInterface:
 
         gfres: tuple = cls.work.goodfit_test()
 
-        return Goodfit(dataok, gfres)
+        cls.goodfit = Goodfit(dataok, gfres)
+        return cls.goodfit
 
     @classmethod
     def goodfit_plot(cls):

@@ -109,7 +109,7 @@ def write_sample_table_tex(ds: DataSetInterface) -> str:
     for row in ds.rows:
         line = "{" + row[idx[0]] + "} & " + \
             f"{row[idx[1]]} & " + \
-            "{" + row[idx[2]] + "} & " + \
+            f"{row[idx[2]]} & " + \
             f"{row[idx[3]]:.3f} & " + \
             f"{row[idx[4]]:.0f} & " + \
             f"{row[idx[5]]:.0f} & " + \
