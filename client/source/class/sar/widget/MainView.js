@@ -245,6 +245,7 @@ qx.Class.define("sar.widget.MainView", {
     __modelSet: function(model) {
       [
         this.__testSetGeneration,
+        this.__loadTestData,
         this.__confirmModel,
         this.__exploreSpace,
         this.__verify,

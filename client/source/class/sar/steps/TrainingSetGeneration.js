@@ -16,15 +16,13 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
 
   members: {
     __exportButton: null,
-    __dataTable: null,
     __distributionImage: null,
 
     // overriden
     _getDescriptionText: function() {
       return "\
-        Generates a random latin hypercube sample with 8 dimensions and saves the results to a .csv file. The 8 test variables are:\
-        <br>Frequency, output power, peak to average power ratio (PAPR), bandwidth (BW), distance (mm), angle (deg), x (mm), and y (mm).\
-        <br><br>When performing the SAR measurements, fill in the SAR (SAR1g and/or SAR10g), and uncertainty (U1g and/or U10g) values. The uncertainty values should be reported with a 95% confidence level (k = 2 standard deviations).\
+        Enter the frequency range, measurement area, and number of samples, then select 'Create Training data'. This will generate the set of test conditions to create the GPI model. These are shown as a list (in the 'Data' tab) and plotted to show the distributions for different dimensions (in the 'Distribution' tab).\
+        <br><br>Click 'Export training data' to export the set to a CSV file. Measure each of these test conditions and fill in the sar10g and u10g columns. The uncertainty values should be reported with a 95% confidence level (k = 2 standard deviations).\
       "
     },
 
@@ -32,6 +30,8 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(20));
 
       const form = new qx.ui.form.Form();
+      sar.steps.Utils.addVPIFASelectBoxToForm(form);
+      sar.steps.Utils.add2PEAKSelectBoxToForm(form);
       form.addGroupHeader("Frequency range (MHz)");
       const fRangeMin = new qx.ui.form.Spinner().set({
         minimum: 300,
@@ -91,16 +91,6 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       return optionsLayout;
     },
 
-    __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.createDataTable();
-      const layout = new qx.ui.layout.VBox();
-      const tabPage = new qx.ui.tabview.Page("Data").set({
-        layout
-      });
-      tabPage.add(dataTable);
-      return tabPage;
-    },
-
     __createDistributionView: function() {
       const distributionImage = this.__distributionImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Distribution", distributionImage);
@@ -115,7 +105,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       });
       resultsLayout.add(resultsTabView);
 
-      const dataView = this.__createDataView();
+      const dataView = this._createDataView();
       resultsTabView.add(dataView);
 
       const distributionView = this.__createDistributionView();
@@ -138,7 +128,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
     },
 
     __popoluateTable: function(data) {
-      sar.steps.Utils.populateDataTable(this.__dataTable, data);
+      sar.steps.Utils.populateDataTable(this._dataTable, data);
     },
 
     __populateDistributionImage: function() {

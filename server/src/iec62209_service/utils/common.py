@@ -254,7 +254,7 @@ class ModelInterface:
     @classmethod
     def load_critical_sample(cls, filename) -> dict:
         cls.raise_if_no_model()
-        tmp = NamedTemporaryFile()
+        tmp = NamedTemporaryFile(delete=False)
         try:
             measured = load_measured_sample(filename)
             add_zvar(measured, "10g")

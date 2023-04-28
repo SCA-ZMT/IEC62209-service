@@ -19,9 +19,20 @@ qx.Class.define("sar.steps.LoadTestData", {
   },
 
   members: {
+    __modelViewer: null,
+
     // overriden
     _getDescriptionText: function() {
       return "Load Test data"
+    },
+
+    _createOptions: function() {
+      const optionsLayout = this.base(arguments);
+
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(null, true);
+      optionsLayout.add(modelViewer);
+
+      return optionsLayout;
     },
 
     // overriden
@@ -34,6 +45,15 @@ qx.Class.define("sar.steps.LoadTestData", {
         }
       });
       return fileInput;
+    },
+
+    // overriden
+    _applyModel: function(modelMetadata) {
+      if (this.__modelViewer) {
+        this._optionsLayout.remove(this.__modelViewer);
+      }
+      const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true);
+      this._optionsLayout.add(modelViewer);
     },
 
     __submitFile: function(file) {

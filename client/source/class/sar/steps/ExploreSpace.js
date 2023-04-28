@@ -17,7 +17,6 @@ qx.Class.define("sar.steps.ExploreSpace", {
   members: {
     __modelViewer: null,
     __exportButton: null,
-    __dataTable: null,
     __distributionImage: null,
 
     // overriden
@@ -64,16 +63,6 @@ qx.Class.define("sar.steps.ExploreSpace", {
       return optionsLayout;
     },
 
-    __createDataView: function() {
-      const dataTable = this.__dataTable = sar.steps.Utils.createDataTable();
-      const layout = new qx.ui.layout.VBox();
-      const tabPage = new qx.ui.tabview.Page("Data").set({
-        layout
-      });
-      tabPage.add(dataTable);
-      return tabPage;
-    },
-
     __createDistributionView: function() {
       const distributionImage = this.__distributionImage = sar.steps.Utils.createImageViewer();
       const tabPage = sar.steps.Utils.createTabPage("Distribution", distributionImage);
@@ -88,7 +77,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
       });
       resultsLayout.add(resultsTabView);
 
-      const dataView = this.__createDataView()
+      const dataView = this._createDataView()
       resultsTabView.add(dataView);
 
       const distributionView = this.__createDistributionView()
@@ -120,7 +109,7 @@ qx.Class.define("sar.steps.ExploreSpace", {
     },
 
     __popoluateTable: function(data) {
-      sar.steps.Utils.populateDataTable(this.__dataTable, data);
+      sar.steps.Utils.populateDataTable(this._dataTable, data);
     },
 
     __populateDistributionImage: function() {
