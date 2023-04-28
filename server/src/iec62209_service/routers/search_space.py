@@ -1,5 +1,7 @@
+from tempfile import NamedTemporaryFile
+
 from fastapi import APIRouter, status
-from fastapi.responses import JSONResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
 from .common import ModelInterface, SampleInterface
 
@@ -26,3 +28,13 @@ async def search_space_distribution() -> Response:
         return JSONResponse(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@router.get("/xport", response_class=FileResponse)
+async def critical_set_xport() -> FileResponse:
+    tmp = NamedTemporaryFile(delete=False)
+    SampleInterface.criticalSet.export_to_csv(tmp.name)
+    with open(tmp.name) as fin:
+        bla = fin.read()
+        print(bla)
+    return FileResponse(tmp.name, media_type="text/csv")
