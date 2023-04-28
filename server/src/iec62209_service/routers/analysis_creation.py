@@ -1,4 +1,4 @@
-from importlib.resources import files
+from importlib.resources import as_file, files
 from json import dumps as jdumps
 from pathlib import Path
 from subprocess import PIPE, run
@@ -14,17 +14,28 @@ from fastapi.responses import (
 )
 
 from .. import reports
-from .common import ModelInterface, ModelMetadata, SampleInterface
+from ..utils.common import Goodfit, ModelInterface, ModelMetadata, SampleInterface
 
 router = APIRouter(prefix="/analysis-creation", tags=["analysis-creation"])
 
 
 def create_temp_folder():
-    tmpdir = TemporaryDirectory(ignore_cleanup_errors=True)
+    tmp = TemporaryDirectory(ignore_cleanup_errors=True)
     try:
-        yield tmpdir
+        yield tmp
     finally:
-        tmpdir.cleanup()
+        tmp.cleanup()
+
+
+def typeset(folder, main: str):
+    rerun = True
+    while rerun:
+        proc = run(
+            ["pdflatex", "-interaction=nonstopmode", main],
+            cwd=folder,
+            stdout=PIPE,
+        )
+        rerun = proc.stdout.find(b"Rerun") != -1
 
 
 @router.get("/reset", response_class=Response)
@@ -39,7 +50,15 @@ async def analysis_creation_create() -> JSONResponse:
         if not ModelInterface.has_init_sample():
             raise Exception("no sample loaded")
         ModelInterface.make_model()
-        response = ModelInterface.goodfit_test()
+        result: Goodfit = ModelInterface.goodfit_test()
+
+        response = {
+            "Acceptance criteria": "Pass" if result.accept else "Fail",
+            "Normalized RMS error": f"{float((result.gfres[1]) * 100):.1f} "
+            + ("< 25% " if result.gfres[0] else "> 25% ")
+            + ("(Pass)" if result.gfres[0] else "(Fail)"),
+        }
+
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -102,20 +121,16 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
 
 
 @router.get("/pdf", response_class=Response)
+async def analysis_creation_static_pdf(tmp=Depends(create_temp_folder)) -> Response:
+    mainres = files(reports).joinpath("gpi-creation.tex")
+    with as_file(mainres) as maintex:
+        with open(Path(tmp.name) / "report.tex", "w") as tex:
+            tex.write(maintex.read_text())
+
+    typeset(tmp.name, "report.tex")
+
+    return FileResponse((Path(tmp.name) / "report.pdf"), media_type="application/pdf")
+
+
 async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
-
-    with open(Path(tmp.name) / "report.tex", "w") as tex:
-        tex.write(files(reports).joinpath("gpi-creation.tex").read_text())
-
-    rerun = True
-    while rerun:
-        proc = run(
-            ["pdflatex", "-interaction=nonstopmode", "report.tex"],
-            cwd=tmp.name,
-            stdout=PIPE,
-        )
-        rerun = proc.stdout.find(b"Rerun") != -1
-
-    return FileResponse(
-        (Path(tmp.name) / "report.pdf").as_posix(), media_type="application/pdf"
-    )
+    ...

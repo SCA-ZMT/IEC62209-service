@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
-from .common import ModelInterface
+from ..utils.common import ModelInterface
 
 router = APIRouter(prefix="/confirm-model", tags=["confirm-model"])
 

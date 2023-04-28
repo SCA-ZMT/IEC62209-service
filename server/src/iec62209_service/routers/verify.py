@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
-from .common import ModelInterface, SampleInterface
+from ..utils.common import ModelInterface, SampleInterface
 
 router = APIRouter(prefix="/verify", tags=["verify"])
 

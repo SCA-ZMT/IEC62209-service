@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.responses import JSONResponse
 
-from .common import IsLoaded, ModelInterface
+from ..utils.common import IsLoaded, ModelInterface
 
 router = APIRouter(prefix="/training-data", tags=["training-data"])
 

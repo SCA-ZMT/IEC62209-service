@@ -9,7 +9,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from .common import SampleConfig, SampleInterface
+from ..utils.common import SampleConfig, SampleInterface
 
 router = APIRouter(
     prefix="/test-set-generation",
