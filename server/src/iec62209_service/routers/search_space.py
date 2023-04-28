@@ -34,7 +34,4 @@ async def search_space_distribution() -> Response:
 async def critical_set_xport() -> FileResponse:
     tmp = NamedTemporaryFile(delete=False)
     SampleInterface.criticalSet.export_to_csv(tmp.name)
-    with open(tmp.name) as fin:
-        bla = fin.read()
-        print(bla)
     return FileResponse(tmp.name, media_type="text/csv")

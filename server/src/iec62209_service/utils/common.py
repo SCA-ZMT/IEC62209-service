@@ -264,7 +264,7 @@ class ModelInterface:
             measured = load_measured_sample(filename)
             add_zvar(measured, "10g")
             measured.to_csv(tmp.name)
-            cls.work.init_critsample()
+            # cls.work.init_critsample()
             xvar = [
                 "frequency",
                 "power",
