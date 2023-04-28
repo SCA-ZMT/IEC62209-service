@@ -25,6 +25,13 @@ async def test_data_load(file: UploadFile = File(...)) -> JSONResponse:
         tmp.close()
         response = ModelInterface.load_test_sample(tmp.name)
         remove(tmp.name)
+
+        if not ModelInterface.model_covers_sample(SampleInterface.testSet):
+            SampleInterface.testSet.clear()
+            raise Exception(
+                "The test data sample extends outside the range of the model"
+            )
+
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.responses import JSONResponse, Response
 
-from ..utils.common import IsLoaded, ModelInterface, SampleInterface
+from ..utils.common import ModelInterface, SampleInterface
 
 router = APIRouter(prefix="/model", tags=["model"])
 
@@ -37,11 +37,6 @@ async def load_model_load(file: UploadFile = File(...)) -> JSONResponse:
         remove(tmp.name)
 
     return JSONResponse(response, status_code=end_status)
-
-
-@router.get("/isloaded", response_class=JSONResponse)
-async def load_model_isloaded() -> JSONResponse:
-    return IsLoaded(ModelInterface.has_model()).to_json()
 
 
 @router.get("/reset", response_class=Response)

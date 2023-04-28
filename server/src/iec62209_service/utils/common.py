@@ -16,21 +16,12 @@ from iec62209.work import (
     save_sample,
 )
 from matplotlib import pyplot as plt
-from pandas import DataFrame
 from pydantic import BaseModel
 
 
 class SarFiltering(str, Enum):
     SAR1G = "SAR1G"
     SAR10G = "SAR10G"
-
-
-class IsLoaded:
-    def __init__(self, ok: bool):
-        self.isloaded: bool = ok
-
-    def to_json(self):
-        return {"isloaded": self.isloaded}
 
 
 class Goodfit:
@@ -43,8 +34,8 @@ class Goodfit:
 
 
 class SampleConfig(BaseModel):
-    fRangeMin: int = 0
-    fRangeMax: int = 0
+    fRangeMin: int = 300
+    fRangeMax: int = 6000
     measAreaX: int = 0
     measAreaY: int = 0
     sampleSize: int = 0
@@ -70,13 +61,14 @@ def fig2png(fig):
     buf = io.BytesIO()
     fig.savefig(buf, format="png")
     buf.seek(0)
+    plt.close(fig)
     return buf
 
 
 class DataSetInterface:
     def __init__(self):
         # headings = ['no.', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
-        self.sample: DataFrame = None
+        self.sample: Sample = None
         self.headings = []
         self.rows = []
         self.config = SampleConfig()
@@ -132,9 +124,10 @@ class DataSetInterface:
         self.config = config
 
     @classmethod
-    def from_dataframe(cls, sample: DataFrame):
+    def from_dataframe(cls, sample: Sample):
         dataset = cls()
         dataset.sample = sample
+
         # we convert to json here to avoid issues when jsonifying numpy data types
         data = dict(sample.to_json()["data"])
         for key in data:
@@ -148,6 +141,11 @@ class DataSetInterface:
             for heading in dataset.headings:
                 row.append(data[heading][n])
             dataset.rows.append(row)
+
+        dataset.config.measAreaX = 2 * sample.mdata["xmax"]
+        dataset.config.measAreaY = 2 * sample.mdata["ymax"]
+        dataset.config.sampleSize = nrows
+
         return dataset
 
     def plot_marginals(self):
@@ -215,6 +213,11 @@ class ModelInterface:
             raise Exception("No model loaded")
 
     @classmethod
+    def model_covers_sample(cls, ds: DataSetInterface) -> bool:
+        cls.raise_if_no_model()
+        return cls.work.data.get("model").contains(ds.sample)
+
+    @classmethod
     def load_init_sample(cls, filename) -> dict:
         tmp = NamedTemporaryFile(delete=False)
         try:
@@ -261,7 +264,7 @@ class ModelInterface:
             measured = load_measured_sample(filename)
             add_zvar(measured, "10g")
             measured.to_csv(tmp.name)
-            cls.work.init_critsample()
+            # cls.work.init_critsample()
             xvar = [
                 "frequency",
                 "power",
@@ -314,14 +317,9 @@ class ModelInterface:
 
     @classmethod
     def plot_model(cls):
-        model = cls.work.data.get("model")
-        if model is not None:
-            _, ax = plt.subplots(2, 1, figsize=(12, 9))
-            plt.subplots_adjust(
-                left=0.07, right=0.95, bottom=0.05, top=0.95, wspace=0.2, hspace=0.2
-            )
-            fig = model.plot_variogram(ax=ax)
-            return fig2png(fig)
+        cls.raise_if_no_model()
+        fig = cls.work.plot_model()
+        return fig2png(fig)
 
     @staticmethod
     def acceptance_criteria(data: DataSetInterface) -> bool:
