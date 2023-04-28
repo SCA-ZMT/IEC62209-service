@@ -123,8 +123,18 @@ async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
 
     imgpath = texpath / "images"
     mkdir(imgpath.as_posix())
+
     with open(imgpath / "model-creation-distribution.png", "wb") as img:
         img.write(SampleInterface.trainingSet.plot_distribution().getvalue())
+
+    with open(imgpath / "model-creation-acceptance.png", "wb") as img:
+        img.write(SampleInterface.trainingSet.plot_deviations().getvalue())
+
+    with open(imgpath / "model-creation-semivariogram.png", "wb") as img:
+        img.write(ModelInterface.plot_model().getvalue())
+
+    with open(imgpath / "model-creation-marginals.png", "wb") as img:
+        img.write(SampleInterface.trainingSet.plot_marginals().getvalue())
 
     # print tables
 
