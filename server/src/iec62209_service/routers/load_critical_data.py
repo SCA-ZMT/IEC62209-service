@@ -1,4 +1,3 @@
-from os import remove
 from tempfile import NamedTemporaryFile
 
 from fastapi import APIRouter, File, UploadFile, status
@@ -24,7 +23,7 @@ async def critical_data_load(file: UploadFile = File(...)) -> JSONResponse:
         tmp.write(file.file.read())
         tmp.close()
         response = ModelInterface.load_critical_sample(tmp.name)
-        remove(tmp.name)
+        # remove(tmp.name)
     except Exception as e:
         response = {"error": str(e)}
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
