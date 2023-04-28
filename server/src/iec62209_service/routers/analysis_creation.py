@@ -6,12 +6,7 @@ from shutil import copyfile
 from tempfile import TemporaryDirectory
 
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import (
-    JSONResponse,
-    PlainTextResponse,
-    Response,
-    StreamingResponse,
-)
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 
 from .. import reports
 from ..utils.common import Goodfit, ModelInterface, ModelMetadata, SampleInterface
@@ -112,8 +107,6 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
 
 @router.get("/pdf", response_class=Response)
 async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
-    from io import BytesIO
-
     from ..reports import tables
     from ..reports.texutils import typeset
 
@@ -166,15 +159,6 @@ async def analysis_creation_pdf(tmp=Depends(create_temp_folder)) -> Response:
     maintex = "report.tex"
     copyfile(mainres, texpath / maintex)
 
-    buf = None
     mainpdf = texpath / typeset(texpath, maintex)
-    with open(mainpdf, "rb") as fin:
-        buf = BytesIO(fin.read())
 
-    if buf is not None:
-        return StreamingResponse(buf, media_type="application/pdf")
-
-    return JSONResponse(
-        {"error": "Failed to generate pdf"},
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    )
+    return FileResponse(mainpdf, media_type="application/pdf")
