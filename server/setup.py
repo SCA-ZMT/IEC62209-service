@@ -38,6 +38,7 @@ SETUP = dict(
     },
     python_requires="~=3.10.0",
     install_requires=INSTALL_REQUIREMENTS,
+    include_package_data=True,
 )
 
 
