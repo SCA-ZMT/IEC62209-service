@@ -27,7 +27,6 @@ qx.Class.define("sar.steps.LoadData", {
   members: {
     _fileInput: null,
     _resetBtn: null,
-    _dataTable: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -64,20 +63,10 @@ qx.Class.define("sar.steps.LoadData", {
       });
       resultsLayout.add(resultsTabView);
 
-      const dataView = this.__createDataView();
+      const dataView = this._createDataView();
       resultsTabView.add(dataView);
 
       return resultsLayout;
-    },
-
-    __createDataView: function() {
-      const dataTable = this._dataTable = this._getDataTable();
-      const layout = new qx.ui.layout.VBox();
-      const tabPage = new qx.ui.tabview.Page("Data").set({
-        layout
-      });
-      tabPage.add(dataTable);
-      return tabPage;
     },
 
     _getDataTable: function() {

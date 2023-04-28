@@ -41,6 +41,7 @@ qx.Class.define("sar.steps.StepBase", {
 
   members: {
     _optionsLayout: null,
+    _dataTable: null,
 
     __builLayout: function() {
       const text = this._getDescriptionText();
@@ -81,6 +82,16 @@ qx.Class.define("sar.steps.StepBase", {
 
     _applyModel: function() {
       return;
-    }
+    },
+
+    _createDataView: function() {
+      const dataTable = this._dataTable = sar.steps.Utils.createDataTable();
+      const layout = new qx.ui.layout.VBox();
+      const tabPage = new qx.ui.tabview.Page("Data").set({
+        layout
+      });
+      tabPage.add(dataTable);
+      return tabPage;
+    },
   }
 });
