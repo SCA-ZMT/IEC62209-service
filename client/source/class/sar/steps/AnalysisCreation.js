@@ -151,7 +151,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       row++;
 
-      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("analysisCreation");
+      const reportButton = this.__reportButton = sar.steps.Utils.createGenerateReportButton("analysisCreation", "ModelCreationReport.pdf");
       stepLayout.add(reportButton, {
         row,
         column: 0,
