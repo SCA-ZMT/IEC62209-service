@@ -39,7 +39,7 @@ async def verify_deviations() -> Response:
 @router.get("/pdf", response_class=Response)
 async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
     from .. import reports
-    from ..reports import tables
+    from ..reports import texwriter
     from ..reports.texutils import typeset
 
     texpath = Path(tmp.name)
@@ -56,25 +56,32 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
 
     accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.criticalSet)
 
+    with open(texpath / "onelinesummary.tex", "w") as fout:
+        fout.write(
+            texwriter.write_one_line_summary(
+                accepted, texutils.ReportStage.VERIFICATION
+            )
+        )
+
     with open(texpath / "metadata.tex", "w") as fout:
-        fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
+        fout.write(texwriter.write_model_metadata_tex(ModelInterface.get_metadata()))
 
     with open(texpath / "summary.tex", "w") as fout:
-        fout.write(tables.write_verification_summary_tex(accepted))
+        fout.write(texwriter.write_verification_summary_tex(accepted))
 
     with open(texpath / "sample_parameters.tex", "w") as fout:
         fout.write(
-            tables.write_sample_parameters_tex(
+            texwriter.write_sample_parameters_tex(
                 SampleInterface.criticalSet.config, texutils.ReportStage.VERIFICATION
             )
         )
 
     with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(tables.write_sample_acceptance_tex(accepted))
+        fout.write(texwriter.write_sample_acceptance_tex(accepted))
 
     with open(texpath / "sample_table.tex", "w") as fout:
         fout.write(
-            tables.write_sample_table_tex(
+            texwriter.write_sample_table_tex(
                 SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
             )
         )

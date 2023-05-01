@@ -102,7 +102,7 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
 @router.get("/pdf", response_class=Response)
 async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
     from .. import reports
-    from ..reports import tables
+    from ..reports import texwriter
     from ..reports.texutils import typeset
 
     texpath = Path(tmp.name)
@@ -127,27 +127,36 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
     # print tables
 
     with open(texpath / "metadata.tex", "w") as fout:
-        fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
+        fout.write(texwriter.write_model_metadata_tex(ModelInterface.get_metadata()))
 
     with open(texpath / "summary.tex", "w") as fout:
-        fout.write(tables.write_creation_summary_tex(ModelInterface.goodfit))
+        fout.write(texwriter.write_creation_summary_tex(ModelInterface.goodfit))
 
     with open(texpath / "sample_parameters.tex", "w") as fout:
         fout.write(
-            tables.write_sample_parameters_tex(
+            texwriter.write_sample_parameters_tex(
                 SampleInterface.trainingSet.config, texutils.ReportStage.CREATION
             )
         )
 
+    accepted = ModelInterface.goodfit.accept
+    gfres = ModelInterface.goodfit.gfres
+    allgood = accepted and gfres[0]
+
+    with open(texpath / "onelinesummary.tex", "w") as fout:
+        fout.write(
+            texwriter.write_one_line_summary(allgood, texutils.ReportStage.CREATION)
+        )
+
     with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(tables.write_sample_acceptance_tex(ModelInterface.goodfit.accept))
+        fout.write(texwriter.write_sample_acceptance_tex(accepted))
 
     with open(texpath / "gfres.tex", "w") as fout:
-        fout.write(tables.write_model_fitting_tex(ModelInterface.goodfit.gfres))
+        fout.write(texwriter.write_model_fitting_tex(gfres))
 
     with open(texpath / "sample_table.tex", "w") as fout:
         fout.write(
-            tables.write_sample_table_tex(
+            texwriter.write_sample_table_tex(
                 SampleInterface.trainingSet, texutils.ReportStage.CREATION
             )
         )

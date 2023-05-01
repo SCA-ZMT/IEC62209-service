@@ -64,7 +64,7 @@ async def confirm_model_deviations() -> Response:
 @router.get("/pdf", response_class=Response)
 async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
     from .. import reports
-    from ..reports import tables
+    from ..reports import texwriter
     from ..reports.texutils import typeset
 
     texpath = Path(tmp.name)
@@ -88,33 +88,45 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
     location: float = qqres[1]
     scale: float = qqres[2]
 
+    allgood = (
+        accepted
+        and percent > 5
+        and (location > -1 and location < 1)
+        and (scale > 0.5 and scale < 1.5)
+    )
+
+    with open(texpath / "onelinesummary.tex", "w") as fout:
+        fout.write(
+            texwriter.write_one_line_summary(allgood, texutils.ReportStage.CONFIRMATION)
+        )
+
     with open(texpath / "metadata.tex", "w") as fout:
-        fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
+        fout.write(texwriter.write_model_metadata_tex(ModelInterface.get_metadata()))
 
     with open(texpath / "summary.tex", "w") as fout:
         fout.write(
-            tables.write_confirmation_summary_tex(accepted, percent, location, scale)
+            texwriter.write_confirmation_summary_tex(accepted, percent, location, scale)
         )
 
     with open(texpath / "sample_parameters.tex", "w") as fout:
         fout.write(
-            tables.write_sample_parameters_tex(
+            texwriter.write_sample_parameters_tex(
                 SampleInterface.testSet.config, texutils.ReportStage.CONFIRMATION
             )
         )
 
     with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(tables.write_sample_acceptance_tex(accepted))
+        fout.write(texwriter.write_sample_acceptance_tex(accepted))
 
     with open(texpath / "normality.tex", "w") as fout:
-        fout.write(tables.write_normality_tex(percent))
+        fout.write(texwriter.write_normality_tex(percent))
 
     with open(texpath / "similarity.tex", "w") as fout:
-        fout.write(tables.write_similarity_tex(location, scale))
+        fout.write(texwriter.write_similarity_tex(location, scale))
 
     with open(texpath / "sample_table.tex", "w") as fout:
         fout.write(
-            tables.write_sample_table_tex(
+            texwriter.write_sample_table_tex(
                 SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
             )
         )
