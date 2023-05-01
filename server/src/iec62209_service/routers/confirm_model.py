@@ -23,9 +23,12 @@ async def confirm_model() -> JSONResponse:
         (swres, qqres) = ModelInterface.residuals_test()
         response = {
             "Acceptance criteria": "Pass" if swres[0] else "Fail",
-            "Normality": f"{swres[1]:.3f}",
-            "QQ location": f"{qqres[1]:.3f}",
-            "QQ scale": f"{qqres[2]:.3f}",
+            "Normality": f"{swres[1]:.3f} "
+            + ("(Pass)" if swres[1] > 0.05 else "(Fail)"),
+            "QQ location": f"{qqres[1]:.3f}"
+            + ("(Pass)" if (qqres[1] > -1 and qqres[1] < 1) else "(Fail)"),
+            "QQ scale": f"{qqres[2]:.3f}"
+            + ("(Pass)" if (qqres[2] > 0.5 and qqres[2] < 1.5) else "(Fail)"),
         }
 
     except Exception as e:
