@@ -8,14 +8,7 @@ from iec62209.plot import (
     plot_sample_distribution,
     plot_sample_marginals,
 )
-from iec62209.work import (
-    Model,
-    Sample,
-    Work,
-    add_zvar,
-    load_measured_sample,
-    save_sample,
-)
+from iec62209.work import Model, Sample, Work, add_zvar, load_measured_sample
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
@@ -70,7 +63,7 @@ def fig2png(fig):
 
 class DataSetInterface:
     def __init__(self):
-        # headings = ['no.', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
+        # headings = ['', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
         self.sample: Sample = None
         self.headings = []
         self.rows = []
@@ -112,17 +105,9 @@ class DataSetInterface:
         values = w.data["sample"].data.values.tolist()
         if not isinstance(headings, list) or not isinstance(values, list):
             raise Exception("Invalid sample generated")
-        need_to_add_ids = False
-        if "no." not in headings:
-            headings = ["no."] + headings
-            need_to_add_ids = True
         self.headings = headings
         self.rows = []
-        idx: int = 1
         for row in values:
-            if need_to_add_ids:
-                row = [idx] + row
-                idx += 1
             self.rows.append(row)
         self.config = config
 
@@ -170,7 +155,7 @@ class DataSetInterface:
         return fig2png(fig)
 
     def export_to_csv(self, filename):
-        save_sample(self.sample, filename)
+        self.sample.data.to_csv(filename, float_format="%.6g", index=False)
 
 
 ### Interfaces to publication-IEC62209
@@ -226,7 +211,7 @@ class ModelInterface:
         try:
             measured = load_measured_sample(filename)
             add_zvar(measured, "10g")
-            measured.to_csv(tmp.name)
+            measured.data.to_csv(tmp.name, float_format="%.6g", index=False)
             sample = cls.work.load_init_sample(tmp.name, "sard10g")
             SampleInterface.trainingSet = DataSetInterface.from_dataframe(sample)
         except TypeError:
@@ -251,7 +236,7 @@ class ModelInterface:
         try:
             measured = load_measured_sample(filename)
             add_zvar(measured, "10g")
-            measured.to_csv(tmp.name)
+            measured.data.to_csv(tmp.name, float_format="%.6g", index=False)
             sample = cls.work.load_test_sample(tmp.name, "sard10g")
             SampleInterface.testSet = DataSetInterface.from_dataframe(sample)
         except TypeError:
@@ -277,7 +262,7 @@ class ModelInterface:
         try:
             measured = load_measured_sample(filename)
             add_zvar(measured, "10g")
-            measured.to_csv(tmp.name)
+            measured.data.to_csv(tmp.name, float_format="%.6g", index=False)
             # cls.work.init_critsample()
             xvar = [
                 "frequency",
@@ -388,11 +373,11 @@ class ModelInterface:
         return fig2png(fig)
 
     @classmethod
-    def explore_space(cls, iters: int = 3) -> dict:
+    def explore_space(cls, iters: int = 12) -> dict:
         cls.raise_if_no_model()
         cls.work.explore(iters, show=False, save_to=None)
         critsample = cls.work.data["critsample"]
-        critsample.data = critsample.data[critsample.data["pass"] > 0.01]
+        critsample.data = critsample.data[critsample.data["pass"] >= 0.05]
         critsample.data["pass"] = critsample.data["pass"].apply(lambda x: x * 100.0)
         critsample.data = critsample.data.drop("sard10g", axis=1)
         critsample.data = critsample.data.drop("err", axis=1)
