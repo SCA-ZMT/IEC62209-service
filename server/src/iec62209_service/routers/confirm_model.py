@@ -21,13 +21,14 @@ async def confirm_model() -> JSONResponse:
         if not ModelInterface.compute_residuals():
             raise Exception("Error computing residuals")
         (swres, qqres) = ModelInterface.residuals_test()
+        accepted = ModelInterface.acceptance_criteria(SampleInterface.testSet)
         response = {
-            "Acceptance criteria": "Pass" if swres[0] else "Fail",
+            "Acceptance criteria": "Pass" if accepted else "Fail",
             "Normality": f"{swres[1]:.3f} "
             + ("(Pass)" if swres[1] > 0.05 else "(Fail)"),
-            "QQ location": f"{qqres[1]:.3f}"
+            "QQ location": f"{qqres[1]:.3f} "
             + ("(Pass)" if (qqres[1] > -1 and qqres[1] < 1) else "(Fail)"),
-            "QQ scale": f"{qqres[2]:.3f}"
+            "QQ scale": f"{qqres[2]:.3f} "
             + ("(Pass)" if (qqres[2] > 0.5 and qqres[2] < 1.5) else "(Fail)"),
         }
 
