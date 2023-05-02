@@ -27,7 +27,8 @@ qx.Class.define("sar.steps.ConfirmModel", {
         <br>- all tests must pass the acceptance criteria (within the mpe)\
         <br>- the Shapiro-Wilk hypothesis p-value, which must be at least 0.05 for the normality to pass,\
         <br>- the QQ location and scale which need to be in the range of [-1, 1] and [0.5, 1.5] respectively for the test to pass.\
-      "
+        <br><br>After pressing the 'Confirm' button, press 'Generate Report' to export a PDF report of the findings.\
+      ";
     },
 
     _createOptions: function() {
@@ -110,16 +111,19 @@ qx.Class.define("sar.steps.ConfirmModel", {
         column: 1
       });
       const normalityValue = new qx.ui.basic.Label();
+      sar.steps.Utils.decoratePassFailLabel(normalityValue);
       resultsLayout.add(normalityValue, {
         row: 1,
         column: 1
       });
       const qqLocationValue = new qx.ui.basic.Label();
+      sar.steps.Utils.decoratePassFailLabel(qqLocationValue);
       resultsLayout.add(qqLocationValue, {
         row: 2,
         column: 1
       });
       const qqScaleValue = new qx.ui.basic.Label();
+      sar.steps.Utils.decoratePassFailLabel(qqScaleValue);
       resultsLayout.add(qqScaleValue, {
         row: 3,
         column: 1

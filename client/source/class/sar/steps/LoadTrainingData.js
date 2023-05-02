@@ -21,7 +21,9 @@ qx.Class.define("sar.steps.LoadTrainingData", {
   members: {
     // overriden
     _getDescriptionText: function() {
-      return "Complete the SAR measurements on the measurement system using the exported file from the 'Training Set Generation' window, and fill in the sar10g and u10g fields. Then load this data using the button below.";
+      return "\
+        Complete the SAR measurements on the measurement system using the exported file from the 'Training Set Generation' window, and fill in the sar10g and u10g fields. Then load this data using the button below.\
+      ";
     },
 
     // overriden

@@ -43,6 +43,32 @@ qx.Class.define("sar.widget.FlashMessage", {
     }
   },
 
+  statics: {
+    popUpFM: function(message, title = "Error") {
+      const flashMessage = new sar.widget.FlashMessage(message);
+      const win = new qx.ui.window.Window(title).set({
+        layout: new qx.ui.layout.VBox(0),
+        contentPadding: 20,
+        resizable: false,
+        showClose: true,
+        showMaximize: false,
+        showMinimize: false,
+        modal: true,
+        width: 500
+      });
+      win.getChildControl("captionbar").set({
+        backgroundColor: "red"
+      });
+      win.add(flashMessage), {
+        flex: 1
+      };
+      win.center();
+      win.open();
+      flashMessage.addListener("closeMessage", () => win.close());
+      setTimeout(() => win.close(), 10000);
+    }
+  },
+
   members: {
     __closeCb: null,
     _createChildControlImpl: function(id) {

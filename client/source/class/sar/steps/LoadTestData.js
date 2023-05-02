@@ -23,7 +23,10 @@ qx.Class.define("sar.steps.LoadTestData", {
 
     // overriden
     _getDescriptionText: function() {
-      return "Load Test data"
+      return "\
+        Press 'Load Test Data...' and search for the CSV file that contains the test set with measured SAR and uncertainty columns filled in.\
+        <br>This automatically calculates the SAR deviations from the measured SAR and the numerical targets in IEC 62209-3, and it calculates the maximum permissible error (mpe) from the uncertainty.\
+      ";
     },
 
     _createOptions: function() {

@@ -11,6 +11,11 @@
 
 ************************************************************************ */
 
+/**
+ * @ignore(fetch)
+ * @ignore(Headers)
+ */
+
 qx.Class.define("sar.steps.Utils", {
   type: "static",
 
@@ -128,6 +133,12 @@ qx.Class.define("sar.steps.Utils", {
       }
     },
 
+    setIdToWidget: function(qWidget, id) {
+      if (qWidget && qWidget.getContentElement) {
+        qWidget.getContentElement().setAttribute("osparc-test-id", id);
+      }
+    },
+
     downloadCSV: function (data, filename) {
       const blob = new Blob([data], {
         type: "text/csv"
@@ -190,28 +201,8 @@ qx.Class.define("sar.steps.Utils", {
           } else {
             const resp = JSON.parse(req.responseText);
             if ("error" in resp) {
-              console.error();
-              const flashMessage = new sar.widget.FlashMessage(resp.error);
-              const win = new qx.ui.window.Window("Error loading data").set({
-                layout: new qx.ui.layout.VBox(0),
-                contentPadding: 20,
-                resizable: false,
-                showClose: true,
-                showMaximize: false,
-                showMinimize: false,
-                modal: true,
-                width: 500
-              });
-              win.getChildControl("captionbar").set({
-                backgroundColor: "red"
-              });
-              win.add(flashMessage), {
-                flex: 1
-              };
-              win.center();
-              win.open();
-              flashMessage.addListener("closeMessage", () => win.close());
-              setTimeout(() => win.close(), 10000);
+              console.error(resp.error);
+              sar.widget.FlashMessage.popUpFM(resp.error, "Error loading data");
             } else {
               console.error(resp);
             }
@@ -455,10 +446,25 @@ qx.Class.define("sar.steps.Utils", {
           method: "GET",
           headers: headers
         })
-          .then(async res => ({
-            filename,
-            blob: await res.blob()
-          }))
+          .then(async res => {
+            if ("status" in res && res.status === 200) {
+              return {
+                filename,
+                blob: await res.blob()
+              }
+            } else {
+              if ("responseText" in res) {
+                const resp = JSON.parse(res.responseText);
+                if ("error" in resp) {
+                  throw resp.error;
+                }
+              }
+              if ("statusText" in res) {
+                throw res.statusText;
+              }
+              throw "Error";
+            }
+          })
           .then(resObj => {
             // It is necessary to create a new blob object with mime-type explicitly set for all browsers except Chrome, but it works for Chrome too.
             const newBlob = new Blob([resObj.blob], {
@@ -481,7 +487,10 @@ qx.Class.define("sar.steps.Utils", {
               setTimeout(() => window.URL.revokeObjectURL(objUrl), 250);
             }
           })
-          .catch(err => console.errror(err))
+          .catch(err => {
+            console.error(err);
+            sar.widget.FlashMessage.popUpFM(err, "Error generating report");
+          })
           .finally(() => button.setFetching(false));
       });
       return button;

@@ -53,17 +53,19 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       form.add(fRangeMax, "Max", null, "fRangeMax");
       sar.steps.Utils.addMeasurementAreaToForm(form);
 
+      form.addGroupHeader(""); // just for adding some padding
       const sampleSize = new qx.ui.form.Spinner().set({
         minimum: 40,
         maximum: 1000,
         value: 400
       });
-      form.add(sampleSize, "Sample size", null, "sampleSize");
+      form.add(sampleSize, "<b>Sample size</b>", null, "sampleSize");
 
       const formRenderer = new qx.ui.form.renderer.Single(form);
       optionsLayout.add(formRenderer);
 
       const createButton = new sar.widget.FetchButton("Create Training data");
+      sar.steps.Utils.setIdToWidget(createButton, "createTrainingSetBtn");
       createButton.addListener("execute", () => {
         createButton.setFetching(true);
         const data = {};
@@ -83,6 +85,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Training data").set({
         enabled: false
       });
+      sar.steps.Utils.setIdToWidget(exportButton, "exportTrainingSetBtn");
       exportButton.addListener("execute", () => {
         exportButton.setFetching(true);
         sar.io.Resources.fetch("trainingSetGeneration", "xport")

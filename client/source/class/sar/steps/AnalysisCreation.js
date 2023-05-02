@@ -24,11 +24,9 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     // overriden
     _getDescriptionText: function() {
       return "\
-        Builds a model and outputs the empirical (blue) and theoretical (red) semi-variogram after rescaling to an isotropic space.\
-        <br>The system analyses geostatistical properties along each direction in the data space, computes an invertible mapping that converts the space to an isotropic one.\
-        <br>The tests evaluate whether:\
-        <br>- the acceptance criteria are met for each measurement,\
-        <br>- the normalized mean squared error (nrsme) is within 0.25 to ensure that the variogram model fits the empirical variances\
+        Press 'Create & Analyze' to create a GPI model from the training data that was loaded in the previous step.\
+        This evaluates the Pass / Fail results for the acceptance criteria (whether all measurements are within the mpe, as shown in the Deviations plot), \
+        and the normalized RMS error of the model (from the Semi-variogram plot), and it creates the Marginals plot as useful information to show how the errors vary with the eight dimensions.\
       "
     },
 
