@@ -105,7 +105,7 @@ def write_sample_acceptance_tex(accepted: bool) -> str:
         r"\begin{table}[h]\centering",
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcome} & \textbf{Pass / Fail} \\\hline",
-        r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Table~\ref{tab:acceptance}& " + res + r" \\\hline",
+        r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Table~\ref{tab:test}& " + res + r" \\\hline",
         r"\end{tabular}\caption{Result for the acceptance criterion.}\label{tab:acceptance}",
         r"\end{table}"
     ]
@@ -158,7 +158,7 @@ def write_sample_table_tex(ds: DataSetInterface, stage: ReportStage) -> str:
     lines = [
         r"\begin{center}",
         r"\begin{longtable}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}",
-        r"\caption{" + caption + r".} \label{tab:training} \\\hline",
+        r"\caption{" + caption + r".} \label{tab:test} \\\hline",
         r"&	$P_f$	&		&	PAPR	&	BW	&	$s$	&	$\theta$	&	$x$	&	$y$	&	$SAR$	&	$u_{s}$	&	$\Delta SAR$	&	$mpe$	&	Pass \\",
         r"ant.	&	(dB)	&	Mod	&	(dB)	&	(MHz)	&	(mm)	&	(°)	&	(mm)	&	(mm)	&	(W/kg)	&	(\%)	&	(dB)	&	(dB)	&	?	\\\hline",
         r"\endfirsthead",
