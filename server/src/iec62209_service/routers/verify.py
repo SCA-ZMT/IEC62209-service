@@ -42,56 +42,64 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
     from ..reports import texwriter
     from ..reports.texutils import typeset
 
-    texpath = Path(tmp.name)
+    try:
+        texpath = Path(tmp.name)
 
-    # images
+        # images
 
-    imgpath = texpath / "images"
-    mkdir(imgpath.as_posix())
+        imgpath = texpath / "images"
+        mkdir(imgpath.as_posix())
 
-    with open(imgpath / "critical-acceptance.png", "wb") as img:
-        img.write(SampleInterface.criticalSet.plot_deviations().getvalue())
+        with open(imgpath / "critical-acceptance.png", "wb") as img:
+            img.write(SampleInterface.criticalSet.plot_deviations().getvalue())
 
-    # tables
+        # tables
 
-    accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.criticalSet)
+        accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.criticalSet)
 
-    with open(texpath / "onelinesummary.tex", "w") as fout:
-        fout.write(
-            texwriter.write_one_line_summary(
-                accepted, texutils.ReportStage.VERIFICATION
+        with open(texpath / "onelinesummary.tex", "w") as fout:
+            fout.write(
+                texwriter.write_one_line_summary(
+                    accepted, texutils.ReportStage.VERIFICATION
+                )
             )
-        )
 
-    with open(texpath / "metadata.tex", "w") as fout:
-        fout.write(texwriter.write_model_metadata_tex(ModelInterface.get_metadata()))
-
-    with open(texpath / "summary.tex", "w") as fout:
-        fout.write(texwriter.write_verification_summary_tex(accepted))
-
-    with open(texpath / "sample_parameters.tex", "w") as fout:
-        fout.write(
-            texwriter.write_sample_parameters_tex(
-                SampleInterface.criticalSet.config, texutils.ReportStage.VERIFICATION
+        with open(texpath / "metadata.tex", "w") as fout:
+            fout.write(
+                texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
             )
-        )
 
-    with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(texwriter.write_sample_acceptance_tex(accepted))
+        with open(texpath / "summary.tex", "w") as fout:
+            fout.write(texwriter.write_verification_summary_tex(accepted))
 
-    with open(texpath / "sample_table.tex", "w") as fout:
-        fout.write(
-            texwriter.write_sample_table_tex(
-                SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
+        with open(texpath / "sample_parameters.tex", "w") as fout:
+            fout.write(
+                texwriter.write_sample_parameters_tex(
+                    SampleInterface.criticalSet.config,
+                    texutils.ReportStage.VERIFICATION,
+                )
             )
+
+        with open(texpath / "acceptance.tex", "w") as fout:
+            fout.write(texwriter.write_sample_acceptance_tex(accepted))
+
+        with open(texpath / "sample_table.tex", "w") as fout:
+            fout.write(
+                texwriter.write_sample_table_tex(
+                    SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
+                )
+            )
+
+        # main tex
+
+        mainres = files(reports).joinpath("verification.tex")
+        maintex = "report.tex"
+        copyfile(mainres, texpath / maintex)
+
+        mainpdf = texpath / typeset(texpath, maintex)
+
+        return FileResponse(mainpdf, media_type="application/pdf")
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    # main tex
-
-    mainres = files(reports).joinpath("verification.tex")
-    maintex = "report.tex"
-    copyfile(mainres, texpath / maintex)
-
-    mainpdf = texpath / typeset(texpath, maintex)
-
-    return FileResponse(mainpdf, media_type="application/pdf")

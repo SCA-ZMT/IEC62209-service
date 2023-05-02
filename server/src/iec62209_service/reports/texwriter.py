@@ -178,9 +178,11 @@ def write_sample_table_tex(ds: DataSetInterface, stage: ReportStage) -> str:
     sardcol = ds.headings.index("sard10g")
     idx = []
     for col in cols:
-        i = ds.headings.index(col)
-        if i < 0:
-            raise Exception(f"Dataset does not contain '{col}'")
+        try:
+            i = ds.headings.index(col)
+            assert(i>=0)
+        except:
+            raise Exception(f"Dataset must contain '{col}'")
         idx.append(i)
     for row in ds.rows:
         line = "{" + row[idx[0]] + "} & " + \

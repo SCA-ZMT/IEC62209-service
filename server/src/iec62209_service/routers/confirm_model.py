@@ -67,76 +67,88 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
     from ..reports import texwriter
     from ..reports.texutils import typeset
 
-    texpath = Path(tmp.name)
+    try:
+        texpath = Path(tmp.name)
 
-    # images
+        # images
 
-    imgpath = texpath / "images"
-    mkdir(imgpath.as_posix())
+        imgpath = texpath / "images"
+        mkdir(imgpath.as_posix())
 
-    with open(imgpath / "model-confirm-acceptance.png", "wb") as img:
-        img.write(SampleInterface.testSet.plot_deviations().getvalue())
+        with open(imgpath / "model-confirm-acceptance.png", "wb") as img:
+            img.write(SampleInterface.testSet.plot_deviations().getvalue())
 
-    with open(imgpath / "model-confirm-qqplot.png", "wb") as img:
-        img.write(ModelInterface.plot_residuals().getvalue())
+        with open(imgpath / "model-confirm-qqplot.png", "wb") as img:
+            img.write(ModelInterface.plot_residuals().getvalue())
 
-    # tables
+        # tables
 
-    accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.testSet)
-    (swres, qqres) = ModelInterface.residuals_test()
-    percent: float = 100 * swres[1]
-    location: float = qqres[1]
-    scale: float = qqres[2]
+        accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.testSet)
+        (swres, qqres) = ModelInterface.residuals_test()
+        percent: float = 100 * swres[1]
+        location: float = qqres[1]
+        scale: float = qqres[2]
 
-    allgood = (
-        accepted
-        and percent > 5
-        and (location > -1 and location < 1)
-        and (scale > 0.5 and scale < 1.5)
-    )
-
-    with open(texpath / "onelinesummary.tex", "w") as fout:
-        fout.write(
-            texwriter.write_one_line_summary(allgood, texutils.ReportStage.CONFIRMATION)
+        allgood = (
+            accepted
+            and percent > 5
+            and (location > -1 and location < 1)
+            and (scale > 0.5 and scale < 1.5)
         )
 
-    with open(texpath / "metadata.tex", "w") as fout:
-        fout.write(texwriter.write_model_metadata_tex(ModelInterface.get_metadata()))
-
-    with open(texpath / "summary.tex", "w") as fout:
-        fout.write(
-            texwriter.write_confirmation_summary_tex(accepted, percent, location, scale)
-        )
-
-    with open(texpath / "sample_parameters.tex", "w") as fout:
-        fout.write(
-            texwriter.write_sample_parameters_tex(
-                SampleInterface.testSet.config, texutils.ReportStage.CONFIRMATION
+        with open(texpath / "onelinesummary.tex", "w") as fout:
+            fout.write(
+                texwriter.write_one_line_summary(
+                    allgood, texutils.ReportStage.CONFIRMATION
+                )
             )
-        )
 
-    with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(texwriter.write_sample_acceptance_tex(accepted))
-
-    with open(texpath / "normality.tex", "w") as fout:
-        fout.write(texwriter.write_normality_tex(percent))
-
-    with open(texpath / "similarity.tex", "w") as fout:
-        fout.write(texwriter.write_similarity_tex(location, scale))
-
-    with open(texpath / "sample_table.tex", "w") as fout:
-        fout.write(
-            texwriter.write_sample_table_tex(
-                SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
+        with open(texpath / "metadata.tex", "w") as fout:
+            fout.write(
+                texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
             )
+
+        with open(texpath / "summary.tex", "w") as fout:
+            fout.write(
+                texwriter.write_confirmation_summary_tex(
+                    accepted, percent, location, scale
+                )
+            )
+
+        with open(texpath / "sample_parameters.tex", "w") as fout:
+            fout.write(
+                texwriter.write_sample_parameters_tex(
+                    SampleInterface.testSet.config, texutils.ReportStage.CONFIRMATION
+                )
+            )
+
+        with open(texpath / "acceptance.tex", "w") as fout:
+            fout.write(texwriter.write_sample_acceptance_tex(accepted))
+
+        with open(texpath / "normality.tex", "w") as fout:
+            fout.write(texwriter.write_normality_tex(percent))
+
+        with open(texpath / "similarity.tex", "w") as fout:
+            fout.write(texwriter.write_similarity_tex(location, scale))
+
+        with open(texpath / "sample_table.tex", "w") as fout:
+            fout.write(
+                texwriter.write_sample_table_tex(
+                    SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
+                )
+            )
+
+        # typeset report
+
+        mainres = files(reports).joinpath("confirmation.tex")
+        maintex = "report.tex"
+        copyfile(mainres, texpath / maintex)
+
+        mainpdf = texpath / typeset(texpath, maintex)
+
+        return FileResponse(mainpdf, media_type="application/pdf")
+
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    # typeset report
-
-    mainres = files(reports).joinpath("confirmation.tex")
-    maintex = "report.tex"
-    copyfile(mainres, texpath / maintex)
-
-    mainpdf = texpath / typeset(texpath, maintex)
-
-    return FileResponse(mainpdf, media_type="application/pdf")
