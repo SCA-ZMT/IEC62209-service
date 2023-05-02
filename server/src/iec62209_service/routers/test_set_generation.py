@@ -9,7 +9,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from ..utils.common import SampleConfig, SampleInterface
+from ..utils.common import ModelInterface, SampleConfig, SampleInterface
 
 router = APIRouter(
     prefix="/test-set-generation",
@@ -52,6 +52,21 @@ async def test_set_xport() -> FileResponse:
     tmp = NamedTemporaryFile(delete=False)
     SampleInterface.testSet.export_to_csv(tmp.name)
     return FileResponse(tmp.name, media_type="text/csv")
+
+
+@router.get("/model-area", response_class=JSONResponse)
+async def test_set_get_model_area() -> JSONResponse:
+    ModelInterface.raise_if_no_model()
+    conf = SampleInterface.testSet.config
+    if conf.sampleSize > 0:
+        return {
+            "measAreaX": f"{conf.measAreaX:.0f}",
+            "measAreaY": f"{conf.measAreaY:.0f}",
+        }
+    return JSONResponse(
+        {"error": "Sample not loaded from model"},
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
 
 
 @router.get("/reset")

@@ -102,62 +102,79 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
 @router.get("/pdf", response_class=Response)
 async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
     from .. import reports
-    from ..reports import tables
+    from ..reports import texwriter
     from ..reports.texutils import typeset
 
-    texpath = Path(tmp.name)
+    try:
+        texpath = Path(tmp.name)
 
-    # print images
+        # print images
 
-    imgpath = texpath / "images"
-    mkdir(imgpath.as_posix())
+        imgpath = texpath / "images"
+        mkdir(imgpath.as_posix())
 
-    with open(imgpath / "model-creation-distribution.png", "wb") as img:
-        img.write(SampleInterface.trainingSet.plot_distribution().getvalue())
+        with open(imgpath / "model-creation-distribution.png", "wb") as img:
+            img.write(SampleInterface.trainingSet.plot_distribution().getvalue())
 
-    with open(imgpath / "model-creation-acceptance.png", "wb") as img:
-        img.write(SampleInterface.trainingSet.plot_deviations().getvalue())
+        with open(imgpath / "model-creation-acceptance.png", "wb") as img:
+            img.write(SampleInterface.trainingSet.plot_deviations().getvalue())
 
-    with open(imgpath / "model-creation-semivariogram.png", "wb") as img:
-        img.write(ModelInterface.plot_model().getvalue())
+        with open(imgpath / "model-creation-semivariogram.png", "wb") as img:
+            img.write(ModelInterface.plot_model().getvalue())
 
-    with open(imgpath / "model-creation-marginals.png", "wb") as img:
-        img.write(SampleInterface.trainingSet.plot_marginals().getvalue())
+        with open(imgpath / "model-creation-marginals.png", "wb") as img:
+            img.write(SampleInterface.trainingSet.plot_marginals().getvalue())
 
-    # print tables
+        # print tables
 
-    with open(texpath / "metadata.tex", "w") as fout:
-        fout.write(tables.write_model_metadata_tex(ModelInterface.get_metadata()))
-
-    with open(texpath / "summary.tex", "w") as fout:
-        fout.write(tables.write_creation_summary_tex(ModelInterface.goodfit))
-
-    with open(texpath / "sample_parameters.tex", "w") as fout:
-        fout.write(
-            tables.write_sample_parameters_tex(
-                SampleInterface.trainingSet.config, texutils.ReportStage.CREATION
+        with open(texpath / "metadata.tex", "w") as fout:
+            fout.write(
+                texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
             )
-        )
 
-    with open(texpath / "acceptance.tex", "w") as fout:
-        fout.write(tables.write_sample_acceptance_tex(ModelInterface.goodfit.accept))
+        with open(texpath / "summary.tex", "w") as fout:
+            fout.write(texwriter.write_creation_summary_tex(ModelInterface.goodfit))
 
-    with open(texpath / "gfres.tex", "w") as fout:
-        fout.write(tables.write_model_fitting_tex(ModelInterface.goodfit.gfres))
-
-    with open(texpath / "sample_table.tex", "w") as fout:
-        fout.write(
-            tables.write_sample_table_tex(
-                SampleInterface.trainingSet, texutils.ReportStage.CREATION
+        with open(texpath / "sample_parameters.tex", "w") as fout:
+            fout.write(
+                texwriter.write_sample_parameters_tex(
+                    SampleInterface.trainingSet.config, texutils.ReportStage.CREATION
+                )
             )
+
+        accepted = ModelInterface.goodfit.accept
+        gfres = ModelInterface.goodfit.gfres
+        allgood = accepted and gfres[0]
+
+        with open(texpath / "onelinesummary.tex", "w") as fout:
+            fout.write(
+                texwriter.write_one_line_summary(allgood, texutils.ReportStage.CREATION)
+            )
+
+        with open(texpath / "acceptance.tex", "w") as fout:
+            fout.write(texwriter.write_sample_acceptance_tex(accepted))
+
+        with open(texpath / "gfres.tex", "w") as fout:
+            fout.write(texwriter.write_model_fitting_tex(gfres))
+
+        with open(texpath / "sample_table.tex", "w") as fout:
+            fout.write(
+                texwriter.write_sample_table_tex(
+                    SampleInterface.trainingSet, texutils.ReportStage.CREATION
+                )
+            )
+
+        # typeset report
+
+        mainres = files(reports).joinpath("creation.tex")
+        maintex = "report.tex"
+        copyfile(mainres, texpath / maintex)
+
+        mainpdf = texpath / typeset(texpath, maintex)
+
+        return FileResponse(mainpdf, media_type="application/pdf")
+
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    # typeset report
-
-    mainres = files(reports).joinpath("creation.tex")
-    maintex = "report.tex"
-    copyfile(mainres, texpath / maintex)
-
-    mainpdf = texpath / typeset(texpath, maintex)
-
-    return FileResponse(mainpdf, media_type="application/pdf")

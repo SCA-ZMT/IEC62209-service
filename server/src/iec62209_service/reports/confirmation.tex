@@ -33,7 +33,7 @@
 \section{Executive Summary}\label{sec:exec_summary}
 The SAR measurement system validation procedure described in IEC 62209-3~\cite{standard} is a three step procedure the consists of a) GPI model creation, b) model confirmation, and c) the critical data space search. This automatically generated document reports on the outcome of the \textit{model confirmation}.
 
-\textbf{\textit{The SAR measurement system described in Table~\ref{tab:system} passes the GPI model confirmation step.}}
+\input{onelinesummary}
 
 The results of the GPI model confirmation are shown in Table~\ref{tab:summary}.
 
@@ -131,7 +131,7 @@ The obtained deviations ($\Delta SAR_{10g}$) of the test configuration measureme
 
 \begin{figure}[H] \centering
 \includegraphics[width=\textwidth]{images/model-confirm-acceptance.png}
-\caption{Deviations of the measured $SAR_{10g}$ from the target values for the confirmation test configurations. The deviations are compared to the acceptance thresholds.} \label{fig:confirm-acc}
+\caption{Deviations of the measured $SAR_{10g}$ from the target values for the confirmation test configurations. The deviations are compared to the maximum permissible errors (mpe; dashed lines). Blue dots are inside the mpe. Any red dots are outside the mpe.} \label{fig:confirm-acc}
 \end{figure}
 
 \FloatBarrier
@@ -152,7 +152,7 @@ The QQ-plot in Figure~\ref{fig:confirm-qqplot} compares the experimentally found
 
 \begin{figure} \centering
 \includegraphics[width=\textwidth]{images/model-confirm-qqplot.png}
-\caption{QQ-plot of the probability distribution of the deviations between the GPI model predictions and the results from the model confirmation measurements. For an ideal GPI model, these deviations are expected to be normally distributed and the linear regression line (red) should be close to the blue line.} \label{fig:confirm-qqplot}
+\caption{QQ-plot of the SAR deviations, comparing the probability distributions of the created validation model and the test set. These SAR deviations are expected to be normally distributed. The linear regression line (red) through the resulting points (blue) should be close to the reference line (black).}
 \end{figure}
 
 \FloatBarrier

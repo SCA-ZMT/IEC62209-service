@@ -6,6 +6,21 @@ from ..utils.common import DataSetInterface, Goodfit, ModelMetadata, SampleConfi
 from .texutils import ReportStage
 
 
+def write_one_line_summary(success: bool, stage: ReportStage) -> str:
+    line = r"\textbf{\textit{The SAR measurement system described in Table~\ref{tab:system} "
+    line += "successfully completed" if success else "failed to complete"
+    if stage == ReportStage.CREATION:
+        line += r" the GPI model creation step.}}"
+    elif stage == ReportStage.CONFIRMATION:
+        line += r" the GPI model confirmation step.}}"
+    elif stage == ReportStage.VERIFICATION:
+        line += r" the critical data space search."
+        if success:
+            line += r" In combination with the model confirmation step, the system can therefore be considered successfully validated.}}"
+        else:
+            line += r"}}"
+    return line + "\n"
+
 def write_model_metadata_tex(mm: ModelMetadata) -> str:
     lines = [
         r"\begin{table}[ht]\centering",
@@ -163,9 +178,11 @@ def write_sample_table_tex(ds: DataSetInterface, stage: ReportStage) -> str:
     sardcol = ds.headings.index("sard10g")
     idx = []
     for col in cols:
-        i = ds.headings.index(col)
-        if i < 0:
-            raise Exception(f"Dataset does not contain '{col}'")
+        try:
+            i = ds.headings.index(col)
+            assert(i>=0)
+        except:
+            raise Exception(f"Dataset must contain '{col}'")
         idx.append(i)
     for row in ds.rows:
         line = "{" + row[idx[0]] + "} & " + \
