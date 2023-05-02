@@ -94,7 +94,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       });
       optionsLayout.add(createButton);
 
-      const exportButton = this.__exportButton =new qx.ui.form.Button("Export Test data").set({
+      const exportButton = this.__exportButton =new sar.widget.FetchButton("Export Test data").set({
         enabled: false
       });
       exportButton.addListener("execute", () => {
