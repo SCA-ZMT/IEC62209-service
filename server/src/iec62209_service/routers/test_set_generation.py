@@ -24,6 +24,7 @@ async def test_set_generate(config: SampleConfig) -> HTMLResponse:
     end_status = status.HTTP_200_OK
     try:
         SampleInterface.testSet.generate(config)
+        SampleInterface.testSet.add_columns(["sar10g", "u10g"])
     except Exception as e:
         message = f"The IEC62209 package raised an exception: {e}"
         end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
