@@ -41,7 +41,7 @@ class Residuals:
         return self.qqres[2]
 
     def normality_ok(self) -> bool:
-        return self.normality() > 0.05
+        return self.normality() >= 0.05
 
     def print_normality(self) -> str:
         return f"{self.normality():.3f} " + (
