@@ -14,7 +14,16 @@
 qx.Class.define("sar.steps.ConfirmModel", {
   extend: sar.steps.StepBase,
 
+  construct: function() {
+    this.__valueLabels = [];
+    this.__images = [];
+
+    this.base(arguments);
+  },
+
   members: {
+    __valueLabels: null,
+    __images: null,
     __modelViewer: null,
     __reportButton: null,
     __qqImage: null,
@@ -105,24 +114,28 @@ qx.Class.define("sar.steps.ConfirmModel", {
       });
       // values
       const acceptanceValue = new qx.ui.basic.Label();
+      this.__valueLabels.push(acceptanceValue);
       sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
       resultsLayout.add(acceptanceValue, {
         row: 0,
         column: 1
       });
       const normalityValue = new qx.ui.basic.Label();
+      this.__valueLabels.push(normalityValue);
       sar.steps.Utils.decoratePassFailLabel(normalityValue);
       resultsLayout.add(normalityValue, {
         row: 1,
         column: 1
       });
       const qqLocationValue = new qx.ui.basic.Label();
+      this.__valueLabels.push(qqLocationValue);
       sar.steps.Utils.decoratePassFailLabel(qqLocationValue);
       resultsLayout.add(qqLocationValue, {
         row: 2,
         column: 1
       });
       const qqScaleValue = new qx.ui.basic.Label();
+      this.__valueLabels.push(qqScaleValue);
       sar.steps.Utils.decoratePassFailLabel(qqScaleValue);
       resultsLayout.add(qqScaleValue, {
         row: 3,
@@ -134,10 +147,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
       });
       confirmButton.addListener("execute", () => {
         confirmButton.setFetching(true);
-        acceptanceValue.setValue("");
-        normalityValue.setValue("");
-        qqLocationValue.setValue("");
-        qqScaleValue.setValue("");
+        this.__resetValueLabels();
         sar.io.Resources.fetch("confirmModel", "confirm")
           .then(data => {
             if ("Acceptance criteria" in data) {
@@ -172,19 +182,15 @@ qx.Class.define("sar.steps.ConfirmModel", {
 
     __createQQView: function() {
       const qqImage = this.__qqImage = sar.steps.Utils.createImageViewer();
+      this.__images.push(qqImage);
       const tabPage = sar.steps.Utils.createTabPage("QQ plot", qqImage);
       return tabPage;
     },
 
     __createDeviationsView: function() {
       const deviationsImage = this.__deviationsImage = sar.steps.Utils.createImageViewer();
+      this.__images.push(deviationsImage);
       const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
-      return tabPage;
-    },
-
-    __createResidualsView: function() {
-      const residualsImage = sar.steps.Utils.createImageViewer();
-      const tabPage = sar.steps.Utils.createTabPage("Residuals", residualsImage);
       return tabPage;
     },
 
@@ -212,6 +218,10 @@ qx.Class.define("sar.steps.ConfirmModel", {
       }
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true, false);
       this._optionsLayout.addAt(modelViewer, 0);
+
+      if (modelMetadata === null) {
+        this.resetResults();
+      }
     },
 
     __modelConfirmed: function() {
@@ -224,11 +234,6 @@ qx.Class.define("sar.steps.ConfirmModel", {
       this.__populateDeviationsImage();
     },
 
-    resetResults: function() {
-      this.__qqImage.resetSource();
-      this.__deviationsImage.resetSource();
-    },
-
     __populateQQImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("confirmModel");
       this.__qqImage.setSource(endpoints["getQQPlot"].url);
@@ -237,6 +242,19 @@ qx.Class.define("sar.steps.ConfirmModel", {
     __populateDeviationsImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("confirmModel");
       this.__deviationsImage.setSource(endpoints["getDeviations"].url);
+    },
+
+    __resetValueLabels: function() {
+      this.__valueLabels.forEach(valueLabel => valueLabel.resetValue());
+    },
+
+    __resetImages: function() {
+      this.__images.forEach(image => image.resetSource());
+    },
+
+    resetResults: function() {
+      this.__resetValueLabels();
+      this.__resetImages();
     },
   }
 });

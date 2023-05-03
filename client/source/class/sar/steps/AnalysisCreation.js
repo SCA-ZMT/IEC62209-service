@@ -14,7 +14,16 @@
 qx.Class.define("sar.steps.AnalysisCreation", {
   extend: sar.steps.StepBase,
 
+  construct: function() {
+    this.__valueLabels = [];
+    this.__images = [];
+
+    this.base(arguments);
+  },
+
   members: {
+    __valueLabels: null,
+    __images: null,
     __exportButton: null,
     __reportButton: null,
     __semivariogramImage: null,
@@ -81,12 +90,14 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       // values
       const acceptanceValue = new qx.ui.basic.Label();
+      this.__valueLabels.push(acceptanceValue);
       sar.steps.Utils.decoratePassFailLabel(acceptanceValue);
       resultsLayout.add(acceptanceValue, {
         row: 0,
         column: 1
       });
       const rmsErrorValue = new qx.ui.basic.Label();
+      this.__valueLabels.push(rmsErrorValue);
       sar.steps.Utils.decoratePassFailLabel(rmsErrorValue);
       resultsLayout.add(rmsErrorValue, {
         row: 1,
@@ -98,8 +109,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       createButton.addListener("execute", () => {
         createButton.setFetching(true);
-        acceptanceValue.setValue("");
-        rmsErrorValue.setValue("");
+        this.__resetValueLabels();
         sar.io.Resources.fetch("analysisCreation", "create")
           .then(data => {
             if ("Acceptance criteria" in data) {
@@ -162,18 +172,21 @@ qx.Class.define("sar.steps.AnalysisCreation", {
 
     __createSemivariogramView: function() {
       const semivariogramImage = this.__semivariogramImage = sar.steps.Utils.createImageViewer();
+      this.__images.push(semivariogramImage);
       const tabPage = sar.steps.Utils.createTabPage("Semi-variogram", semivariogramImage);
       return tabPage;
     },
 
     __createMarginalsView: function() {
       const marginalsImage = this.__marginalsImage = sar.steps.Utils.createImageViewer();
+      this.__images.push(marginalsImage);
       const tabPage = sar.steps.Utils.createTabPage("Marginals", marginalsImage);
       return tabPage;
     },
 
     __createDeviationsView: function() {
       const deviationsImage = this.__deviationsImage = sar.steps.Utils.createImageViewer();
+      this.__images.push(deviationsImage);
       const tabPage = sar.steps.Utils.createTabPage("Deviations", deviationsImage);
       return tabPage;
     },
@@ -186,8 +199,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       resultsLayout.add(resultsTabView);
 
-      const variogramView = this.__createSemivariogramView()
-      resultsTabView.add(variogramView);
+      const semivariogramView = this.__createSemivariogramView()
+      resultsTabView.add(semivariogramView);
 
       const marginalsView = this.__createMarginalsView()
       resultsTabView.add(marginalsView);
@@ -207,12 +220,6 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       this.__populateSemivariogramImage();
       this.__populateMarginalsImage();
       this.__populateDeviationsImage();
-    },
-
-    resetResults: function() {
-      this.__semivariogramImage.resetSource();
-      this.__marginalsImage.resetSource();
-      this.__deviationsImage.resetSource();
     },
 
     __populateSemivariogramImage: function() {
@@ -235,6 +242,19 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       sar.steps.Utils.downloadJson(data, filename);
 
       this.__reportButton.setEnabled(true);
-    }
+    },
+
+    __resetValueLabels: function() {
+      this.__valueLabels.forEach(valueLabel => valueLabel.resetValue());
+    },
+
+    __resetImages: function() {
+      this.__images.forEach(image => image.resetSource());
+    },
+
+    resetResults: function() {
+      this.__resetValueLabels();
+      this.__resetImages();
+    },
   }
 });

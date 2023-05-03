@@ -21,8 +21,8 @@ qx.Class.define("sar.steps.ExploreSpace", {
   members: {
     __modelViewer: null,
     __criticalsValue: null,
-    __exportButton: null,
     __distributionImage: null,
+    __exportButton: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -56,6 +56,8 @@ qx.Class.define("sar.steps.ExploreSpace", {
       const searchButton = new sar.widget.FetchButton("Search");
       searchButton.addListener("execute", () => {
         searchButton.setFetching(true);
+        this.__criticalsValue.resetValue();
+        this.__distributionImage.resetSource();
         sar.io.Resources.fetch("searchSpace", "search")
           .then(data => this.__spaceSearched(data))
           .catch(err => console.error(err))

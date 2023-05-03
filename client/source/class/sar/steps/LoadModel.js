@@ -28,7 +28,7 @@ qx.Class.define("sar.steps.LoadModel", {
 
     // overriden
     _getFileInput: function() {
-      const fileInput = this._fileInput = new sar.widget.FileInput("Load Model...", ["json"]);
+      const fileInput = new sar.widget.FileInput("Load Model...", ["json"]);
       fileInput.addListener("selectionChanged", () => {
         const file = fileInput.getFile();
         if (file) {
