@@ -40,7 +40,7 @@ async def critical_set_xport() -> FileResponse:
 @router.get("/model-area", response_class=JSONResponse)
 async def critical_set_get_model_area() -> JSONResponse:
     ModelInterface.raise_if_no_model()
-    conf = SampleInterface.testSet.config
+    conf = SampleInterface.trainingSet.config
     if conf.sampleSize > 0:
         return {
             "measAreaX": f"{conf.measAreaX:.0f}",

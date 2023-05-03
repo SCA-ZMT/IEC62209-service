@@ -2,7 +2,13 @@
 
 from math import fabs
 
-from ..utils.common import DataSetInterface, Goodfit, ModelMetadata, SampleConfig
+from ..utils.common import (
+    DataSetInterface,
+    Goodfit,
+    ModelMetadata,
+    Residuals,
+    SampleConfig,
+)
 from .texutils import ReportStage
 
 
@@ -46,7 +52,7 @@ def write_creation_summary_tex(data: Goodfit) -> str:
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcome} & \textbf{Pass / Fail} \\\hline",
         r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Table~\ref{tab:acceptance}& \textbf{" + accept + r"} \\\hline",
-        r"Model fitting & $nrmse " + ("<" if gfok else ">") + r"$ 25~\%  & " + gfval + r"~\%   & \textbf{" + gfok + r"} \\\hline",
+        r"Model fitting & $nrmse < $ 25~\%  & " + gfval + r"~\%   & \textbf{" + gfok + r"} \\\hline",
         r"\end{tabular}",
         r"\caption{Summary of the GPI Model creation outcomes for the measurement system described in Table~\ref{tab:system}.}",
         r"\label{tab:summary}",
@@ -54,18 +60,18 @@ def write_creation_summary_tex(data: Goodfit) -> str:
     ]
     return '\n'.join(lines)
 
-def write_confirmation_summary_tex(accepted: bool, percent: float, location: float, scale: float) -> str:
+def write_confirmation_summary_tex(accepted: bool, residuals: Residuals) -> str:
     resacc = "Pass" if accepted else "Fail"
-    resnorm = "Pass" if percent > 5 else "Fail"
-    resloc = "Pass" if (location > -1 and location < 1) else "Fail"
-    ressca = "Pass" if (scale > 0.5 and scale < 1.5) else "Fail"
+    resnorm = "Pass" if residuals.normality_ok() else "Fail"
+    resloc = "Pass" if residuals.qq_location_ok() else "Fail"
+    ressca = "Pass" if residuals.qq_scale_ok() else "Fail"
     lines = [
         r"\begin{table}[ht]\centering",
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcome} & \textbf{Pass / Fail} \\\hline",
         r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Table~\ref{tab:test}& \textbf{" + resacc + r"} \\\hline",
-        r"Normality & $p \ge$ 0.05 & " + f"{0.01*percent:.3f}" + r"& \textbf{" + resnorm + r"} \\\hline",
-        r"Similarity & location $\in$ [-1, 1] & " + f"{location:.3f}" + r" & \textbf{" + resloc + r"} \\\cline{2-4} & scale $\in$ [0.5, 1.5] & " + f"{scale:.3f}" + r" & \textbf{" + ressca + r"} \\\hline",
+        r"Normality & $p \ge$ 0.05 & " + f"{residuals.normality():.3f}" + r"& \textbf{" + resnorm + r"} \\\hline",
+        r"Similarity & location $\in$ [-1, 1] & " + f"{residuals.location():.3f}" + r" & \textbf{" + resloc + r"} \\\cline{2-4} & scale $\in$ [0.5, 1.5] & " + f"{residuals.scale():.3f}" + r" & \textbf{" + ressca + r"} \\\hline",
         r"\end{tabular}\caption{Summary of the GPI Model confirmation outcomes for the measurement system described in Table~\ref{tab:system}.} \label{tab:summary}",
         r"\end{table}"
     ]
@@ -118,32 +124,32 @@ def write_model_fitting_tex(gfres: tuple) -> str:
         r"\begin{table}[ht]\centering",
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcome} & \textbf{Pass / Fail} \\\hline",
-        r"Model fitting & $nrmse " + ("<" if gfok else ">") + r"$ 25~\%  & " + gfval + r"~\%   & \textbf{" + gfok + r"} \\\hline",
+        r"Model fitting & $nrmse < $ 25~\%  & " + gfval + r"~\%   & \textbf{" + gfok + r"} \\\hline",
         r"\end{tabular}\caption{Quantification (normalized mean squared error) of the semi-variogram fitting quality, which affects the GPI model quality.} \label{tab:nrmse}",
         r"\end{table}"
     ]
     return '\n'.join(lines)
 
-def write_normality_tex(percent: float) -> str:
-    result = "Pass" if percent > 5 else "Fail"
+def write_normality_tex(residuals: Residuals) -> str:
+    result = "Pass" if residuals.normality_ok() else "Fail"
     lines = [
         r"\begin{table}[ht]\centering",
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Specification} & \textbf{Value} & \textbf{Pass / Fail} \\\hline",
-        r"Normality & $p \ge$ 5\,\% & " + f"{percent:.1f}" + r"\,\% & \textbf{" + result + r"} \\\hline",
+        r"Normality & $p \ge$ 5\,\% & " + f"{residuals.normality() * 100:.1f}" + r"\,\% & \textbf{" + result + r"} \\\hline",
         r"\end{tabular}\caption{Summary results of the \textit{GPI Model Confirmation} step for the measurement system described in Table~\ref{tab:system}.} \label{tab:normality}",
         r"\end{table}"
     ]
     return '\n'.join(lines)
 
-def write_similarity_tex(location: float, scale: float) -> str:
-    resloc = "Pass" if (location > -1 and location < 1) else "Fail"
-    ressca = "Pass" if (scale > 0.5 and scale < 1.5) else "Fail"
+def write_similarity_tex(residuals: Residuals) -> str:
+    resloc = "Pass" if residuals.qq_location_ok() else "Fail"
+    ressca = "Pass" if residuals.qq_scale_ok() else "Fail"
     lines = [
         r"\begin{table}[ht]\centering",
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcome} & \textbf{Pass / Fail} \\\hline",
-        r"Similarity & location $\in$ [-1, 1] & " + f"{location:.3f}" + r" & \textbf{" + resloc + r"} \\\cline{2-4} & scale $\in$ [0.5, 1.5] & " + f"{scale:.3f}" + r" & \textbf{" + ressca + r"} \\\hline",
+        r"Similarity & location $\in$ [-1, 1] & " + f"{residuals.location():.3f}" + r" & \textbf{" + resloc + r"} \\\cline{2-4} & scale $\in$ [0.5, 1.5] & " + f"{residuals.scale():.3f}" + r" & \textbf{" + ressca + r"} \\\hline",
         r"\end{tabular}\caption{Summary of the GPI model confirmation results for the measurement system described in Table~\ref{tab:system}.} \label{tab:qq}",
         r"\end{table}"
     ]

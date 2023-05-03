@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
 from ..reports import texutils
-from ..utils.common import ModelInterface, SampleInterface
+from ..utils.common import ModelInterface, Residuals, SampleInterface
 
 router = APIRouter(prefix="/confirm-model", tags=["confirm-model"])
 
@@ -20,16 +20,13 @@ async def confirm_model() -> JSONResponse:
         # storing these for later
         if not ModelInterface.compute_residuals():
             raise Exception("Error computing residuals")
-        (swres, qqres) = ModelInterface.residuals_test()
+        residuals: Residuals = ModelInterface.residuals_test()
         accepted = ModelInterface.acceptance_criteria(SampleInterface.testSet)
         response = {
             "Acceptance criteria": "Pass" if accepted else "Fail",
-            "Normality": f"{swres[1]:.3f} "
-            + ("(Pass)" if swres[1] > 0.05 else "(Fail)"),
-            "QQ location": f"{qqres[1]:.3f} "
-            + ("(Pass)" if (qqres[1] > -1 and qqres[1] < 1) else "(Fail)"),
-            "QQ scale": f"{qqres[2]:.3f} "
-            + ("(Pass)" if (qqres[2] > 0.5 and qqres[2] < 1.5) else "(Fail)"),
+            "Normality": residuals.print_normality(),
+            "QQ location": residuals.print_qq_location(),
+            "QQ scale": residuals.print_qq_scale(),
         }
 
     except Exception as e:
@@ -84,17 +81,9 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
         # tables
 
         accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.testSet)
-        (swres, qqres) = ModelInterface.residuals_test()
-        percent: float = 100 * swres[1]
-        location: float = qqres[1]
-        scale: float = qqres[2]
+        residuals: Residuals = ModelInterface.residuals_test()
 
-        allgood = (
-            accepted
-            and percent > 5
-            and (location > -1 and location < 1)
-            and (scale > 0.5 and scale < 1.5)
-        )
+        allgood = accepted and residuals.all_ok()
 
         with open(texpath / "onelinesummary.tex", "w") as fout:
             fout.write(
@@ -109,11 +98,7 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
             )
 
         with open(texpath / "summary.tex", "w") as fout:
-            fout.write(
-                texwriter.write_confirmation_summary_tex(
-                    accepted, percent, location, scale
-                )
-            )
+            fout.write(texwriter.write_confirmation_summary_tex(accepted, residuals))
 
         with open(texpath / "sample_parameters.tex", "w") as fout:
             fout.write(
@@ -126,10 +111,10 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
             fout.write(texwriter.write_sample_acceptance_tex(accepted))
 
         with open(texpath / "normality.tex", "w") as fout:
-            fout.write(texwriter.write_normality_tex(percent))
+            fout.write(texwriter.write_normality_tex(residuals))
 
         with open(texpath / "similarity.tex", "w") as fout:
-            fout.write(texwriter.write_similarity_tex(location, scale))
+            fout.write(texwriter.write_similarity_tex(residuals))
 
         with open(texpath / "sample_table.tex", "w") as fout:
             fout.write(
