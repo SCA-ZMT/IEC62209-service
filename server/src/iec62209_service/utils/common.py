@@ -26,6 +26,48 @@ class Goodfit:
         self.gfres: tuple = gfres
 
 
+class Residuals:
+    def __init__(self, sw_qq: tuple):
+        self.swres = sw_qq[0]
+        self.qqres = sw_qq[1]
+
+    def normality(self) -> float:
+        return self.swres[1]
+
+    def location(self) -> float:
+        return self.qqres[1]
+
+    def scale(self) -> float:
+        return self.qqres[2]
+
+    def normality_ok(self) -> bool:
+        return self.normality() > 0.05
+
+    def print_normality(self) -> str:
+        return f"{self.normality():.3f} " + (
+            "(Pass)" if self.normality_ok() else "(Fail)"
+        )
+
+    def qq_location_ok(self) -> bool:
+        loc = self.location()
+        return loc > -1 and loc < 1
+
+    def print_qq_location(self) -> str:
+        return f"{self.location():.3f} " + (
+            "(Pass)" if self.qq_location_ok() else "(Fail)"
+        )
+
+    def qq_scale_ok(self) -> bool:
+        scale = self.scale()
+        return scale > 0.5 and scale < 1.5
+
+    def print_qq_scale(self) -> str:
+        return f"{self.scale():.3f} " + ("(Pass)" if self.qq_scale_ok() else "(Fail)")
+
+    def all_ok(self) -> bool:
+        return self.normality_ok() and self.qq_location_ok() and self.qq_scale_ok()
+
+
 ### pydantic MODELS
 
 
@@ -363,7 +405,7 @@ class ModelInterface:
         if len(cls.residuals) == 0:
             raise Exception("Residuals have not been calculated")
         swres, qqres = cls.work.resid_test(cls.residuals)
-        return (swres, qqres)
+        return Residuals((swres, qqres))
 
     @classmethod
     def plot_residuals(cls):
