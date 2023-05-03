@@ -25,8 +25,9 @@ qx.Class.define("sar.steps.LoadData", {
   },
 
   members: {
-    _fileInput: null,
-    _resetBtn: null,
+    __fileInput: null,
+    _selectedFileName: null,
+    _resetLayout: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -36,17 +37,29 @@ qx.Class.define("sar.steps.LoadData", {
     _createOptions: function() {
       const optionsLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
-      const fileInput = this._fileInput = this._getFileInput();
+      const fileInput = this.__fileInput = this._getFileInput();
       optionsLayout.add(fileInput);
 
-      const resetBtn = this._resetBtn = new qx.ui.form.Button("Reset data").set({
+      const resetLayout = this._resetLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(15));
+      const resetBtn = new qx.ui.form.Button("Reset data").set({
         allowGrowX: false
       });
       resetBtn.addListener("execute", () => {
         fileInput.resetValue();
         this._resetPressed();
       });
-      optionsLayout.add(resetBtn);
+      resetLayout.add(resetBtn);
+      const selectedFileName = this._selectedFileName = new qx.ui.basic.Label().set({
+        alignY: "middle"
+      });
+      fileInput.addListener("selectionChanged", () => {
+        const file = fileInput.getFile();
+        if (file) {
+          selectedFileName.setValue(file.name);
+        }
+      });
+      resetLayout.add(selectedFileName);
+      optionsLayout.add(resetLayout);
 
       return optionsLayout;
     },
@@ -91,11 +104,11 @@ qx.Class.define("sar.steps.LoadData", {
 
     _applyStepData: function(testData) {
       if (testData) {
-        this._fileInput.exclude();
-        this._resetBtn.show();
+        this.__fileInput.exclude();
+        this._resetLayout.show();
       } else {
-        this._fileInput.show();
-        this._resetBtn.exclude();
+        this.__fileInput.show();
+        this._resetLayout.exclude();
       }
 
       if (testData) {

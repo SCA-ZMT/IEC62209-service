@@ -2,7 +2,7 @@ name: SAR Validation
 key: simcore/services/dynamic/iec62209-web
 type: dynamic
 integration-version: 1.0.0
-version: 1.0.13
+version: 1.0.14
 description: >
   SAR System Validation (SAR System Validation) web service following [publication-IEC62209](https://github.com/ITISFoundation/publication-IEC62209)
 contact: bujard@itis.swiss

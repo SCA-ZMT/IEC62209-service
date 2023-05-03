@@ -74,6 +74,7 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       const createButton = new sar.widget.FetchButton("Create Test data");
       createButton.addListener("execute", () => {
         createButton.setFetching(true);
+        this.__distributionImage.resetSource();
         const data = {};
         const includeOnly = [
           "measAreaX",

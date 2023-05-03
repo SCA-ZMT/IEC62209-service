@@ -29,7 +29,7 @@ qx.Class.define("sar.steps.LoadCriticalData", {
 
     // overriden
     _getFileInput: function() {
-      const fileInput = this.__fileInput = new sar.widget.FileInput("Load Critical data...", ["csv"]);
+      const fileInput = new sar.widget.FileInput("Load Critical data...", ["csv"]);
       fileInput.addListener("selectionChanged", () => {
         const file = fileInput.getFile();
         if (file) {

@@ -146,6 +146,10 @@ qx.Class.define("sar.steps.Verify", {
       }
       const modelViewer = this.__modelViewer = sar.steps.Utils.modelViewer(modelMetadata, true, false);
       this._optionsLayout.addAt(modelViewer, 0);
+
+      if (modelMetadata === null) {
+        this.resetResults();
+      }
     },
 
     __criticalDataAnalyzed: function() {

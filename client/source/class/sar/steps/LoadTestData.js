@@ -40,7 +40,7 @@ qx.Class.define("sar.steps.LoadTestData", {
 
     // overriden
     _getFileInput: function() {
-      const fileInput = this._fileInput = new sar.widget.FileInput("Load Test data...", ["csv"]);
+      const fileInput = new sar.widget.FileInput("Load Test data...", ["csv"]);
       fileInput.addListener("selectionChanged", () => {
         const file = fileInput.getFile();
         if (file) {

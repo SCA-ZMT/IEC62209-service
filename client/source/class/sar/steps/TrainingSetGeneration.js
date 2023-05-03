@@ -68,6 +68,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       sar.steps.Utils.setIdToWidget(createButton, "createTrainingSetBtn");
       createButton.addListener("execute", () => {
         createButton.setFetching(true);
+        this.__distributionImage.resetSource();
         const data = {};
         for (const [key, item] of Object.entries(form.getItems())) {
           data[key] = item.getValue()
