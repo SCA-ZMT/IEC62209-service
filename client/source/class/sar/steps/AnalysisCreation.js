@@ -165,6 +165,10 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         column: 0,
         colSpan: 2
       });
+      // disable 'Generate Report' button any time the user changes something in the Model information
+      Object.values(modelEditor._form.getItems()).forEach(field => {
+        field.addListener("changeValue", () => reportButton.setEnabled(false));
+      });
       row++;
 
       return optionsLayout;
@@ -255,6 +259,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     resetResults: function() {
       this.__resetValueLabels();
       this.__resetImages();
+      this.__reportButton.setEnabled(false);
     },
   }
 });

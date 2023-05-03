@@ -34,7 +34,7 @@ qx.Class.define("sar.widget.MainView", {
     __testSetGeneration: null,
     __loadTestData: null,
     __confirmModel: null,
-    __exploreSpace: null,
+    __searchSpace: null,
     __loadCriticalData: null,
     __verify: null,
 
@@ -120,7 +120,7 @@ qx.Class.define("sar.widget.MainView", {
       this.__testSetGeneration = new sar.steps.TestSetGeneration();
       this.__loadTestData = new sar.steps.LoadTestData();
       this.__confirmModel = new sar.steps.ConfirmModel();
-      this.__exploreSpace = new sar.steps.ExploreSpace();
+      this.__searchSpace = new sar.steps.SearchSpace();
       this.__loadCriticalData = new sar.steps.LoadCriticalData();
       this.__verify = new sar.steps.Verify();
 
@@ -157,7 +157,7 @@ qx.Class.define("sar.widget.MainView", {
       }, {
         icon: "sar/icons/step4_icon.png",
         label: "Search Space",
-        step: this.__exploreSpace,
+        step: this.__searchSpace,
       }, {
         icon: "sar/icons/step_import_icon.svg",
         label: "Load Critical Data",
@@ -222,9 +222,9 @@ qx.Class.define("sar.widget.MainView", {
         });
       }
 
-      const exploreSpace = this.__exploreSpace;
-      if (exploreSpace) {
-        exploreSpace.addListener("criticalsFound", e => {
+      const searchSpace = this.__searchSpace;
+      if (searchSpace) {
+        searchSpace.addListener("criticalsFound", e => {
           const nCriticals = e.getData();
           if (nCriticals === 0) {
             // show passed
@@ -264,7 +264,7 @@ qx.Class.define("sar.widget.MainView", {
         this.__testSetGeneration,
         this.__loadTestData,
         this.__confirmModel,
-        this.__exploreSpace,
+        this.__searchSpace,
         this.__verify,
       ].forEach(step => {
         step.setModel(model);
@@ -273,7 +273,7 @@ qx.Class.define("sar.widget.MainView", {
       [
         this.__testSetGeneration,
         this.__loadTestData,
-        this.__exploreSpace,
+        this.__searchSpace,
         this.__loadCriticalData,
       ].forEach(step => {
         step.stepButton.setEnabled(Boolean(model));

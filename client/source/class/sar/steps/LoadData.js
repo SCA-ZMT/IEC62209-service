@@ -26,8 +26,7 @@ qx.Class.define("sar.steps.LoadData", {
 
   members: {
     __fileInput: null,
-    _selectedFileName: null,
-    _resetLayout: null,
+    __resetLayout: null,
 
     // overriden
     _getDescriptionText: function() {
@@ -40,7 +39,7 @@ qx.Class.define("sar.steps.LoadData", {
       const fileInput = this.__fileInput = this._getFileInput();
       optionsLayout.add(fileInput);
 
-      const resetLayout = this._resetLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(15));
+      const resetLayout = this.__resetLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(15));
       const resetBtn = new qx.ui.form.Button("Reset data").set({
         allowGrowX: false
       });
@@ -49,7 +48,7 @@ qx.Class.define("sar.steps.LoadData", {
         this._resetPressed();
       });
       resetLayout.add(resetBtn);
-      const selectedFileName = this._selectedFileName = new qx.ui.basic.Label().set({
+      const selectedFileName = new qx.ui.basic.Label().set({
         alignY: "middle"
       });
       fileInput.addListener("selectionChanged", () => {
@@ -105,10 +104,10 @@ qx.Class.define("sar.steps.LoadData", {
     _applyStepData: function(testData) {
       if (testData) {
         this.__fileInput.exclude();
-        this._resetLayout.show();
+        this.__resetLayout.show();
       } else {
         this.__fileInput.show();
-        this._resetLayout.exclude();
+        this.__resetLayout.exclude();
       }
 
       if (testData) {

@@ -494,6 +494,6 @@ qx.Class.define("sar.steps.Utils", {
           .finally(() => button.setFetching(false));
       });
       return button;
-    }
+    },
   }
 });

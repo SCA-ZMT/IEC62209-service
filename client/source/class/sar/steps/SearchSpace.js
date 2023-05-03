@@ -11,7 +11,7 @@
 
 ************************************************************************ */
 
-qx.Class.define("sar.steps.ExploreSpace", {
+qx.Class.define("sar.steps.SearchSpace", {
   extend: sar.steps.StepBase,
 
   events: {

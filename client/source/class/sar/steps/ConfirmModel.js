@@ -255,6 +255,7 @@ qx.Class.define("sar.steps.ConfirmModel", {
     resetResults: function() {
       this.__resetValueLabels();
       this.__resetImages();
+      this.__reportButton.setEnabled(false);
     },
   }
 });
