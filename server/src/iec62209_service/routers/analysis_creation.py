@@ -160,7 +160,9 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
         with open(texpath / "sample_parameters.tex", "w") as fout:
             fout.write(
                 texwriter.write_sample_parameters_tex(
-                    SampleInterface.trainingSet.config, texutils.ReportStage.CREATION
+                    SampleInterface.trainingSet.config,
+                    ModelInterface.get_metadata(),
+                    texutils.ReportStage.CREATION,
                 )
             )
 
