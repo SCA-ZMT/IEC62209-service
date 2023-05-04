@@ -1,6 +1,6 @@
 fastapi
 # NOTE: copy commit from https://github.com/ITISFoundation/publication-IEC62209/commits/main
-iec62209 @ git+https://github.com/ITISFoundation/publication-IEC62209.git@954ccc0659f11e7461e2437890970d1ca1e449d4
+iec62209 @ git+https://github.com/ITISFoundation/publication-IEC62209.git@fa9d56886b7d83e8c669cab22c2cfef16d6c624a
 pydantic
 python-multipart
 uvicorn
