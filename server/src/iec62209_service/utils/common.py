@@ -334,7 +334,10 @@ class ModelInterface:
     @classmethod
     def get_metadata(cls) -> ModelMetadata:
         cls.raise_if_no_model()
-        return ModelMetadata.parse_obj(cls.work.model_metadata())
+        try:
+            ModelMetadata.parse_obj(cls.work.model_metadata())
+        except:
+            raise Exception("Incomplete or missing metadata in model")
 
     @classmethod
     def dump_model_to_json(cls):
