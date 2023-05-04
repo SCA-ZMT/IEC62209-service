@@ -60,7 +60,7 @@ async def test_set_get_model_area() -> JSONResponse:
     try:
         ModelInterface.raise_if_no_model()
         md: ModelMetadata = ModelInterface.get_metadata()
-        if len(md.modelAreaX) == 0 or len(md.modelAreaY) == 0:
+        if not (md.modelAreaX and md.modelAreaY):
             raise Exception(
                 "Model JSON missing area metadata. Please generate a new one."
             )

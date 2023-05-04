@@ -337,7 +337,8 @@ class ModelInterface:
     def get_metadata(cls) -> ModelMetadata:
         cls.raise_if_no_model()
         try:
-            ModelMetadata.parse_obj(cls.work.model_metadata())
+            md = cls.work.model_metadata()
+            return ModelMetadata.parse_obj(md)
         except:
             raise Exception("Incomplete or missing metadata in model")
 
