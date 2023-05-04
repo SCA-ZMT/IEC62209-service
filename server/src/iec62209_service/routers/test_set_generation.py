@@ -9,7 +9,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from ..utils.common import ModelInterface, SampleConfig, SampleInterface
+from ..utils.common import ModelInterface, ModelMetadata, SampleConfig, SampleInterface
 
 router = APIRouter(
     prefix="/test-set-generation",
@@ -56,17 +56,22 @@ async def test_set_xport() -> FileResponse:
 
 @router.get("/model-area", response_class=JSONResponse)
 async def test_set_get_model_area() -> JSONResponse:
-    ModelInterface.raise_if_no_model()
-    conf = SampleInterface.trainingSet.config
-    if conf.sampleSize > 0:
-        return {
-            "measAreaX": f"{conf.measAreaX:.0f}",
-            "measAreaY": f"{conf.measAreaY:.0f}",
-        }
-    return JSONResponse(
-        {"error": "Sample not loaded from model"},
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    )
+    area = {}
+    try:
+        ModelInterface.raise_if_no_model()
+        md: ModelMetadata = ModelInterface.get_metadata()
+        if md.modelAreaX == 0 or md.modelAreaY == 0:
+            raise Exception(
+                "Model JSON missing area metadata. Please generate a new one."
+            )
+        area = {"measAreaX": f"{md.modelAreaX:0f}", "measAreaY": f"{md.modelAreaY:0f}"}
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return JSONResponse(area)
 
 
 @router.get("/reset")
