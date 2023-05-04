@@ -107,6 +107,7 @@ def fig2png(fig):
 
 class DataSetInterface:
     def __init__(self):
+        # these are the columns that the iec62209 package expects:
         # headings = ['', 'antenna', 'frequency', 'power', 'modulation', 'par', 'bandwidth', 'distance', 'angle', 'x', 'y', 'sar_1g', 'sar_10g', 'u_1g', 'u_10g']
         self.sample: Sample = None
         self.headings = []
