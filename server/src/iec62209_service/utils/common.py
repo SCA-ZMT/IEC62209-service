@@ -88,6 +88,8 @@ class ModelMetadata(BaseModel):
     softwareVersion: str
     acceptanceCriteria: str
     normalizedRMSError: str
+    modelAreaX: int
+    modelAreaY: int
 
 
 ### Helper classes

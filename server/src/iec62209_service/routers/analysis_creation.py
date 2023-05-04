@@ -82,6 +82,28 @@ async def analysis_creation_marginals():
         )
 
 
+@router.get("/model-constraint", response_class=JSONResponse)
+async def analysis_creation_constraints() -> JSONResponse:
+    constraints = {}
+    try:
+        samp = SampleInterface.trainingSet.sample
+        if samp is None:
+            raise Exception("No training data sample found")
+        md = samp.metadata()
+        constraints = {
+            "xmin": str(md["xmax"]),
+            "xmax": str(md["xsup"]),
+            "ymin": str(md["ymax"]),
+            "ymax": str(md["ysup"]),
+        }
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return JSONResponse(constraints)
+
+
 @router.post("/xport", response_class=PlainTextResponse)
 async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
     response = ""
