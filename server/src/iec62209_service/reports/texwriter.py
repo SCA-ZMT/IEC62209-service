@@ -194,8 +194,8 @@ def write_sample_table_tex(ds: DataSetInterface, stage: ReportStage) -> str:
         line = "{" + row[idx[0]] + "} & " + \
             f"{row[idx[1]]} & " + \
             f"{row[idx[2]]} & " + \
-            f"{row[idx[3]]:.3f} & " + \
-            f"{row[idx[4]]:.0f} & " + \
+            f"{row[idx[3]]:.2f} & " + \
+            f"{row[idx[4]]:.1f} & " + \
             f"{row[idx[5]]:.0f} & " + \
             f"{row[idx[6]]:.0f} & " + \
             f"{row[idx[7]]:.0f} & " + \
