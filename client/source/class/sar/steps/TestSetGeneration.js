@@ -53,14 +53,11 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       sar.steps.Utils.addVPIFASelectBoxToForm(form);
       sar.steps.Utils.add2PEAKSelectBoxToForm(form);
 
-      const {
-        xArea,
-        yArea
-      } = sar.steps.Utils.addMeasurementAreaToForm(form);
+      sar.steps.Utils.addMeasurementAreaToForm(form);
+      const xArea = this.__xArea = form.getItem("modelAreaX");
+      const yArea = this.__yArea = form.getItem("modelAreaY");
       xArea.resetMinimum();
       yArea.resetMinimum();
-      this.__xArea = xArea;
-      this.__yArea = yArea;
 
       form.addGroupHeader(""); // just for adding some padding
       const sampleSize = new qx.ui.form.Spinner().set({
@@ -79,8 +76,8 @@ qx.Class.define("sar.steps.TestSetGeneration", {
         this.__distributionImage.resetSource();
         const data = {};
         const includeOnly = [
-          "measAreaX",
-          "measAreaY",
+          "modelAreaX",
+          "modelAreaY",
           "sampleSize",
         ];
         for (const [key, item] of Object.entries(form.getItems())) {

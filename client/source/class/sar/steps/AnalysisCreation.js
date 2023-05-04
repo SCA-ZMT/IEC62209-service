@@ -23,6 +23,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
 
   members: {
     __valueLabels: null,
+    __xArea: null,
+    __yArea: null,
     __images: null,
     __exportButton: null,
     __reportButton: null,
@@ -131,6 +133,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         column: 0,
         colSpan: 2
       });
+      this.__xArea = modelEditor._form.getItem("modelAreaX");
+      this.__yArea = modelEditor._form.getItem("modelAreaY");
       row++;
 
       const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Model").set({
@@ -140,7 +144,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         exportButton.setFetching(true);
         const data = {};
         for (const [key, item] of Object.entries(modelEditor._form.getItems())) {
-          data[key] = item.getValue()
+          data[key] = String(item.getValue())
         }
         data["acceptanceCriteria"] = acceptanceValue.getValue();
         data["normalizedRMSError"] = rmsErrorValue.getValue();
@@ -216,7 +220,24 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     },
 
     __trainingDataAnalyzed: function() {
-      this.__exportButton.setEnabled(true);
+      sar.io.Resources.fetch("analysisCreation", "getModelConstraints")
+        .then(data => {
+          if ("xmin" in data) {
+            this.__xArea.setMinimum(parseInt(data["xmin"]));
+          }
+          if ("xmax" in data) {
+            this.__xArea.setMaximum(parseInt(data["xmax"]));
+          }
+          if ("ymin" in data) {
+            this.__yArea.setMinimum(parseInt(data["ymin"]));
+          }
+          if ("ymax" in data) {
+            this.__yArea.setMaximum(parseInt(data["ymax"]));
+          }
+          this.__exportButton.setEnabled(true);
+        })
+        .catch(err => console.error(err));
+
       this.__fetchResults();
     },
 

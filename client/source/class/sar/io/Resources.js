@@ -99,6 +99,10 @@ qx.Class.define("sar.io.Resources", {
             method: "POST",
             url: "/analysis-creation/create"
           },
+          getModelConstraints: {
+            method: "GET",
+            url: "/analysis-creation/model-constraint"
+          },
           xport: {
             method: "POST",
             url: "/analysis-creation/xport"

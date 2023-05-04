@@ -88,6 +88,8 @@ class ModelMetadata(BaseModel):
     softwareVersion: str
     acceptanceCriteria: str
     normalizedRMSError: str
+    modelAreaX: str = ""
+    modelAreaY: str = ""
 
 
 ### Helper classes
@@ -172,8 +174,8 @@ class DataSetInterface:
                 row.append(data[heading][n])
             dataset.rows.append(row)
 
-        dataset.config.measAreaX = 2 * sample.mdata["xmax"]
-        dataset.config.measAreaY = 2 * sample.mdata["ymax"]
+        dataset.config.measAreaX = 2 * sample.mdata["xsup"]
+        dataset.config.measAreaY = 2 * sample.mdata["ysup"]
         dataset.config.sampleSize = nrows
 
         return dataset
@@ -334,7 +336,10 @@ class ModelInterface:
     @classmethod
     def get_metadata(cls) -> ModelMetadata:
         cls.raise_if_no_model()
-        return ModelMetadata.parse_obj(cls.work.model_metadata())
+        try:
+            ModelMetadata.parse_obj(cls.work.model_metadata())
+        except:
+            raise Exception("Incomplete or missing metadata in model")
 
     @classmethod
     def dump_model_to_json(cls):

@@ -89,13 +89,13 @@ def write_verification_summary_tex(accepted: bool) -> str:
     ]
     return '\n'.join(lines)
 
-def write_sample_parameters_tex(cfg: SampleConfig, stage: ReportStage) -> str:
+def write_sample_parameters_tex(cfg: SampleConfig, md: ModelMetadata, stage: ReportStage) -> str:
     stagestring = "relevant" if stage == ReportStage.CREATION else ("confirmed" if stage == ReportStage.CONFIRMATION else "critically examined")
     lines = [
         r"\begin{table}[h!]\centering",
         r"\begin{tabular}{|l|c|}\hline",
         r"\textbf{Parameter} & \textbf{Value} \\\hline",
-        r"Measurement area: $x$,$y$ (mm) & " + f"{cfg.measAreaX}, {cfg.measAreaY}" + r" \\\hline",
+        r"Measurement area: $x$,$y$ (mm) & " + md.modelAreaX + "," + md.modelAreaY + r" \\\hline",
         r"Frequency range (MHz) & " + f"{cfg.fRangeMin} -- {cfg.fRangeMax}" + r"\\\hline",
         r"Size of training data & " + f"{cfg.sampleSize}" + r" \\\hline"
         r"\end{tabular}",
@@ -194,8 +194,8 @@ def write_sample_table_tex(ds: DataSetInterface, stage: ReportStage) -> str:
         line = "{" + row[idx[0]] + "} & " + \
             f"{row[idx[1]]} & " + \
             f"{row[idx[2]]} & " + \
-            f"{row[idx[3]]:.3f} & " + \
-            f"{row[idx[4]]:.0f} & " + \
+            f"{row[idx[3]]:.2f} & " + \
+            f"{row[idx[4]]:.1f} & " + \
             f"{row[idx[5]]:.0f} & " + \
             f"{row[idx[6]]:.0f} & " + \
             f"{row[idx[7]]:.0f} & " + \

@@ -76,6 +76,7 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
             fout.write(
                 texwriter.write_sample_parameters_tex(
                     SampleInterface.criticalSet.config,
+                    ModelInterface.get_metadata(),
                     texutils.ReportStage.VERIFICATION,
                 )
             )
