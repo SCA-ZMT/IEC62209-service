@@ -20,7 +20,10 @@ async def search_space() -> JSONResponse:
 
 
 @router.get("/distribution", response_class=Response)
-async def search_space_distribution() -> Response:
+async def search_space_distribution(dummy: str = "") -> Response:
+    if not dummy:
+        # dummy parameter to avoid browser caching the plot
+        return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         buf = SampleInterface.criticalSet.plot_distribution()
         return StreamingResponse(buf, media_type="image/png")

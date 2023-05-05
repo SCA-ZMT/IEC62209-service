@@ -20,7 +20,10 @@ async def training_set_reset():
 
 
 @router.get("/distribution", response_class=Response)
-async def training_set_distribution() -> Response:
+async def training_set_distribution(dummy: str = "") -> Response:
+    if not dummy:
+        # dummy parameter to avoid browser caching the plot
+        return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         buf = SampleInterface.trainingSet.plot_distribution()
         return StreamingResponse(buf, media_type="image/png")
