@@ -277,6 +277,7 @@ class ModelInterface:
 
     @classmethod
     def load_test_sample(cls, filename) -> dict:
+        cls.raise_if_no_model()
         tmp = NamedTemporaryFile(delete=False)
         try:
             measured = load_measured_sample(filename)

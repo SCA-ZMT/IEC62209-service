@@ -25,7 +25,10 @@ async def verify_results() -> JSONResponse:
 
 
 @router.get("/deviations", response_class=Response)
-async def verify_deviations() -> Response:
+async def verify_deviations(dummy: str = "") -> Response:
+    if not dummy:
+        # dummy parameter to avoid browser caching the plot
+        return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         ModelInterface.raise_if_no_model()
         buf = SampleInterface.criticalSet.plot_deviations()
