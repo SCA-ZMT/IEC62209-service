@@ -91,10 +91,10 @@ async def analysis_creation_constraints() -> JSONResponse:
             raise Exception("No training data sample found")
         md = samp.metadata()
         constraints = {
-            "xmin": str(md["xmax"]),
-            "xmax": str(md["xsup"]),
-            "ymin": str(md["ymax"]),
-            "ymax": str(md["ysup"]),
+            "xmin": str(2 * int(md["xmax"])),
+            "xmax": str(2 * int(md["xsup"])),
+            "ymin": str(2 * int(md["ymax"])),
+            "ymax": str(2 * int(md["ysup"])),
         }
     except Exception as e:
         return JSONResponse(
