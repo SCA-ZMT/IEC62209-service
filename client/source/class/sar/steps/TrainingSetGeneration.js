@@ -62,6 +62,7 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
       form.add(sampleSize, "<b>Sample size</b>", null, "sampleSize");
 
       const formRenderer = new qx.ui.form.renderer.Single(form);
+      sar.steps.Utils.makeFormHeadersWider(formRenderer);
       optionsLayout.add(formRenderer);
 
       const createButton = new sar.widget.FetchButton("Create Training data");
@@ -141,7 +142,8 @@ qx.Class.define("sar.steps.TrainingSetGeneration", {
 
     __populateDistributionImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("trainingSetGeneration");
-      this.__distributionImage.setSource(endpoints["getDistribution"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getDistribution"].url);
+      this.__distributionImage.setSource(url);
     },
 
     __trainingDataExported: function(data) {

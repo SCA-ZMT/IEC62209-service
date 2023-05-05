@@ -67,7 +67,7 @@ qx.Class.define("sar.io.Resources", {
           },
           getDistribution: {
             method: "GET",
-            url: "/training-set-generation/distribution"
+            url: "/training-set-generation/distribution?timestamp={timestamp}"
           },
           resetData: {
             method: "GET",
@@ -109,15 +109,15 @@ qx.Class.define("sar.io.Resources", {
           },
           getSemivariogram: {
             method: "GET",
-            url: "/analysis-creation/variogram"
+            url: "/analysis-creation/variogram?timestamp={timestamp}"
           },
           getMarginals: {
             method: "GET",
-            url: "/analysis-creation/marginals"
+            url: "/analysis-creation/marginals?timestamp={timestamp}"
           },
           getDeviations: {
             method: "GET",
-            url: "/analysis-creation/deviations"
+            url: "/analysis-creation/deviations?timestamp={timestamp}"
           },
           getReport: {
             method: "GET",
@@ -167,7 +167,7 @@ qx.Class.define("sar.io.Resources", {
           },
           getDistribution: {
             method: "GET",
-            url: "/test-set-generation/distribution"
+            url: "/test-set-generation/distribution?timestamp={timestamp}"
           },
           resetData: {
             method: "GET",
@@ -201,11 +201,11 @@ qx.Class.define("sar.io.Resources", {
           },
           getQQPlot: {
             method: "GET",
-            url: "/confirm-model/qqplot"
+            url: "/confirm-model/qqplot?timestamp={timestamp}"
           },
           getDeviations: {
             method: "GET",
-            url: "/confirm-model/deviations"
+            url: "/confirm-model/deviations?timestamp={timestamp}"
           },
           getReport: {
             method: "GET",
@@ -228,7 +228,7 @@ qx.Class.define("sar.io.Resources", {
           },
           getDistribution: {
             method: "GET",
-            url: "/search-space/distribution"
+            url: "/search-space/distribution?timestamp={timestamp}"
           },
         }
       },
@@ -258,7 +258,7 @@ qx.Class.define("sar.io.Resources", {
           },
           getDeviations: {
             method: "GET",
-            url: "/verify/deviations"
+            url: "/verify/deviations?timestamp={timestamp}"
           },
           getReport: {
             method: "GET",

@@ -170,7 +170,8 @@ qx.Class.define("sar.steps.SearchSpace", {
 
     __populateDistributionImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("searchSpace");
-      this.__distributionImage.setSource(endpoints["getDistribution"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getDistribution"].url);
+      this.__distributionImage.setSource(url);
     },
 
     __searchSpaceExported: function(data) {

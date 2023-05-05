@@ -26,6 +26,7 @@ qx.Class.define("sar.steps.AnalysisCreation", {
     __xArea: null,
     __yArea: null,
     __images: null,
+    __modelEditor: null,
     __exportButton: null,
     __reportButton: null,
     __semivariogramImage: null,
@@ -127,7 +128,9 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       });
       row++;
 
-      const modelEditor = sar.steps.Utils.modelEditor();
+      const modelEditor = this.__modelEditor = sar.steps.Utils.modelEditor();
+      modelEditor.setEnabled(false);
+      sar.steps.Utils.makeFormHeadersWider(modelEditor);
       stepLayout.add(modelEditor, {
         row,
         column: 0,
@@ -137,9 +140,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
       this.__yArea = modelEditor._form.getItem("modelAreaY");
       row++;
 
-      const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Model").set({
-        enabled: false
-      });
+      const exportButton = this.__exportButton = new sar.widget.FetchButton("Export Model");
+      exportButton.setEnabled(false);
       exportButton.addListener("execute", () => {
         exportButton.setFetching(true);
         const data = {};
@@ -224,16 +226,21 @@ qx.Class.define("sar.steps.AnalysisCreation", {
         .then(data => {
           if ("xmin" in data) {
             this.__xArea.setMinimum(parseInt(data["xmin"]));
+            // default to minimum
+            this.__xArea.setValue(parseInt(data["xmin"]));
           }
           if ("xmax" in data) {
             this.__xArea.setMaximum(parseInt(data["xmax"]));
           }
           if ("ymin" in data) {
             this.__yArea.setMinimum(parseInt(data["ymin"]));
+            // default to minimum
+            this.__yArea.setValue(parseInt(data["ymin"]));
           }
           if ("ymax" in data) {
             this.__yArea.setMaximum(parseInt(data["ymax"]));
           }
+          this.__modelEditor.setEnabled(true);
           this.__exportButton.setEnabled(true);
         })
         .catch(err => console.error(err));
@@ -249,17 +256,20 @@ qx.Class.define("sar.steps.AnalysisCreation", {
 
     __populateSemivariogramImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
-      this.__semivariogramImage.setSource(endpoints["getSemivariogram"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getSemivariogram"].url);
+      this.__semivariogramImage.setSource(url);
     },
 
     __populateMarginalsImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
-      this.__marginalsImage.setSource(endpoints["getMarginals"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getMarginals"].url);
+      this.__marginalsImage.setSource(url);
     },
 
     __populateDeviationsImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("analysisCreation");
-      this.__deviationsImage.setSource(endpoints["getDeviations"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getDeviations"].url);
+      this.__deviationsImage.setSource(url);
     },
 
     __modelExported: function(data) {
@@ -279,6 +289,8 @@ qx.Class.define("sar.steps.AnalysisCreation", {
 
     resetResults: function() {
       this.__resetValueLabels();
+      this.__modelEditor.setEnabled(false);
+      this.__exportButton.setEnabled(false);
       this.__resetImages();
       this.__reportButton.setEnabled(false);
     },

@@ -47,9 +47,9 @@ async def analysis_creation_create() -> JSONResponse:
 
 
 @router.get("/variogram", response_class=Response)
-async def analysis_creation_variogram(dummy: str = ""):
-    if not dummy:
-        # dummy parameter to avoid browser caching the plot
+async def analysis_creation_variogram(timestamp: str = ""):
+    if not timestamp:
+        # timestamp parameter to avoid browser caching the plot
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         ModelInterface.raise_if_no_model()
@@ -62,9 +62,9 @@ async def analysis_creation_variogram(dummy: str = ""):
 
 
 @router.get("/deviations", response_class=Response)
-async def analysis_creation_deviations(dummy: str = ""):
-    if not dummy:
-        # dummy parameter to avoid browser caching the plot
+async def analysis_creation_deviations(timestamp: str = ""):
+    if not timestamp:
+        # timestamp parameter to avoid browser caching the plot
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         ModelInterface.raise_if_no_model()
@@ -77,9 +77,9 @@ async def analysis_creation_deviations(dummy: str = ""):
 
 
 @router.get("/marginals", response_class=Response)
-async def analysis_creation_marginals(dummy: str = ""):
-    if not dummy:
-        # dummy parameter to avoid browser caching the plot
+async def analysis_creation_marginals(timestamp: str = ""):
+    if not timestamp:
+        # timestamp parameter to avoid browser caching the plot
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         ModelInterface.raise_if_no_model()

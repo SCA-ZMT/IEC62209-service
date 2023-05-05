@@ -252,7 +252,18 @@ qx.Class.define("sar.steps.Utils", {
       this.addMeasurementAreaToForm(form);
 
       const formRenderer = new qx.ui.form.renderer.Single(form);
+      this.makeFormHeadersWider(formRenderer);
       return formRenderer;
+    },
+
+    makeFormHeadersWider: function(formSingleRenderer) {
+      formSingleRenderer._getChildren().forEach(item => {
+        const lProps = item.getLayoutProperties();
+        if ("colSpan" in lProps && lProps["colSpan"] === 2) {
+          // hack< way to find group headers
+          item.setMinWidth(180);
+        }
+      });
     },
 
     modelViewer: function(data, withTitle = false, long = true) {
@@ -404,6 +415,8 @@ qx.Class.define("sar.steps.Utils", {
       const tabPage = new qx.ui.tabview.Page(title).set({
         layout
       });
+      // avoid ellipsis
+      tabPage.getChildControl("button").setMinWidth(title.length*10);
       tabPage.add(widget, {
         top: 0,
         bottom: 0,
@@ -423,6 +436,10 @@ qx.Class.define("sar.steps.Utils", {
         image.setSource(source);
       }
       return image;
+    },
+
+    setTimestampOnQuery: function(url) {
+      return url.replace("{timestamp}", Date.now());
     },
 
     createGenerateReportButton: function(resourceName, filename) {

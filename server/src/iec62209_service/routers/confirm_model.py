@@ -37,9 +37,9 @@ async def confirm_model() -> JSONResponse:
 
 
 @router.get("/qqplot", response_class=Response)
-async def confirm_model_qqplot(dummy: str = "") -> Response:
-    if not dummy:
-        # dummy parameter to avoid browser caching the plot
+async def confirm_model_qqplot(timestamp: str = "") -> Response:
+    if not timestamp:
+        # timestamp parameter to avoid browser caching the plot
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         buf = ModelInterface.plot_residuals()
@@ -51,9 +51,9 @@ async def confirm_model_qqplot(dummy: str = "") -> Response:
 
 
 @router.get("/deviations", response_class=Response)
-async def confirm_model_deviations(dummy: str = "") -> Response:
-    if not dummy:
-        # dummy parameter to avoid browser caching the plot
+async def confirm_model_deviations(timestamp: str = "") -> Response:
+    if not timestamp:
+        # timestamp parameter to avoid browser caching the plot
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     try:
         buf = SampleInterface.testSet.plot_deviations()

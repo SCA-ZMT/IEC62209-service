@@ -236,12 +236,14 @@ qx.Class.define("sar.steps.ConfirmModel", {
 
     __populateQQImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("confirmModel");
-      this.__qqImage.setSource(endpoints["getQQPlot"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getQQPlot"].url);
+      this.__qqImage.setSource(url);
     },
 
     __populateDeviationsImage: function() {
       const endpoints = sar.io.Resources.getEndPoints("confirmModel");
-      this.__deviationsImage.setSource(endpoints["getDeviations"].url);
+      const url = sar.steps.Utils.setTimestampOnQuery(endpoints["getDeviations"].url);
+      this.__deviationsImage.setSource(url);
     },
 
     __resetValueLabels: function() {
