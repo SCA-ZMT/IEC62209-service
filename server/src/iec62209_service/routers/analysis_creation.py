@@ -113,8 +113,8 @@ async def analysis_creation_constraints() -> JSONResponse:
     return JSONResponse(constraints)
 
 
-@router.post("/xport", response_class=PlainTextResponse)
-async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
+@router.post("/xport", response_class=Response)
+async def analysis_creation_xport(metadata: ModelMetadata) -> Response:
     response = ""
     end_status = status.HTTP_200_OK
     try:
@@ -122,12 +122,13 @@ async def analysis_creation_xport(metadata: ModelMetadata) -> PlainTextResponse:
         ModelInterface.set_metadata(metadata)
         data = ModelInterface.dump_model_to_json()
         response = jdumps(data)
+        return PlainTextResponse(
+            response, media_type="application/json", status_code=end_status
+        )
     except Exception as e:
-        response = {"error": str(e)}
-        end_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return PlainTextResponse(
-        response, media_type="application/json", status_code=end_status
-    )
+        return JSONResponse(
+            {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @router.get("/pdf", response_class=Response)

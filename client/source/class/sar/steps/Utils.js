@@ -249,7 +249,7 @@ qx.Class.define("sar.steps.Utils", {
       });
       form.add(softwareVersion, "Software version", null, "softwareVersion");
 
-      this.addMeasurementAreaToForm(form);
+      this.addMeasurementAreaToForm(form, true);
 
       const formRenderer = new qx.ui.form.renderer.Single(form);
       this.makeFormHeadersWider(formRenderer);
@@ -336,20 +336,20 @@ qx.Class.define("sar.steps.Utils", {
       return modelViewerLayout;
     },
 
-    addMeasurementAreaToForm: function(form) {
+    addMeasurementAreaToForm: function(form, isModel = false) {
       form.addGroupHeader("Measurement area (mm)");
       const xArea = new qx.ui.form.Spinner().set({
         minimum: 80,
         maximum: 1000,
         value: 100
       });
-      form.add(xArea, "x", null, "modelAreaX");
+      form.add(xArea, "x", null, isModel ? "modelAreaX" : "measAreaX");
       const yArea = new qx.ui.form.Spinner().set({
         minimum: 160,
         maximum: 1000,
         value: 200
       });
-      form.add(yArea, "y", null, "modelAreaY");
+      form.add(yArea, "y", null, isModel ? "modelAreaY" : "measAreaY");
     },
 
     addVPIFASelectBoxToForm: function(form) {

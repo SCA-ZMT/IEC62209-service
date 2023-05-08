@@ -54,8 +54,8 @@ qx.Class.define("sar.steps.TestSetGeneration", {
       sar.steps.Utils.add2PEAKSelectBoxToForm(form);
 
       sar.steps.Utils.addMeasurementAreaToForm(form);
-      const xArea = this.__xArea = form.getItem("modelAreaX");
-      const yArea = this.__yArea = form.getItem("modelAreaY");
+      const xArea = this.__xArea = form.getItem("measAreaX");
+      const yArea = this.__yArea = form.getItem("measAreaY");
       xArea.resetMinimum();
       yArea.resetMinimum();
 
@@ -77,8 +77,8 @@ qx.Class.define("sar.steps.TestSetGeneration", {
         this.__distributionImage.resetSource();
         const data = {};
         const includeOnly = [
-          "modelAreaX",
-          "modelAreaY",
+          "measAreaX",
+          "measAreaY",
           "sampleSize",
         ];
         for (const [key, item] of Object.entries(form.getItems())) {

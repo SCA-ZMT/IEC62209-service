@@ -20,9 +20,12 @@ qx.Class.define("sar.widget.StepButton", {
     const width = 112;
     const height = 112;
     const padding = 6;
-    const grid = new qx.ui.layout.Grid(5, 5);
-    grid.setRowHeight(0, height-60);
-    grid.setRowHeight(1, 42); // two lines of text
+    const grid = new qx.ui.layout.Grid(10, 10);
+    grid.setRowFlex(0, 1);
+     // two lines of text
+    grid.setRowMinHeight(1, 40);
+    grid.setRowHeight(1, 40);
+    grid.setRowAlign(1, "center", "middle");
     this._setLayout(grid);
 
     this.set({
@@ -61,8 +64,6 @@ qx.Class.define("sar.widget.StepButton", {
         font: "text-16",
         rich: true,
         width: width - 2*padding,
-        alignX: "center",
-        alignY: "middle",
         textAlign: "center"
       });
       this._add(label, {

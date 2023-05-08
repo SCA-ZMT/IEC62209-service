@@ -37,6 +37,7 @@ qx.Class.define("sar.widget.MainView", {
     __searchSpace: null,
     __loadCriticalData: null,
     __verify: null,
+    __trainingData: null,
 
     __builLayout: function() {
       const introLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(20));
@@ -253,6 +254,7 @@ qx.Class.define("sar.widget.MainView", {
     },
 
     __trainingDataSet: function(trainingData) {
+      this.__trainingData = trainingData;
       this.__analysisCreation.stepButton.setEnabled(Boolean(trainingData));
       if (trainingData === null) {
         this.__analysisCreation.resetResults();
@@ -269,6 +271,18 @@ qx.Class.define("sar.widget.MainView", {
       ].forEach(step => {
         step.setModel(model);
       });
+
+      [
+        this.__trainingSetGeneration,
+        this.__loadTrainingData,
+        this.__analysisCreation,
+      ].forEach(step => {
+        step.stepButton.setEnabled(!Boolean(model));
+      });
+
+      if (this.__analysisCreation.stepButton.getEnabled()) {
+        this.__analysisCreation.stepButton.setEnabled(Boolean(this.__trainingData))
+      }
 
       [
         this.__testSetGeneration,
