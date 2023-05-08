@@ -423,9 +423,9 @@ class ModelInterface:
         return fig2png(fig)
 
     @classmethod
-    def explore_space(cls, iters: int = 12) -> dict:
+    def explore_space(cls) -> dict:
         cls.raise_if_no_model()
-        cls.work.explore(iters, show=False, save_to=None)
+        cls.work.explore(show=False, save_to=None)
         critsample = cls.work.data["critsample"]
         critsample.data = critsample.data[critsample.data["pass"] >= 0.05]
         critsample.data["pass"] = critsample.data["pass"].apply(lambda x: x * 100.0)
