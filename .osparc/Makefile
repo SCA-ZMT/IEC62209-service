@@ -19,14 +19,21 @@ info: ## lists environments and required tools
 	@echo 'docker buildx  : $(shell docker buildx version 2>/dev/null || echo WARNING optional tool missing )'
 	@echo 'make           : $(shell make --version 2>&1 | head -n 1)'
 	@echo 'awk            : $(shell awk -W version 2>&1 | head -n 1)'
+	@echo 'sed            : $(shell sed  --version 2>&1 | head -n 1)'
 	# environments
 	@echo "REPO_DIR        = ${REPO_DIR}"
 	@echo "IMAGES          = ${IMAGES}"
 	@echo "DOCKER_REGISTRY = ${DOCKER_REGISTRY}"
 
 
+.PHONY: update-version
+update-version:
+	cd $(REPO_DIR) \
+	&& . update_version.sh \
+	&& cd -
+
 .PHONY: compose
-compose: ## creates docker-compose.yml
+compose: update-version ## creates docker-compose.yml
 	# creating compose specs
 	cd $(REPO_DIR) \
 	&& .osparc/bin/ooil.bash compose -f .osparc/docker-compose.yml

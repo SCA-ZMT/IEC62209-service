@@ -6,6 +6,7 @@ from shutil import copyfile
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
+from .._meta import info
 from ..reports import texutils
 from ..utils.common import ModelInterface, SampleInterface
 
@@ -97,6 +98,9 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
                     SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
                 )
             )
+
+        with open(texpath / "version.tex", "w") as fout:
+            fout.write(info.__version__)
 
         # main tex
 

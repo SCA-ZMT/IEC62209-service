@@ -201,3 +201,6 @@ cython_debug/
 !.github/workflows/build-and-push.yaml
 
 .osparc/docker-compose.yml
+.osparc/iec62209-web/metadata.yml
+server/setup.py
+client/package.json
