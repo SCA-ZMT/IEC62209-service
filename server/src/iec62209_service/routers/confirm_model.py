@@ -6,6 +6,7 @@ from shutil import copyfile
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
+from .._meta import info
 from ..reports import texutils
 from ..utils.common import ModelInterface, Residuals, SampleInterface
 
@@ -128,6 +129,9 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
                 SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
             )
         )
+
+        with open(texpath / "version.tex", "w") as fout:
+            fout.write(info.__version__)
 
         # typeset report
 

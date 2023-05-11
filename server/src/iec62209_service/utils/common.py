@@ -188,8 +188,12 @@ class DataSetInterface:
         return fig2png(fig)
 
     def plot_deviations(self):
+        from io import BytesIO
+
         if self.sample is None:
             raise Exception("Sample not loaded")
+        if len(self.rows) == 0:
+            return BytesIO(bytes(0))
         fig = plot_sample_deviations(self.sample)
         return fig2png(fig)
 
@@ -372,7 +376,7 @@ class ModelInterface:
     @staticmethod
     def acceptance_criteria(data: DataSetInterface) -> bool:
         dataok = True
-        if data is not None:
+        if data is not None and len(data.rows) > 0:
             mpecol = data.headings.index("mpe10g")
             sardcol = data.headings.index("sard10g")
             for row in data.rows:
@@ -423,9 +427,9 @@ class ModelInterface:
         return fig2png(fig)
 
     @classmethod
-    def explore_space(cls, iters: int = 12) -> dict:
+    def explore_space(cls) -> dict:
         cls.raise_if_no_model()
-        cls.work.explore(iters, show=False, save_to=None)
+        cls.work.explore(show=False, save_to=None)
         critsample = cls.work.data["critsample"]
         critsample.data = critsample.data[critsample.data["pass"] >= 0.05]
         critsample.data["pass"] = critsample.data["pass"].apply(lambda x: x * 100.0)

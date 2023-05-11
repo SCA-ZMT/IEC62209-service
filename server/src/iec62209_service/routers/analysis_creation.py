@@ -13,6 +13,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
+from .._meta import info
 from ..reports import texutils
 from ..utils.common import Goodfit, ModelInterface, ModelMetadata, SampleInterface
 
@@ -198,6 +199,9 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
                 SampleInterface.trainingSet, texutils.ReportStage.CREATION
             )
         )
+
+        with open(texpath / "version.tex", "w") as fout:
+            fout.write(info.__version__)
 
         # typeset report
 

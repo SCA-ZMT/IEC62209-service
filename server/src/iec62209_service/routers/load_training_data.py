@@ -24,6 +24,11 @@ async def training_data_load(
     try:
         ModelInterface.clear()
 
+        if len([x for x in file.file.readlines() if x.strip()]) < 2:
+            # only headings, empty critical sample
+            raise Exception("Empty data set")
+        file.file.seek(0)
+
         # need to write to a temp file
         tmp = NamedTemporaryFile(delete=False)
         tmp.write(file.file.read())

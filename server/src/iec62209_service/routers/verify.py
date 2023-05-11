@@ -6,6 +6,7 @@ from shutil import copyfile
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
+from .._meta import info
 from ..reports import texutils
 from ..utils.common import ModelInterface, SampleInterface
 
@@ -16,8 +17,12 @@ router = APIRouter(prefix="/verify", tags=["verify"])
 async def verify_results() -> JSONResponse:
     try:
         ModelInterface.raise_if_no_model()
-        dataok: bool = ModelInterface.acceptance_criteria(SampleInterface.criticalSet)
-        return {"Acceptance criteria": "Pass" if dataok else "Fail"}
+        # if no critical tests found, model is verified automatically
+        data = SampleInterface.criticalSet
+        dataok: bool = data.sample is not None and len(data.rows) == 0
+        if not dataok:
+            dataok = ModelInterface.acceptance_criteria(SampleInterface.criticalSet)
+        return JSONResponse({"Acceptance criteria": "Pass" if dataok else "Fail"})
     except Exception as e:
         return JSONResponse(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -34,7 +39,7 @@ async def verify_deviations(timestamp: str = "") -> Response:
         buf = SampleInterface.criticalSet.plot_deviations()
         return StreamingResponse(buf, media_type="image/png")
     except Exception as e:
-        return Response(
+        return JSONResponse(
             {"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -92,6 +97,9 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
                 SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
             )
         )
+
+        with open(texpath / "version.tex", "w") as fout:
+            fout.write(info.__version__)
 
         # main tex
 

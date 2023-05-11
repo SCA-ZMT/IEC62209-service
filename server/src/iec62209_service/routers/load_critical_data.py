@@ -19,6 +19,10 @@ async def critical_data_load(file: UploadFile = File(...)) -> JSONResponse:
     response = {}
     end_status = status.HTTP_200_OK
     try:
+        if len([x for x in file.file.readlines() if x.strip()]) < 2:
+            # only headings, empty critical sample
+            raise Exception("Empty data set")
+        file.file.seek(0)
         # need to write to a temp file
         tmp = NamedTemporaryFile(delete=False)
         tmp.write(file.file.read())
