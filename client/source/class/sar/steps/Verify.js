@@ -110,6 +110,10 @@ qx.Class.define("sar.steps.Verify", {
     setAcceptanceValue: function(val) {
       if (this.__acceptanceValue) {
         this.__acceptanceValue.setValue(val);
+
+        if (value === 0) {
+          this.__reportButton.setEnabled(true);
+        }
       }
     },
 

@@ -229,23 +229,23 @@ qx.Class.define("sar.steps.Utils", {
       });
       form.add(filename, "Filename", null, "filename");
       const systemName = new qx.ui.form.TextField().set({
-        value: "cSAR3D"
+        value: "A SAR System"
       });
       form.add(systemName, "System name", null, "systemName");
       const manufacturer = new qx.ui.form.TextField().set({
-        value: ""
+        value: "A Manufacturer"
       });
       form.add(manufacturer, "Manufacturer", null, "manufacturer");
       const phantomType = new qx.ui.form.TextField().set({
-        value: "Flat HSL"
+        value: "Flat"
       });
       form.add(phantomType, "Phantom type", null, "phantomType");
       const hardwareVersion = new qx.ui.form.TextField().set({
-        value: "SD C00 F01 AC"
+        value: "AD 385 12B"
       });
       form.add(hardwareVersion, "Hardware version", null, "hardwareVersion");
       const softwareVersion = new qx.ui.form.TextField().set({
-        value: "V5.2.0"
+        value: "V2.0"
       });
       form.add(softwareVersion, "Software version", null, "softwareVersion");
 
