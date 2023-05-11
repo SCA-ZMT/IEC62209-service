@@ -146,61 +146,61 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
         imgpath = texpath / "images"
         mkdir(imgpath.as_posix())
 
-        with open(imgpath / "model-creation-distribution.png", "wb") as img:
-            img.write(SampleInterface.trainingSet.plot_distribution().getvalue())
+        (imgpath / "model-creation-distribution.png").write_bytes(
+            SampleInterface.trainingSet.plot_distribution().getvalue()
+        )
 
-        with open(imgpath / "model-creation-acceptance.png", "wb") as img:
-            img.write(SampleInterface.trainingSet.plot_deviations().getvalue())
+        (imgpath / "model-creation-acceptance.png").write_bytes(
+            SampleInterface.trainingSet.plot_deviations().getvalue()
+        )
 
-        with open(imgpath / "model-creation-semivariogram.png", "wb") as img:
-            img.write(ModelInterface.plot_model().getvalue())
+        (imgpath / "model-creation-semivariogram.png").write_bytes(
+            ModelInterface.plot_model().getvalue()
+        )
 
-        with open(imgpath / "model-creation-marginals.png", "wb") as img:
-            img.write(SampleInterface.trainingSet.plot_marginals().getvalue())
+        (imgpath / "model-creation-marginals.png").write_bytes(
+            SampleInterface.trainingSet.plot_marginals().getvalue()
+        )
 
         # print tables
 
-        with open(texpath / "metadata.tex", "w") as fout:
-            fout.write(
-                texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
-            )
+        (texpath / "metadata.tex").write_text(
+            texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
+        )
 
-        with open(texpath / "summary.tex", "w") as fout:
-            fout.write(texwriter.write_creation_summary_tex(ModelInterface.goodfit))
+        (texpath / "summary.tex").write_text(
+            texwriter.write_creation_summary_tex(ModelInterface.goodfit)
+        )
 
-        with open(texpath / "sample_parameters.tex", "w") as fout:
-            fout.write(
-                texwriter.write_sample_parameters_tex(
-                    SampleInterface.trainingSet.config,
-                    ModelInterface.get_metadata(),
-                    texutils.ReportStage.CREATION,
-                )
+        (texpath / "sample_parameters.tex").write_text(
+            texwriter.write_sample_parameters_tex(
+                SampleInterface.trainingSet.config,
+                ModelInterface.get_metadata(),
+                texutils.ReportStage.CREATION,
             )
+        )
 
         accepted = ModelInterface.goodfit.accept
         gfres = ModelInterface.goodfit.gfres
         allgood = accepted and gfres[0]
 
-        with open(texpath / "onelinesummary.tex", "w") as fout:
-            fout.write(
-                texwriter.write_one_line_summary(allgood, texutils.ReportStage.CREATION)
+        (texpath / "onelinesummary.tex").write_text(
+            texwriter.write_one_line_summary(allgood, texutils.ReportStage.CREATION)
+        )
+
+        (texpath / "acceptance.tex").write_text(
+            texwriter.write_sample_acceptance_tex(accepted)
+        )
+
+        (texpath / "gfres.tex").write_text(texwriter.write_model_fitting_tex(gfres))
+
+        (texpath / "sample_table.tex").write_text(
+            texwriter.write_sample_table_tex(
+                SampleInterface.trainingSet, texutils.ReportStage.CREATION
             )
+        )
 
-        with open(texpath / "acceptance.tex", "w") as fout:
-            fout.write(texwriter.write_sample_acceptance_tex(accepted))
-
-        with open(texpath / "gfres.tex", "w") as fout:
-            fout.write(texwriter.write_model_fitting_tex(gfres))
-
-        with open(texpath / "sample_table.tex", "w") as fout:
-            fout.write(
-                texwriter.write_sample_table_tex(
-                    SampleInterface.trainingSet, texutils.ReportStage.CREATION
-                )
-            )
-
-        with open(texpath / "version.tex", "w") as fout:
-            fout.write(info.__version__)
+        (texpath / "version.tex").write_text(info.__version__)
 
         # typeset report
 

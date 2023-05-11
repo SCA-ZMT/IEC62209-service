@@ -79,11 +79,13 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
         imgpath = texpath / "images"
         mkdir(imgpath.as_posix())
 
-        with open(imgpath / "model-confirm-acceptance.png", "wb") as img:
-            img.write(SampleInterface.testSet.plot_deviations().getvalue())
+        (imgpath / "model-confirm-acceptance.png").write_bytes(
+            SampleInterface.testSet.plot_deviations().getvalue()
+        )
 
-        with open(imgpath / "model-confirm-qqplot.png", "wb") as img:
-            img.write(ModelInterface.plot_residuals().getvalue())
+        (imgpath / "model-confirm-qqplot.png").write_bytes(
+            ModelInterface.plot_residuals().getvalue()
+        )
 
         # tables
 
@@ -92,48 +94,43 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
 
         allgood = accepted and residuals.all_ok()
 
-        with open(texpath / "onelinesummary.tex", "w") as fout:
-            fout.write(
-                texwriter.write_one_line_summary(
-                    allgood, texutils.ReportStage.CONFIRMATION
-                )
+        (texpath / "onelinesummary.tex").write_text(
+            texwriter.write_one_line_summary(allgood, texutils.ReportStage.CONFIRMATION)
+        )
+
+        (texpath / "metadata.tex").write_text(
+            texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
+        )
+
+        (texpath / "summary.tex").write_text(
+            texwriter.write_confirmation_summary_tex(accepted, residuals)
+        )
+
+        (texpath / "sample_parameters.tex").write_text(
+            texwriter.write_sample_parameters_tex(
+                SampleInterface.testSet.config,
+                ModelInterface.get_metadata(),
+                texutils.ReportStage.CONFIRMATION,
             )
+        )
 
-        with open(texpath / "metadata.tex", "w") as fout:
-            fout.write(
-                texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
+        (texpath / "acceptance.tex").write_text(
+            texwriter.write_sample_acceptance_tex(accepted)
+        )
+
+        (texpath / "normality.tex").write_text(texwriter.write_normality_tex(residuals))
+
+        (texpath / "similarity.tex").write_text(
+            texwriter.write_similarity_tex(residuals)
+        )
+
+        (texpath / "sample_table.tex").write_text(
+            texwriter.write_sample_table_tex(
+                SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
             )
+        )
 
-        with open(texpath / "summary.tex", "w") as fout:
-            fout.write(texwriter.write_confirmation_summary_tex(accepted, residuals))
-
-        with open(texpath / "sample_parameters.tex", "w") as fout:
-            fout.write(
-                texwriter.write_sample_parameters_tex(
-                    SampleInterface.testSet.config,
-                    ModelInterface.get_metadata(),
-                    texutils.ReportStage.CONFIRMATION,
-                )
-            )
-
-        with open(texpath / "acceptance.tex", "w") as fout:
-            fout.write(texwriter.write_sample_acceptance_tex(accepted))
-
-        with open(texpath / "normality.tex", "w") as fout:
-            fout.write(texwriter.write_normality_tex(residuals))
-
-        with open(texpath / "similarity.tex", "w") as fout:
-            fout.write(texwriter.write_similarity_tex(residuals))
-
-        with open(texpath / "sample_table.tex", "w") as fout:
-            fout.write(
-                texwriter.write_sample_table_tex(
-                    SampleInterface.testSet, texutils.ReportStage.CONFIRMATION
-                )
-            )
-
-        with open(texpath / "version.tex", "w") as fout:
-            fout.write(info.__version__)
+        (texpath / "version.tex").write_text(info.__version__)
 
         # typeset report
 
