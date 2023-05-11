@@ -200,8 +200,7 @@ async def analysis_creation_pdf(tmp=Depends(texutils.create_temp_folder)) -> Res
             )
         )
 
-        with open(texpath / "version.tex", "w") as fout:
-            fout.write(info.__version__)
+        (texpath / "version.tex").write_text(info.__version__)
 
         # typeset report
 

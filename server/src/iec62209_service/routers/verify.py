@@ -98,8 +98,7 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
             )
         )
 
-        with open(texpath / "version.tex", "w") as fout:
-            fout.write(info.__version__)
+        (texpath / "version.tex").write_text(info.__version__)
 
         # main tex
 
