@@ -26,6 +26,11 @@ info: ## info on tools and environs
 	@$@/bin/pip3 list --verbose
 
 
+.PHONY: update-version
+update-version:
+	@. update_version.sh
+
+
 .PHONY: devenv
 devenv: .venv ## create a python virtual environment with dev tools (e.g. linters, etc)
 	$</bin/pip3 --quiet install -r requirements-dev.txt
@@ -36,20 +41,20 @@ devenv: .venv ## create a python virtual environment with dev tools (e.g. linter
 
 
 .PHONY: client
-client: ## installs and compiles client
+client: update-version ## installs and compiles client
 	$(MAKE_C) client install
 	$(MAKE_C) client compile
 
 
 .PHONY: server
-server: _check_venv_active ## installs and runs server (devel mode)
+server: update-version _check_venv_active  ## installs and runs server (devel mode)
 	$(MAKE_C) server install-dev
 	$(MAKE_C) server run-dev
 
 
 
 .PHONY: build build-nc
-build build-nc: ## build image. Suffix -nc disables cache
+build build-nc: update-version ## build image. Suffix -nc disables cache
 	docker build \
 		$(if $(findstring -nc,$@),--no-cache,) \
 		--tag ${IMAGE_NAME} \
@@ -57,7 +62,7 @@ build build-nc: ## build image. Suffix -nc disables cache
 
 
 .PHONY: run
-run: ## runs container and serves in http://127.0.0.1:8000/
+run: update-version ## runs container and serves in http://127.0.0.1:8000/
 	docker run \
 		--tty \
 		--interactive \

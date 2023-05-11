@@ -188,8 +188,12 @@ class DataSetInterface:
         return fig2png(fig)
 
     def plot_deviations(self):
+        from io import BytesIO
+
         if self.sample is None:
             raise Exception("Sample not loaded")
+        if len(self.rows) == 0:
+            return BytesIO(bytes(0))
         fig = plot_sample_deviations(self.sample)
         return fig2png(fig)
 
@@ -372,7 +376,7 @@ class ModelInterface:
     @staticmethod
     def acceptance_criteria(data: DataSetInterface) -> bool:
         dataok = True
-        if data is not None:
+        if data is not None and len(data.rows) > 0:
             mpecol = data.headings.index("mpe10g")
             sardcol = data.headings.index("sard10g")
             for row in data.rows:
