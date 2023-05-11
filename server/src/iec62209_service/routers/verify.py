@@ -53,46 +53,45 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
         imgpath = texpath / "images"
         mkdir(imgpath.as_posix())
 
-        with open(imgpath / "critical-acceptance.png", "wb") as img:
-            img.write(SampleInterface.criticalSet.plot_deviations().getvalue())
+        (imgpath / "critical-acceptance.png").write_bytes(
+            SampleInterface.criticalSet.plot_deviations().getvalue()
+        )
 
         # tables
 
         accepted: bool = ModelInterface.acceptance_criteria(SampleInterface.criticalSet)
 
-        with open(texpath / "onelinesummary.tex", "w") as fout:
-            fout.write(
-                texwriter.write_one_line_summary(
-                    accepted, texutils.ReportStage.VERIFICATION
-                )
+        (texpath / "onelinesummary.tex").write_text(
+            texwriter.write_one_line_summary(
+                accepted, texutils.ReportStage.VERIFICATION
             )
+        )
 
-        with open(texpath / "metadata.tex", "w") as fout:
-            fout.write(
-                texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
+        (texpath / "metadata.tex").write_text(
+            texwriter.write_model_metadata_tex(ModelInterface.get_metadata())
+        )
+
+        (texpath / "summary.tex").write_text(
+            texwriter.write_verification_summary_tex(accepted)
+        )
+
+        (texpath / "sample_parameters.tex").write_text(
+            texwriter.write_sample_parameters_tex(
+                SampleInterface.criticalSet.config,
+                ModelInterface.get_metadata(),
+                texutils.ReportStage.VERIFICATION,
             )
+        )
 
-        with open(texpath / "summary.tex", "w") as fout:
-            fout.write(texwriter.write_verification_summary_tex(accepted))
+        (texpath / "acceptance.tex").write_text(
+            texwriter.write_sample_acceptance_tex(accepted)
+        )
 
-        with open(texpath / "sample_parameters.tex", "w") as fout:
-            fout.write(
-                texwriter.write_sample_parameters_tex(
-                    SampleInterface.criticalSet.config,
-                    ModelInterface.get_metadata(),
-                    texutils.ReportStage.VERIFICATION,
-                )
+        (texpath / "sample_table.tex").write_text(
+            texwriter.write_sample_table_tex(
+                SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
             )
-
-        with open(texpath / "acceptance.tex", "w") as fout:
-            fout.write(texwriter.write_sample_acceptance_tex(accepted))
-
-        with open(texpath / "sample_table.tex", "w") as fout:
-            fout.write(
-                texwriter.write_sample_table_tex(
-                    SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
-                )
-            )
+        )
 
         # main tex
 
