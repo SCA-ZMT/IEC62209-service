@@ -119,15 +119,7 @@ Table~\ref{tab:outcome_critical} shows the results of the critical data space se
 
 \FloatBarrier
 \subsection{Performance on Acceptance Criteria} \label{subsec:acceptance_criteria}
-The test data for the critical GPI model exploration are shown in Figure~\ref{fig:critical-acc}. The complete details on the exposure conditions and measurement results are tabulated in Table~\ref{tab:test} in Appendix~\ref{sec:critical-data}.
-The obtained deviations ($\Delta SAR_{10g}$) of the critical test configuration measurements from the target values are shown in Figure~\ref{fig:critical-acc}, along with the acceptance thresholds. The pass/fail result is shown in Table~\ref{tab:acceptance}.
-
-\input{acceptance}
-
-\begin{figure}[H] \centering
-\includegraphics[width=\textwidth]{images/critical-acceptance.png}
-\caption{Deviations of the measured $SAR_{10g}$ from the target values for the critical test configurations. The deviations are compared to the maximum permissible errors (mpe; dashed lines). Blue dots are inside the mpe. Any red dots are outside the mpe.} \label{fig:critical-acc}
-\end{figure}
+Since the critical data space search found no cases with at least 5\% risk of exceeding the acceptance criteria, the SAR measurement system successfully passes the critical data space search without testing.
 
 \FloatBarrier
 
@@ -139,12 +131,5 @@ IEC 62209-3, ``Measurement procedure for the assessment of specific absorption r
 \bibitem{gpi-paper}
 C. Bujard, E. Neufeld, M. Douglas, J. Wiart, N. Kuster, ``A Gaussian-process-model-based approach for robust, independent, and implementation-agnostic validation of complex multi-variable measurement systems: application to SAR measurement systems,'' online \url{https://arxiv.org/abs/2211.12907}, uploaded April 12, 2023.
 \end{thebibliography}
-
-\FloatBarrier
-\newpage
-\appendix
-\section{Critical Configurations and Measurement Outcomes} \label{sec:critical-data}
-
-\input{sample_table}
 
 \end{document}

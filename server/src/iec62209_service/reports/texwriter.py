@@ -83,7 +83,7 @@ def write_verification_summary_tex(accepted: bool) -> str:
         r"\begin{table}[ht]\centering",
         r"\begin{tabular}{|l|c|c|c|}\hline",
         r"\textbf{Test} & \textbf{Success Criterion} & \textbf{Outcomes} & \textbf{Pass / Fail} \\\hline",
-        r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Table~\ref{tab:test}& \textbf{" + res + r"} \\\hline",
+        r"Acceptance of data & $\Delta SAR \in [-U, +O]$ & See Section~\ref{subsec:acceptance_criteria} & \textbf{" + res + r"} \\\hline",
         r"\end{tabular}\caption{Summary of the critical data space search outcomes for the measurement system described in Table~\ref{tab:system}.} \label{tab:summary}",
         r"\end{table}"
     ]
@@ -95,12 +95,38 @@ def write_sample_parameters_tex(cfg: SampleConfig, md: ModelMetadata, stage: Rep
         r"\begin{table}[h!]\centering",
         r"\begin{tabular}{|l|c|}\hline",
         r"\textbf{Parameter} & \textbf{Value} \\\hline",
-        r"Measurement area: $x$,$y$ (mm) & " + md.modelAreaX + "," + md.modelAreaY + r" \\\hline",
-        r"Frequency range (MHz) & " + f"{cfg.fRangeMin} -- {cfg.fRangeMax}" + r"\\\hline",
-        r"Size of training data & " + f"{cfg.sampleSize}" + r" \\\hline"
+        r"Measurement area: $x$,$y$ (mm) & " + md.modelAreaX + ", " + md.modelAreaY + r" \\\hline",
+        r"Frequency range (MHz) & " + f"{cfg.fRangeMin} -- {cfg.fRangeMax}" + r"\\\hline"
+    ]
+    if stage is ReportStage.CREATION:
+        lines.extend([
+            r"Size of training data & " + f"{cfg.sampleSize}" + r" \\\hline"
+        ])
+    elif stage is ReportStage.CONFIRMATION:
+        lines.extend([
+            r"Size of test data & " + f"{cfg.sampleSize}" + r" \\\hline"
+        ])
+    elif stage is ReportStage.VERIFICATION:
+        # do not print sample size
+        ...
+    lines.extend([
         r"\end{tabular}",
         r"\caption{Range of the exposure parameter space covered by the test configurations. The GPI model can therefore be considered to be " + stagestring + r" within this range.}",
         r"\label{tab:params}",
+        r"\end{table}"
+    ])
+    return '\n'.join(lines)
+
+def write_outcome_critical(sampleSize: int) -> str:
+    lines = [
+        r"\begin{table}[h!]\centering",
+        r"\begin{tabular}{|l|c|}\hline",
+        r"\textbf{Parameter} & \textbf{Value} \\\hline",
+        r"Minimum failure risk & 5\% \\\hline",
+        r"Number of critical cases & " + f"{sampleSize:.0f}" + r"\\\hline",
+        r"\end{tabular}",
+        r"\caption{Outcome of the critical data space search.}",
+        r"\label{tab:outcome_critical}",
         r"\end{table}"
     ]
     return '\n'.join(lines)
