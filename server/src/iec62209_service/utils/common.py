@@ -92,7 +92,7 @@ class ModelMetadata(BaseModel):
     modelAreaY: str = ""
 
 
-### Helper classes
+### Helpers
 
 
 def fig2png(fig):
@@ -103,6 +103,15 @@ def fig2png(fig):
     buf.seek(0)
     plt.close(fig)
     return buf
+
+
+def empty_plot():
+    fig, ax = plt.subplots(1, 1, figsize=[12, 9])
+    plt.subplots_adjust(
+        left=0.09, right=0.95, bottom=0.09, top=0.95, wspace=0.2, hspace=0.4
+    )
+    ax.axis("off")
+    return fig
 
 
 class DataSetInterface:
@@ -188,19 +197,22 @@ class DataSetInterface:
         return fig2png(fig)
 
     def plot_deviations(self):
-        from io import BytesIO
 
         if self.sample is None:
             raise Exception("Sample not loaded")
         if len(self.rows) == 0:
-            return BytesIO(bytes(0))
-        fig = plot_sample_deviations(self.sample)
+            fig = empty_plot()
+        else:
+            fig = plot_sample_deviations(self.sample)
         return fig2png(fig)
 
     def plot_distribution(self):
         if self.sample is None:
             raise Exception("Sample not loaded")
-        fig = plot_sample_distribution(self.sample)
+        if len(self.rows) == 0:
+            fig = empty_plot()
+        else:
+            fig = plot_sample_distribution(self.sample)
         return fig2png(fig)
 
     def export_to_csv(self, filename):
