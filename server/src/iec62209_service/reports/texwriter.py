@@ -98,10 +98,17 @@ def write_sample_parameters_tex(cfg: SampleConfig, md: ModelMetadata, stage: Rep
         r"Measurement area: $x$,$y$ (mm) & " + md.modelAreaX + ", " + md.modelAreaY + r" \\\hline",
         r"Frequency range (MHz) & " + f"{cfg.fRangeMin} -- {cfg.fRangeMax}" + r"\\\hline"
     ]
-    if stage is not ReportStage.VERIFICATION:
+    if stage is ReportStage.CREATION:
         lines.extend([
             r"Size of training data & " + f"{cfg.sampleSize}" + r" \\\hline"
         ])
+    elif stage is ReportStage.CONFIRMATION:
+        lines.extend([
+            r"Size of test data & " + f"{cfg.sampleSize}" + r" \\\hline"
+        ])
+    elif stage is ReportStage.VERIFICATION:
+        # do not print sample size
+        ...
     lines.extend([
         r"\end{tabular}",
         r"\caption{Range of the exposure parameter space covered by the test configurations. The GPI model can therefore be considered to be " + stagestring + r" within this range.}",
