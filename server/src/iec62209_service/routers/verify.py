@@ -51,6 +51,8 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
     from ..reports.texutils import typeset
 
     try:
+        trivial_case: bool = len(SampleInterface.criticalSet.rows) == 0
+
         texpath = Path(tmp.name)
 
         # images
@@ -58,9 +60,10 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
         imgpath = texpath / "images"
         mkdir(imgpath.as_posix())
 
-        (imgpath / "critical-acceptance.png").write_bytes(
-            SampleInterface.criticalSet.plot_deviations().getvalue()
-        )
+        if not trivial_case:
+            (imgpath / "critical-acceptance.png").write_bytes(
+                SampleInterface.criticalSet.plot_deviations().getvalue()
+            )
 
         # tables
 
@@ -88,21 +91,31 @@ async def verify_pdf(tmp=Depends(texutils.create_temp_folder)) -> Response:
             )
         )
 
+        (texpath / "outcome_critical.tex").write_text(
+            texwriter.write_outcome_critical(
+                SampleInterface.criticalSet.config.sampleSize
+            )
+        )
+
         (texpath / "acceptance.tex").write_text(
             texwriter.write_sample_acceptance_tex(accepted)
         )
 
-        (texpath / "sample_table.tex").write_text(
-            texwriter.write_sample_table_tex(
-                SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
+        if not trivial_case:
+            (texpath / "sample_table.tex").write_text(
+                texwriter.write_sample_table_tex(
+                    SampleInterface.criticalSet, texutils.ReportStage.VERIFICATION
+                )
             )
-        )
 
         (texpath / "version.tex").write_text(info.__version__)
 
         # main tex
 
-        mainres = files(reports).joinpath("verification.tex")
+        if trivial_case:
+            mainres = files(reports).joinpath("verification_trivial.tex")
+        else:
+            mainres = files(reports).joinpath("verification.tex")
         maintex = "report.tex"
         copyfile(mainres, texpath / maintex)
 

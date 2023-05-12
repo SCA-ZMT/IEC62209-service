@@ -106,17 +106,20 @@ When expressed in dB, the error bounds are equal, meaning that $10 \times log_{1
 
 \section{Critical Cases}
 
-\subsection{Input Parameters}
-The set of exposure conditions for the critical testing of the measurement system described in Table~\ref{tab:system} was generated and measured on the system using the input parameters of Table~\ref{tab:params}.
-
 \subsection{Limits of Relevant Exposure Parameter Space}
 The test configurations for the critical testing of the measurement system detailed in Table~\ref{tab:system} were chosen within the parameter range defined in Table~\ref{tab:params}, which therefore defines the extent of the exposure parameter space for which the GPI model can be considered to have been critically examined.
 
 \input{sample_parameters}
 
+\subsection{Outcome of Critical Data Space Search}
+
+Table~\ref{tab:outcome_critical} shows the results of the critical data space search, showing the number of test conditions that have been identified as having at least the given risk of failing the acceptance criteria.
+
+\input{outcome_critical}
+
 \FloatBarrier
-\subsection{Performance on Acceptance Criteria}
-The test data for the critical GPI model exploration are shown in Figure~\ref{fig:critical-acc}. Thecomplete details on the exposure conditions and measurement results are tabulated in Table~\ref{tab:test} in Appendix~\ref{sec:critical-data}.
+\subsection{Performance on Acceptance Criteria} \label{subsec:acceptance_criteria}
+The test data for the critical GPI model exploration are shown in Figure~\ref{fig:critical-acc}. The complete details on the exposure conditions and measurement results are tabulated in Table~\ref{tab:test} in Appendix~\ref{sec:critical-data}.
 The obtained deviations ($\Delta SAR_{10g}$) of the critical test configuration measurements from the target values are shown in Figure~\ref{fig:critical-acc}, along with the acceptance thresholds. The pass/fail result is shown in Table~\ref{tab:acceptance}.
 
 \input{acceptance}
