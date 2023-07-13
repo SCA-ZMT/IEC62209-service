@@ -8,8 +8,10 @@ REPO_DIR := $(abspath $(CURDIR)/..)
 # NOTE that IMAGES variable can change when docker-compose.yml gets rebuilt. Do NOT use := !!!
 IMAGES = $(shell ./bin/yq.bash eval '.services.*.image' docker-compose.yml)
 
-export DOCKER_REGISTRY ?= registry:5000
-
+export DOCKER_REGISTRY ?= itisfoundation
+export DOCKER_IMAGE_NAME ?= iec62209-service
+export DOCKER_IMAGE_TAG  ?= $(shell cat ../VERSION 2> /dev/null || echo undefined)
+export DOCKER_IMAGE ?= ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 
 .PHONY: info
 info: ## lists environments and required tools
@@ -21,9 +23,9 @@ info: ## lists environments and required tools
 	@echo 'awk            : $(shell awk -W version 2>&1 | head -n 1)'
 	@echo 'sed            : $(shell sed  --version 2>&1 | head -n 1)'
 	# environments
-	@echo "REPO_DIR        = ${REPO_DIR}"
-	@echo "IMAGES          = ${IMAGES}"
-	@echo "DOCKER_REGISTRY = ${DOCKER_REGISTRY}"
+	@echo "REPO_DIR           = ${REPO_DIR}"
+	@echo "DOCKER_IMAGE       = ${DOCKER_IMAGE}"
+	@echo "DOCKER_REGISTRY    = ${DOCKER_REGISTRY}"
 
 
 .PHONY: update-version
@@ -44,18 +46,15 @@ build build-nc: compose ## builds image. Suffix -nc disables cache
 	# building
 	docker compose build $(if $(findstring -nc,$@),--no-cache,)
 
+version_exists = $(shell DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect $(DOCKER_REGISTRY)/$(DOCKER_IMAGE) > /dev/null && echo "image already exists on $(DOCKER_REGISTRY)")
 
 .PHONY: push
 push: ## retags and pushes to ${DOCKER_REGISTRY}
 	# tag & push
-	@for image in ${IMAGES}; do \
-		echo "Tagging and pushing ${DOCKER_REGISTRY}/$$image ..."; \
-		docker tag "$$image" "${DOCKER_REGISTRY}/$$image"; \
-		docker push "${DOCKER_REGISTRY}/$$image"; \
-	done
-	# registry view
-	@curl --silent ${DOCKER_REGISTRY}/v2/_catalog | jq
-
+	$(if $(call version_exists),$(error $(DOCKER_REGISTRY)/$(DOCKER_IMAGE) already exists on $(DOCKER_REGISTRY)), $(info $(DOCKER_IMAGE) not yet on $(DOCKER_REGISTRY)))
+	echo "Tagging and pushing ${DOCKER_REGISTRY}/${DOCKER_IMAGE} ..."; \
+	docker tag "$(DOCKER_IMAGE)" "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"; \
+	docker push "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"; \
 
 
 .PHONY: all
