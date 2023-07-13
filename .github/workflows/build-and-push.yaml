@@ -22,7 +22,6 @@ jobs:
           cd .osparc
           make info
           make compose
-          cd ..
           make build-nc
           docker images
 
@@ -34,4 +33,5 @@ jobs:
 
       - name: Tag and Push image
         run: |
+          cd .osparc
           make push
