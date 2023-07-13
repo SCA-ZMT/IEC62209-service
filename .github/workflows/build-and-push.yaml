@@ -33,4 +33,5 @@ jobs:
 
       - name: Tag and Push image
         run: |
+          cd .osparc
           make push
