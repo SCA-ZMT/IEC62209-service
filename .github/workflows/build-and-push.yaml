@@ -22,6 +22,7 @@ jobs:
           cd .osparc
           make info
           make compose
+          cd ..
           make build-nc
           docker images
 
