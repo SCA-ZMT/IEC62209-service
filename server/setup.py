@@ -23,7 +23,7 @@ INSTALL_REQUIREMENTS = list(read_reqs(CURRENT_DIR / "requirements.txt"))
 
 SETUP = dict(
     name="iec62209-service",
-    version="1.0.19",
+    version="1.0.20",
     description="Service built around publication-IEC62209",
     author=", ".join(
         (

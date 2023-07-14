@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 
 from pydantic import Field, validator
-from pydantic_settings import BaseSettingsModel
+from pydantic_settings import BaseSettings
 
 
-class OsparcServiceSettings(BaseSettingsModel):
+class OsparcServiceSettings(BaseSettings):
 
     INPUT_FOLDER: Path | None = Field(
         None,
