@@ -36,7 +36,7 @@ compose: update-version ## creates docker-compose.yml
 	# creating compose specs
 	cd $(REPO_DIR) \
 	&& .osparc/bin/ooil.bash compose -f .osparc/docker-compose.yml \
-	&& sed -r "s/ image: .+/"${DOCKER_IMAGE}"/g" -i .osparc/docker-compose.yml
+	&& sed -r "s/ image: .+/ image: "${DOCKER_IMAGE}"/g" -i .osparc/docker-compose.yml
 
 
 .PHONY: build build-nc
