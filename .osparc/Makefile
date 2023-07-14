@@ -54,6 +54,12 @@ push: ## retags and pushes to ${DOCKER_REGISTRY}
 	docker tag "$(DOCKER_IMAGE)" "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"; \
 	docker push "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"; \
 
+.PHONY: force-push
+push: ## retags and pushes to ${DOCKER_REGISTRY}
+	# tag & force-push
+	echo "Tagging and pushing ${DOCKER_REGISTRY}/${DOCKER_IMAGE} ..."; \
+	docker tag "$(DOCKER_IMAGE)" "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"; \
+	docker push "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"; \
 
 .PHONY: all
 all: compose build-nc push ## all workflow
