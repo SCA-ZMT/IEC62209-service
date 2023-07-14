@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, validator
+from pydantic_settings import BaseSettings
 
 
 class OsparcServiceSettings(BaseSettings):
@@ -38,7 +39,7 @@ class OsparcServiceSettings(BaseSettings):
 
 
 class ApplicationSettings(OsparcServiceSettings):
-    CLIENT_OUTPUT_DIR: Path
+    CLIENT_OUTPUT_DIR: Path | None
 
     @validator("CLIENT_OUTPUT_DIR")
     @classmethod
