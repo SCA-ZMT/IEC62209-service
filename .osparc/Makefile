@@ -5,9 +5,6 @@ SHELL := /bin/bash
 
 REPO_DIR := $(abspath $(CURDIR)/..)
 
-# NOTE that IMAGES variable can change when docker-compose.yml gets rebuilt. Do NOT use := !!!
-IMAGES = $(shell ./bin/yq.bash eval '.services.*.image' docker-compose.yml)
-
 export DOCKER_REGISTRY ?= itisfoundation
 export DOCKER_IMAGE_NAME ?= iec62209-service
 export DOCKER_IMAGE_TAG  ?= $(shell cat ../VERSION 2> /dev/null || echo undefined)
@@ -38,7 +35,8 @@ update-version:
 compose: update-version ## creates docker-compose.yml
 	# creating compose specs
 	cd $(REPO_DIR) \
-	&& .osparc/bin/ooil.bash compose -f .osparc/docker-compose.yml
+	&& .osparc/bin/ooil.bash compose -f .osparc/docker-compose.yml \
+	&& sed -r "s/ image: .+/ image: "${DOCKER_IMAGE}"/g" -i .osparc/docker-compose.yml
 
 
 .PHONY: build build-nc
